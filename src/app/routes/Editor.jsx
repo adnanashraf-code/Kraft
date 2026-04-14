@@ -1,12 +1,50 @@
 import React from 'react';
+import useEditorStore from '../../store/useEditorStore';
+import Toolbar from '../../components/editor/Toolbar';
+import LayersPanel from '../../components/editor/LayersPanel';
+import PropertiesPanel from '../../components/editor/PropertiesPanel';
+import Canvas from '../../components/canvas/Canvas';
+import ContextMenu from '../../components/common/ContextMenu';
+import SettingsModal from '../../components/editor/overlays/SettingsModal';
+import TemplatesModal from '../../components/editor/overlays/TemplatesModal';
+import AssetsModal from '../../components/editor/overlays/AssetsModal';
+import TrashBin from '../../components/canvas/TrashBin';
+import { THEMES } from '../../utils/themes';
 
-const EditorPlaceholder = () => (
-  <div className="flex h-screen items-center justify-center bg-surface text-black">
-    <div className="text-center">
-      <h1 className="font-editorial text-4xl mb-4">Editor Workspace</h1>
-      <p className="text-gray-500">The 2D/3D interaction engine is currently being built.</p>
+const Editor = () => {
+  const { uiTheme } = useEditorStore();
+  const theme = THEMES[uiTheme];
+
+  // Safety check for theme
+  if (!theme) return <div className="p-10 text-red-500 font-bold">Error: Theme '{uiTheme}' not found.</div>;
+
+  return (
+    <div className={`flex h-screen w-screen ${theme.canvas} overflow-hidden font-sans relative transition-colors duration-500`}>
+      {/* Sidebar Navigation & Tools */}
+      <Toolbar />
+
+      <div className="flex flex-1 overflow-hidden relative">
+        {/* Layer Stack */}
+        <LayersPanel />
+        
+        {/* Main Canvas Area */}
+        <div className={`flex-1 relative overflow-hidden ${theme.canvas}`}>
+          <Canvas />
+        </div>
+
+        {/* Property Controls */}
+        <PropertiesPanel />
+      </div>
+
+      <ContextMenu />
+
+      {/* Overlays / Modals */}
+      <SettingsModal />
+      <TemplatesModal />
+      <AssetsModal />
+      <TrashBin />
     </div>
-  </div>
-);
+  );
+};
 
-export default EditorPlaceholder;
+export default Editor;
