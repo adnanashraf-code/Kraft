@@ -70,7 +70,7 @@ const PropertiesPanel = () => {
   );
 
   return (
-    <div className={`w-[320px] ${theme.sidebar} border-l ${theme.border} flex flex-col h-full shrink-0 relative z-10 overflow-hidden transition-colors duration-500`}>
+    <div className={`w-[320px] ${theme.sidebar} border-l ${theme.border} flex flex-col h-full shrink-0 relative z-10 transition-colors duration-500`}>
       <div className={`h-14 border-b ${theme.border} flex items-center px-4 justify-between ${isLight ? 'bg-gray-50' : 'bg-black/20'} shrink-0`}>
         <div className="flex items-center">
             <Hash size={15} className="mr-2 text-blue-500" strokeWidth={3} />
@@ -152,6 +152,35 @@ const PropertiesPanel = () => {
           </div>
         </Section>
 
+        {/* SHADOW */}
+        <Section title="Effects / Shadow" defaultOpen={false} theme={theme} isLight={isLight}>
+            <div className="space-y-5">
+              <div className="flex items-center justify-between">
+                <span className={`text-[11px] font-bold uppercase tracking-widest ${theme.title}`}>Enable Shadow</span>
+                <button 
+                  onClick={() => updateElement(selectedElement.id, { shadowEnabled: !selectedElement.shadowEnabled })}
+                  className={`w-10 h-5 rounded-full relative transition-all ${selectedElement.shadowEnabled ? 'bg-blue-600' : 'bg-gray-300'}`}
+                >
+                  <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${selectedElement.shadowEnabled ? 'right-1' : 'left-1'}`} />
+                </button>
+              </div>
+
+              {selectedElement.shadowEnabled && (
+                <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <div className="grid grid-cols-2 gap-3">
+                    <InputBox label="X" name="shadowOffsetX" value={selectedElement.shadowOffsetX} onChange={handleChange} />
+                    <InputBox label="Y" name="shadowOffsetY" value={selectedElement.shadowOffsetY} onChange={handleChange} />
+                    <InputBox label="B" name="shadowBlur" value={selectedElement.shadowBlur} onChange={handleChange} />
+                    <div className={`flex items-center ${isLight ? 'bg-white border-gray-200 shadow-sm' : 'bg-white/5 border-white/5'} border p-1 rounded-xl`}>
+                      <input type="color" name="shadowColor" value={selectedElement.shadowColor?.startsWith('rgba') ? '#000000' : selectedElement.shadowColor} onChange={handleChange} className="w-6 h-6 rounded-lg cursor-pointer bg-transparent border-none p-0" />
+                      <span className={`text-[11px] font-mono px-2 uppercase truncate ${isLight ? 'text-gray-900' : 'text-white/80'}`}>Color</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+        </Section>
+
         {/* TYPOGRAPHY */}
         {selectedElement.type === 'text' && (
           <Section title="Text & Type" theme={theme} isLight={isLight}>
@@ -195,7 +224,7 @@ const PropertiesPanel = () => {
                  <span className={`text-[10px] font-black uppercase tracking-[0.2em] px-1 ${theme.title}`}>Raw Content</span>
                  <textarea 
                   name="content"
-                  value={selectedElement.content}
+                  value={selectedElement.content || ''}
                   onChange={handleChange}
                   className={`w-full text-[12px] font-medium border rounded-xl p-3 outline-none min-h-[100px] transition-all ${isLight ? 'bg-white border-gray-200 text-gray-900 shadow-sm' : 'bg-white/5 border-white/5 text-white/80 focus:bg-white/10'}`}
                   placeholder="Enter text..."

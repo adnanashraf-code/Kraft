@@ -23,6 +23,10 @@ const useEditorStore = create((set, get) => ({
   uiTheme: 'light', // 'dark', 'medium', 'gray', 'light'
   isSearchOpen: false,
   isSettingsOpen: false,
+  isShapePickerOpen: false,
+  isHelpOpen: false,
+  isOnboardingOpen: false,
+  currentOnboardingStep: 0,
   activeFlyout: 'none', // 'none', 'templates', 'assets'
   isTemplatesOpen: false,
   isAssetsOpen: false,
@@ -34,6 +38,10 @@ const useEditorStore = create((set, get) => ({
   setSearchOpen: (open) => set({ isSearchOpen: open }),
   setSearchQuery: (query) => set({ searchQuery: query }),
   setSettingsOpen: (open) => set({ isSettingsOpen: open }),
+  setShapePickerOpen: (open) => set({ isShapePickerOpen: open }),
+  setHelpOpen: (open) => set({ isHelpOpen: open }),
+  setOnboardingOpen: (open) => set({ isOnboardingOpen: open }),
+  setOnboardingStep: (step) => set({ currentOnboardingStep: step }),
   setTemplatesOpen: (open) => set({ isTemplatesOpen: open }),
   setAssetsOpen: (open) => set({ isAssetsOpen: open }),
   setDraggingGlobal: (dragging) => set({ isDraggingGlobal: dragging }),
@@ -62,6 +70,7 @@ const useEditorStore = create((set, get) => ({
         opacity: 1,
         visible: true,
         locked: false,
+        clipPath: 'none',
         
         // Advanced Design Defaults
         strokeColor: '#000000',
@@ -86,7 +95,8 @@ const useEditorStore = create((set, get) => ({
           letterSpacing: 0,
           textTransform: 'none', // none, uppercase, lowercase, capitalize
           textDecoration: 'none', // none, underline, line-through
-          fontStyle: 'normal' // normal, italic
+          fontStyle: 'normal', // normal, italic
+          content: 'New Text'
         }),
         ...element
       }],

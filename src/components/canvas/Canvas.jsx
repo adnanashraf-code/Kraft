@@ -5,11 +5,11 @@ import { useResizable } from '../../hooks/useResizable';
 import { THEMES } from '../../utils/themes';
 import ZoomControls from './ZoomControls';
 
-const DraggableElement = ({ el }) => {
-  const { selectedElementIds, uiTheme } = useEditorStore();
+const DraggableElement = React.memo(({ el }) => {
+  const isSelected = useEditorStore(state => state.selectedElementIds.includes(el.id));
+  const uiTheme = useEditorStore(state => state.uiTheme);
   const { handleMouseDown } = useDraggable(el.id);
   const { onResizeStart } = useResizable(el.id);
-  const isSelected = selectedElementIds.includes(el.id);
   const isLight = uiTheme === 'light' || uiTheme === 'gray';
 
   const handles = [
@@ -39,12 +39,13 @@ const DraggableElement = ({ el }) => {
       onMouseDown={el.locked ? undefined : handleMouseDown}
     >
         <div 
-          className="absolute inset-0 pointer-events-none overflow-hidden"
+          className="absolute inset-0 pointer-events-none"
           style={{
             borderRadius: `${el.borderRadius || 0}px`,
             border: el.strokeWidth ? `${el.strokeWidth}px ${el.strokeStyle || 'solid'} ${el.strokeColor || '#000'}` : 'none',
             boxShadow: el.shadowEnabled ? `${el.shadowOffsetX || 0}px ${el.shadowOffsetY || 4}px ${el.shadowBlur || 10}px ${el.shadowColor || 'rgba(0,0,0,0.15)'}` : 'none',
-            background: el.type === 'rectangle' ? el.fill : 'transparent'
+            background: el.type === 'rectangle' ? el.fill : 'transparent',
+            clipPath: el.clipPath || 'none'
           }}
         >
           {el.type === 'text' && (
@@ -77,12 +78,12 @@ const DraggableElement = ({ el }) => {
         ))}
     </div>
   );
-};
+});
 
 const Canvas = () => {
   const { 
     elements, selectedElementIds, canvas, setZoom, setPan, 
-    smartGuides, selectElement, deleteElements, uiTheme 
+    smartGuides, selectElement, clearSelection, deleteElements, uiTheme 
   } = useEditorStore();
   const canvasRef = useRef(null);
   const theme = THEMES[uiTheme];

@@ -80,6 +80,7 @@ const AssetsModal = () => {
                         height: Math.min(asset.h, 80),
                         background: asset.fill,
                         borderRadius: asset.borderRadius ? Math.min(asset.borderRadius, 40) : 0,
+                        clipPath: asset.clipPath || 'none'
                       }}
                     />
                     <span className={`text-xs font-bold uppercase tracking-wider ${isLight ? 'text-gray-900' : 'text-white'}`}>{asset.name}</span>
