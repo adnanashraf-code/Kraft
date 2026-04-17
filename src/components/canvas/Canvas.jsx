@@ -4,6 +4,7 @@ import { useDraggable } from '../../hooks/useDraggable';
 import { useResizable } from '../../hooks/useResizable';
 import { THEMES } from '../../utils/themes';
 import ZoomControls from './ZoomControls';
+import HistoryControls from './HistoryControls';
 
 const DraggableElement = React.memo(({ el }) => {
   const isSelected = useEditorStore(state => state.selectedElementIds.includes(el.id));
@@ -56,7 +57,7 @@ const DraggableElement = React.memo(({ el }) => {
                 fontSize: `${el.fontSize || 24}px`,
                 fontWeight: el.fontWeight || '400',
                 textAlign: el.textAlign || 'left',
-                color: el.color || (el.fill === 'transparent' ? (isLight ? '#000' : '#fff') : el.fill),
+                color: el.color || (isLight ? '#000000' : '#ffffff'),
                 lineHeight: el.lineHeight || 1.5,
                 letterSpacing: `${el.letterSpacing || 0}px`,
                 wordBreak: 'break-word',
@@ -89,6 +90,8 @@ const Canvas = () => {
   const theme = THEMES[uiTheme];
   const isLight = uiTheme === 'light' || uiTheme === 'gray';
 
+  const [marquee, setMarquee] = React.useState({ active: false, startX: 0, startY: 0, currentX: 0, currentY: 0 });
+
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
@@ -105,6 +108,70 @@ const Canvas = () => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedElementIds, deleteElements]);
+
+  useEffect(() => {
+    if (!marquee.active) return;
+
+    const handleMouseMove = (e) => {
+      setMarquee(prev => ({ ...prev, currentX: e.clientX, currentY: e.clientY }));
+    };
+
+    const handleMouseUp = (e) => {
+      const canvasRect = canvasRef.current.getBoundingClientRect();
+      const zoomScale = canvas.zoom / 100;
+
+      // Helper to convert client coords to canvas coords
+      const toCanvas = (clientX, clientY) => ({
+        x: (clientX - canvasRect.left - canvas.panX) / zoomScale,
+        y: (clientY - canvasRect.top - canvas.panY) / zoomScale
+      });
+
+      const start = toCanvas(marquee.startX, marquee.startY);
+      const end = toCanvas(e.clientX, e.clientY);
+
+      const selRect = {
+        left: Math.min(start.x, end.x),
+        top: Math.min(start.y, end.y),
+        right: Math.max(start.x, end.x),
+        bottom: Math.max(start.y, end.y),
+      };
+
+      // Intersection logic: bounding box check
+      const newlySelected = elements
+        .filter(el => {
+          if (el.locked) return false;
+          const elRect = { left: el.x, top: el.y, right: el.x + el.w, bottom: el.y + el.h };
+          return !(
+            elRect.left > selRect.right ||
+            elRect.right < selRect.left ||
+            elRect.top > selRect.bottom ||
+            elRect.bottom < selRect.top
+          );
+        })
+        .map(el => el.id);
+
+      if (e.shiftKey) {
+        // Toggle/Add to selection
+        const currentSelected = new Set(selectedElementIds);
+        newlySelected.forEach(id => {
+          if (currentSelected.has(id)) currentSelected.delete(id);
+          else currentSelected.add(id);
+        });
+        useEditorStore.setState({ selectedElementIds: Array.from(currentSelected) });
+      } else {
+        useEditorStore.setState({ selectedElementIds: newlySelected });
+      }
+
+      setMarquee({ active: false, startX: 0, startY: 0, currentX: 0, currentY: 0 });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [marquee.active, elements, canvas, selectedElementIds]);
 
   const backgroundStyle = {
     backgroundColor: isLight ? '#ffffff' : (theme.canvas.includes('[') ? theme.canvas.split('[')[1].split(']')[0] : '#000'),
@@ -131,10 +198,17 @@ const Canvas = () => {
     return () => canvasEl.removeEventListener('wheel', handleWheelRaw);
   }, [canvas.zoom, setZoom]);
 
-  const handleCanvasClick = (e) => {
-    // Only clear if clicking the actual canvas background, not an element
+  const handleCanvasMouseDown = (e) => {
+    // Only start if clicking the actual canvas background, not an element
     if (e.target === e.currentTarget) {
-      clearSelection();
+      if (!e.shiftKey) clearSelection();
+      setMarquee({
+        active: true,
+        startX: e.clientX,
+        startY: e.clientY,
+        currentX: e.clientX,
+        currentY: e.clientY
+      });
     }
   };
 
@@ -143,8 +217,20 @@ const Canvas = () => {
       ref={canvasRef}
       className={`relative flex-grow overflow-hidden cursor-crosshair h-full w-full transition-colors duration-500`}
       style={backgroundStyle}
-      onMouseDown={handleCanvasClick}
+      onMouseDown={handleCanvasMouseDown}
     >
+      {/* Visual Marquee Overlay */}
+      {marquee.active && (
+        <div 
+          className="absolute z-50 border border-blue-500 bg-blue-500/10 pointer-events-none"
+          style={{
+            left: Math.min(marquee.startX, marquee.currentX) - (canvasRef.current?.getBoundingClientRect().left || 0),
+            top: Math.min(marquee.startY, marquee.currentY) - (canvasRef.current?.getBoundingClientRect().top || 0),
+            width: Math.abs(marquee.startX - marquee.currentX),
+            height: Math.abs(marquee.startY - marquee.currentY),
+          }}
+        />
+      )}
       <div
         className="absolute origin-top-left touch-none"
         style={{
@@ -184,6 +270,7 @@ const Canvas = () => {
       </div>
       
       <ZoomControls />
+      <HistoryControls />
     </div>
   );
 };

@@ -1,97 +1,168 @@
 // Premium Readymade Templates for KRAFT
 // Each template is a full UI composition ready for production use.
 
-export const TEMPLATES = [
+/**
+ * BASE DESIGNS (30 CATEGORIES)
+ * These are the fundamental layouts that the factory will use to generate 100+ variants.
+ */
+const BASE_DESIGNS = [
   {
-    id: 'hero_modern_saas',
-    name: 'Modern SaaS Hero',
-    category: 'Marketing',
-    elements: [
-      { type: 'rectangle', x: 0, y: 0, w: 1000, h: 700, fill: '#ffffff' },
-      // Nav Bar
-      { type: 'rectangle', x: 50, y: 30, w: 900, h: 60, fill: '#f8fafc', borderRadius: 16 },
-      { type: 'text', x: 80, y: 45, w: 100, h: 30, content: 'KRAFT', fontSize: 20, fontWeight: '900', color: '#2563eb' },
-      { type: 'text', x: 250, y: 50, w: 300, h: 20, content: 'Features    Product    Pricing', fontSize: 13, fontWeight: '600', color: '#64748b' },
-      { type: 'rectangle', x: 830, y: 40, w: 100, h: 40, fill: '#2563eb', borderRadius: 10 },
-      { type: 'text', x: 830, y: 50, w: 100, h: 20, content: 'Sign Up', fontSize: 12, fontWeight: '700', color: '#ffffff', textAlign: 'center' },
-      // Hero Content
-      { type: 'text', x: 200, y: 180, w: 600, h: 100, content: 'Build better layouts, locally.', fontSize: 56, fontWeight: '900', textAlign: 'center', color: '#0f172a', lineHeight: 1.1 },
-      { type: 'text', x: 250, y: 300, w: 500, h: 40, content: 'A professional grade editorial engine designed for the next generation of designers and developers.', fontSize: 18, fontWeight: '400', textAlign: 'center', color: '#64748b' },
-      { type: 'rectangle', x: 400, y: 380, w: 200, h: 56, fill: '#0f172a', borderRadius: 28, shadowEnabled: true },
-      { type: 'text', x: 400, y: 395, w: 200, h: 24, content: 'Get Started Free', fontSize: 15, fontWeight: '700', color: '#ffffff', textAlign: 'center' },
-    ]
-  },
-  {
-    id: 'pricing_cards_3',
-    name: 'Pro Pricing Grid',
-    category: 'Marketing',
-    elements: [
-      { type: 'rectangle', x: 0, y: 0, w: 1000, h: 700, fill: '#f8fafc' },
-      // Header
-      { type: 'text', x: 200, y: 80, w: 600, h: 40, content: 'Simple, transparent pricing', fontSize: 32, fontWeight: '900', textAlign: 'center', color: '#0f172a' },
-      // Card 1
-      { type: 'rectangle', x: 100, y: 180, w: 250, h: 400, fill: '#ffffff', borderRadius: 24, shadowEnabled: true },
-      { type: 'text', x: 140, y: 220, w: 170, h: 30, content: 'Free', fontSize: 18, fontWeight: '900', color: '#64748b' },
-      { type: 'text', x: 140, y: 260, w: 170, h: 30, content: '$0', fontSize: 36, fontWeight: '900', color: '#0f172a' },
-      { type: 'rectangle', x: 130, y: 510, w: 190, h: 40, fill: '#f1f5f9', borderRadius: 10 },
-      // Card 2 (Featured)
-      { type: 'rectangle', x: 375, y: 160, w: 270, h: 440, fill: '#2563eb', borderRadius: 24, shadowEnabled: true },
-      { type: 'text', x: 425, y: 210, w: 170, h: 30, content: 'Pro', fontSize: 18, fontWeight: '900', color: '#bfdbfe' },
-      { type: 'text', x: 425, y: 250, w: 170, h: 30, content: '$29', fontSize: 36, fontWeight: '900', color: '#ffffff' },
-      { type: 'rectangle', x: 415, y: 530, w: 190, h: 46, fill: '#ffffff', borderRadius: 10 },
-      { type: 'text', x: 415, y: 542, w: 190, h: 20, content: 'Get Started', fontSize: 14, fontWeight: '900', color: '#2563eb', textAlign: 'center' },
-      // Card 3
-      { type: 'rectangle', x: 670, y: 180, w: 250, h: 400, fill: '#ffffff', borderRadius: 24, shadowEnabled: true },
-      { type: 'text', x: 710, y: 220, w: 170, h: 30, content: 'Startup', fontSize: 18, fontWeight: '900', color: '#64748b' },
-      { type: 'text', x: 710, y: 260, w: 170, h: 30, content: '$99', fontSize: 36, fontWeight: '900', color: '#0f172a' },
-      { type: 'rectangle', x: 700, y: 510, w: 190, h: 40, fill: '#f1f5f9', borderRadius: 10 },
-    ]
-  },
-  {
-    id: 'dashboard_pro_ux',
-    name: 'Admin Dashboard',
+    id: 'saas_landing_pro',
+    name: 'Pro SaaS Landing',
     category: 'SaaS',
     elements: [
-      { type: 'rectangle', x: 0, y: 0, w: 1000, h: 700, fill: '#ffffff' },
-      // Sidebar
-      { type: 'rectangle', x: 0, y: 0, w: 240, h: 700, fill: '#0f172a' },
-      { type: 'rectangle', x: 30, y: 40, w: 40, h: 40, fill: '#2563eb', borderRadius: 10 },
-      { type: 'text', x: 85, y: 50, w: 120, h: 20, content: 'KRAFT PRO', fontSize: 14, fontWeight: '900', color: '#ffffff' },
-      { type: 'rectangle', x: 20, y: 120, w: 200, h: 44, fill: '#2563eb', borderRadius: 12, opacity: 0.15 },
-      { type: 'text', x: 70, y: 133, w: 120, h: 20, content: 'Dashboard', fontSize: 13, fontWeight: '600', color: '#ffffff' },
-      // Header
-      { type: 'rectangle', x: 240, y: 0, w: 760, h: 80, fill: '#ffffff', border: '0 0 1px 0 solid #f1f5f9' },
-      { type: 'text', x: 280, y: 30, w: 300, h: 24, content: 'Project Statistics', fontSize: 18, fontWeight: '900', color: '#0f172a' },
-      // Content Cards
-      { type: 'rectangle', x: 280, y: 120, w: 220, h: 140, fill: '#ffffff', border: '1px solid #f1f5f9', borderRadius: 20, shadowEnabled: true },
-      { type: 'text', x: 310, y: 150, w: 150, h: 20, content: 'TOTAL USERS', fontSize: 10, fontWeight: '900', color: '#64748b' },
-      { type: 'text', x: 310, y: 180, w: 150, h: 40, content: '24.5k', fontSize: 32, fontWeight: '900', color: '#0f172a' },
-      { type: 'rectangle', x: 310, y: 230, w: 50, h: 5, fill: '#2563eb', borderRadius: 2 },
+      { type: 'rectangle', x: 0, y: 0, w: 1200, h: 3000, fill: '#ffffff' }, // Page Container
+      // HERO SECTION
+      { type: 'text', x: 300, y: 150, w: 600, h: 100, content: 'Scale your engineering with KRAFT.', fontSize: 56, fontWeight: '900', textAlign: 'center' },
+      { type: 'text', x: 350, y: 280, w: 500, h: 60, content: 'The only design engine that understands code as well as you do.', fontSize: 18, textAlign: 'center', opacity: 0.6 },
+      { type: 'rectangle', x: 500, y: 380, w: 200, h: 56, fill: 'ACCENT', borderRadius: 28 }, // CTA
+      { type: 'text', x: 500, y: 395, w: 200, h: 24, content: 'Get Started', fontSize: 15, fontWeight: '700', color: '#ffffff', textAlign: 'center' },
       
-      { type: 'rectangle', x: 530, y: 120, w: 420, h: 140, fill: '#ffffff', border: '1px solid #f1f5f9', borderRadius: 20, shadowEnabled: true },
-       { type: 'text', x: 560, y: 150, w: 150, h: 20, content: 'REVENUE', fontSize: 10, fontWeight: '900', color: '#64748b' },
-      { type: 'text', x: 560, y: 180, w: 150, h: 40, content: '$89,400', fontSize: 32, fontWeight: '900', color: '#10b981' },
+      // FEATURES SECTION
+      { type: 'text', x: 500, y: 600, w: 200, h: 30, content: 'FEATURES', fontSize: 12, fontWeight: '900', textAlign: 'center', color: 'ACCENT' },
+      { type: 'text', x: 300, y: 640, w: 600, h: 40, content: 'Everything you need in one place.', fontSize: 32, fontWeight: '900', textAlign: 'center' },
       
-      { type: 'rectangle', x: 280, y: 290, w: 670, h: 360, fill: '#f8fafc', borderRadius: 24 },
-      { type: 'text', x: 320, y: 330, w: 300, h: 30, content: 'Traffic Overview', fontSize: 16, fontWeight: '900', color: '#0f172a' },
+      { type: 'rectangle', x: 200, y: 750, w: 250, h: 300, fill: 'ACCENT', opacity: 0.05, borderRadius: 24 },
+      { type: 'text', x: 230, y: 780, w: 190, h: 30, content: 'Real-time Sync', fontSize: 18, fontWeight: '900' },
+      { type: 'text', x: 230, y: 820, w: 190, h: 60, content: 'Collaborate with your team seamlessly across any device.', fontSize: 14, opacity: 0.7 },
+      
+      { type: 'rectangle', x: 475, y: 750, w: 250, h: 300, fill: 'ACCENT', opacity: 0.05, borderRadius: 24 },
+      { type: 'text', x: 505, y: 780, w: 190, h: 30, content: 'AI Optimized', fontSize: 18, fontWeight: '900' },
+      { type: 'text', x: 505, y: 820, w: 190, h: 60, content: 'Trained on millions of professional design tokens.', fontSize: 14, opacity: 0.7 },
+      
+      { type: 'rectangle', x: 750, y: 750, w: 250, h: 300, fill: 'ACCENT', opacity: 0.05, borderRadius: 24 },
+      { type: 'text', x: 780, y: 780, w: 190, h: 30, content: 'Export Ready', fontSize: 18, fontWeight: '900' },
+      { type: 'text', x: 780, y: 820, w: 190, h: 60, content: 'Export clean React and Tailwind code in seconds.', fontSize: 14, opacity: 0.7 },
+
+      // PRICING SECTION
+      { type: 'rectangle', x: 0, y: 1200, w: 1200, h: 800, fill: 'ACCENT', opacity: 0.02 },
+      { type: 'text', x: 400, y: 1280, w: 400, h: 40, content: 'Pricing for everyone.', fontSize: 32, fontWeight: '900', textAlign: 'center' },
+      
+      { type: 'rectangle', x: 200, y: 1380, w: 250, h: 450, fill: '#ffffff', borderRadius: 24, shadowEnabled: true }, // Card 1
+      { type: 'text', x: 240, y: 1430, w: 170, h: 30, content: 'Free', fontSize: 18, fontWeight: '900', opacity: 0.5 },
+      { type: 'text', x: 240, y: 1470, w: 170, h: 50, content: '$0', fontSize: 44, fontWeight: '900' },
+      
+      { type: 'rectangle', x: 475, y: 1350, w: 250, h: 510, fill: 'ACCENT', borderRadius: 24, shadowEnabled: true }, // Card 2 (Featured)
+      { type: 'text', x: 515, y: 1400, w: 170, h: 30, content: 'Pro', fontSize: 18, fontWeight: '900', color: '#ffffff', opacity: 0.8 },
+      { type: 'text', x: 515, y: 1440, w: 170, h: 50, content: '$29', fontSize: 44, fontWeight: '900', color: '#ffffff' },
+      { type: 'rectangle', x: 505, y: 1770, w: 190, h: 50, fill: '#ffffff', borderRadius: 12 },
+      { type: 'text', x: 505, y: 1785, w: 190, h: 20, content: 'Purchase Now', fontSize: 14, fontWeight: '900', textAlign: 'center', color: 'ACCENT' },
+
+      { type: 'rectangle', x: 750, y: 1380, w: 250, h: 450, fill: '#ffffff', borderRadius: 24, shadowEnabled: true }, // Card 3
+      
+      // TESTIMONIALS
+      { type: 'text', x: 400, y: 2000, w: 400, h: 40, content: 'Loved by thousands.', fontSize: 32, fontWeight: '900', textAlign: 'center' },
+      { type: 'rectangle', x: 200, y: 2100, w: 800, h: 200, fill: '#ffffff', borderRadius: 32, border: '1px solid ACCENT', opacity: 0.1 },
+      { type: 'text', x: 250, y: 2150, w: 700, h: 100, content: '"KRAFT transformed our design workflow. The components are pixel perfect and the speed of the interface is unmatched."', fontSize: 20, fontWeight: '500', textAlign: 'center', fontStyle: 'italic' },
+      
+      // FOOTER
+      { type: 'rectangle', x: 0, y: 2400, w: 1200, h: 400, fill: '#0f172a' },
+      { type: 'text', x: 100, y: 2480, w: 200, h: 30, content: 'KRAFT', fontSize: 24, fontWeight: '900', color: '#ffffff' },
+      { type: 'text', x: 100, y: 2520, w: 300, h: 20, content: 'Built with passion for designers.', fontSize: 13, color: '#ffffff', opacity: 0.5 },
+      { type: 'text', x: 900, y: 2480, w: 200, h: 20, content: '© 2024 KRAFT INC', fontSize: 12, color: '#ffffff', opacity: 0.3, textAlign: 'right' }
     ]
   },
   {
-    id: 'mobile_app_wire',
-    name: 'Mobile Core UI',
-    category: 'Mobile',
+    id: 'crypto_dashboard',
+    name: 'Crypto & Fintech',
+    category: 'SaaS',
     elements: [
-       { type: 'rectangle', x: 350, y: 50, w: 300, h: 600, fill: '#000000', borderRadius: 44, shadowEnabled: true },
-       { type: 'rectangle', x: 360, y: 60, w: 280, h: 580, fill: '#ffffff', borderRadius: 36 },
-       { type: 'rectangle', x: 450, y: 75, w: 100, h: 25, fill: '#000000', borderRadius: 12 }, // Dynamic Island
-       // App Content
-       { type: 'text', x: 380, y: 130, w: 240, h: 40, content: 'Welcome Back', fontSize: 24, fontWeight: '900', color: '#000000' },
-       { type: 'rectangle', x: 380, y: 190, w: 240, h: 160, fill: '#2563eb', borderRadius: 24 },
-       { type: 'text', x: 405, y: 215, w: 150, h: 20, content: 'Your Balance', fontSize: 12, fontWeight: '600', color: '#ffffff', opacity: 0.8 },
-       { type: 'text', x: 405, y: 240, w: 200, h: 40, content: '$4,520.00', fontSize: 28, fontWeight: '900', color: '#ffffff' },
-       // Bottom Nav
-       { type: 'rectangle', x: 360, y: 580, w: 280, h: 60, fill: '#ffffff', border: '1px 0 0 0 solid #f1f5f9' },
-       { type: 'rectangle', x: 490, y: 630, w: 20, h: 20, fill: '#000000', borderRadius: 10 },
+       { type: 'rectangle', x: 0, y: 0, w: 1000, h: 700, fill: 'SIDEBAR' },
+       { type: 'rectangle', x: 50, y: 50, w: 200, h: 600, fill: 'ACCENT', borderRadius: 32, opacity: 0.8 },
+       { type: 'text', x: 80, y: 100, w: 140, h: 30, content: 'Assets', fontSize: 18, fontWeight: '900', color: '#ffffff' },
+       { type: 'rectangle', x: 300, y: 50, w: 650, h: 180, fill: 'ACCENT', borderRadius: 32, shadowEnabled: true },
+       { type: 'text', x: 340, y: 90, w: 200, h: 20, content: 'Total Portfolio Balance', fontSize: 12, color: '#ffffff', opacity: 0.7 },
+       { type: 'text', x: 340, y: 120, w: 300, h: 40, content: '$148,500.24', fontSize: 36, fontWeight: '900', color: '#ffffff' }
     ]
-  }
+  },
+  {
+    id: 'ai_tool_terminal',
+    name: 'AI Tool Landing',
+    category: 'AI / Modern',
+    elements: [
+       { type: 'rectangle', x: 0, y: 0, w: 1000, h: 700, fill: '#050505' },
+       { type: 'text', x: 300, y: 100, w: 400, h: 40, content: 'Prompt Everything.', fontSize: 36, fontWeight: 'black', textAlign: 'center', color: '#ffffff' },
+       { type: 'rectangle', x: 200, y: 200, w: 600, h: 300, fill: '#111111', borderRadius: 24, border: '1px solid #222' },
+       { type: 'text', x: 230, y: 230, w: 500, h: 20, content: '> Initializing neural networks...', fontSize: 12, color: 'ACCENT', fontWeight: 'bold' }
+    ]
+  },
+  {
+    id: 'medical_portal_web',
+    name: 'Healthcare Hub',
+    category: 'Healthcare',
+    elements: [
+       { type: 'rectangle', x: 0, y: 0, w: 1000, h: 700, fill: '#f0f9ff' },
+       { type: 'rectangle', x: 100, y: 80, w: 800, h: 540, fill: '#ffffff', borderRadius: 40, shadowEnabled: true },
+       { type: 'text', x: 160, y: 150, w: 300, h: 40, content: 'Find your doctor', fontSize: 24, fontWeight: '900', color: '#0c4a6e' },
+       { type: 'rectangle', x: 160, y: 210, w: 300, h: 50, fill: '#f1f5f9', borderRadius: 12 }
+    ]
+  },
+  { id: 'agency_portfolio_v1', name: 'Creative Agency', category: 'Agency' },
+  { id: 'ecom_detailed_v1', name: 'Product Showcase', category: 'E-commerce' },
+  { id: 'blog_modern_v1', name: 'Editorial Blog', category: 'Marketing' },
+  { id: 'resume_pro_v1', name: 'Executive Resume', category: 'Resume' },
+  { id: 'podcast_landing_v1', name: 'Audio & Podcast', category: 'Creative' },
+  { id: 'fitness_tracker_v1', name: 'Activity Dashboard', category: 'Healthcare' },
+  { id: 'real_estate_v1', name: 'Property Search', category: 'Marketing' },
+  { id: 'travel_booking_v1', name: 'Destination Hub', category: 'Agency' },
+  { id: 'restaurant_menu_v1', name: 'Gourmet Menu', category: 'Agency' },
+  { id: 'educ_course_v1', name: 'Active Learning', category: 'SaaS' },
+  { id: 'event_landing_v1', name: 'Summit 2024', category: 'Marketing' },
+  { id: 'app_store_page_v1', name: 'Mobile App View', category: 'Mobile' },
+  { id: 'social_profile_v1', name: 'Influencer Bio', category: 'Mobile' },
+  { id: 'newsletter_v1', name: 'Lead Capture', category: 'Marketing' },
+  { id: 'studio_minimal_v1', name: 'Studio One', category: 'Agency' },
+  { id: 'pitch_deck_v1', name: 'Startup Pitch', category: 'SaaS' },
+  { id: 'gaming_portal_v1', name: 'Gamer Portal', category: 'Agency' },
+  { id: 'fashion_v1', name: 'Lookbook Pro', category: 'E-commerce' },
+  { id: 'fintech_wallet_v1', name: 'Digital Wallet', category: 'SaaS' },
+  { id: 'legal_v1', name: 'Law Firm Plus', category: 'SaaS' },
+  { id: 'travel_blog_v1', name: 'Nomad Journal', category: 'Marketing' },
+  { id: 'ai_tool_v2', name: 'Neural Engine', category: 'AI / Modern' },
+  { id: 'resort_v1', name: 'Summer Resort', category: 'Agency' },
+  { id: 'agency_v2', name: 'Edge Digital', category: 'Agency' },
+  { id: 'saas_lite_v1', name: 'SaaS Starter', category: 'SaaS' },
+  { id: 'personal_blog_v1', name: 'Minimalist Blog', category: 'Marketing' }
 ];
+
+/**
+ * THEMES & COLORS
+ */
+const THEME_VARIANTS = [
+  { id: 'light_blue', mode: 'light', accent: '#2563eb', bg: '#ffffff', text: '#0f172a' },
+  { id: 'dark_blue', mode: 'dark', accent: '#3b82f6', bg: '#0c0c0c', text: '#ffffff' },
+  { id: 'light_purple', mode: 'light', accent: '#8b5cf6', bg: '#ffffff', text: '#1e1b4b' },
+  { id: 'dark_purple', mode: 'dark', accent: '#a78bfa', bg: '#080616', text: '#f5f3ff' }
+];
+
+/**
+ * VARIANT FACTORY
+ * Multiplies base designs by theme variants to reach 120+ templates.
+ */
+const generateTemplates = () => {
+  const finalTemplates = [];
+
+  BASE_DESIGNS.forEach(base => {
+    THEME_VARIANTS.forEach(variant => {
+      finalTemplates.push({
+        id: `${base.id}_${variant.id}`,
+        name: `${base.name} (${variant.mode === 'light' ? 'Light' : 'Dark'} ${variant.id.split('_')[1]})`,
+        category: base.category,
+        elements: (base.elements || []).map(el => ({
+          ...el,
+          fill: el.fill === 'ACCENT' ? variant.accent : 
+                el.fill === 'SIDEBAR' ? (variant.mode === 'dark' ? '#111' : '#f8fafc') :
+                (el.fill === '#ffffff' && variant.mode === 'dark') ? variant.bg : el.fill,
+          color: el.color === '#ffffff' ? (variant.mode === 'dark' ? '#ffffff' : '#ffffff') :
+                 el.color === 'ACCENT' ? variant.accent :
+                 (!el.color && variant.mode === 'dark' && el.type === 'text') ? '#ffffff' : el.color
+        }))
+      });
+    });
+  });
+
+  return finalTemplates;
+};
+
+export const TEMPLATES = generateTemplates();
+

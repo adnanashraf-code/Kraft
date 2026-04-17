@@ -57,38 +57,56 @@ const HelpModal = () => {
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
           
-          <Section icon={MousePointer2} title="Canvas Navigation">
-            <FAQItem q="How do I move around?" a="Hold Spacebar + Drag to pan across the infinite canvas, or use your middle mouse button." />
-            <FAQItem q="Zooming in/out?" a="Use the scroll wheel to zoom. You can also use the + / - buttons at the bottom right." />
+          <Section icon={MousePointer2} title="Selection & Navigation">
+            <FAQItem q="How do I move around? [SPACE]" a="Hold Spacebar + Drag to pan across the infinite canvas, or use your middle mouse button." />
+            <FAQItem q="Zooming in/out? [WHEEL]" a="Use the scroll wheel to zoom. You can also use the + / - buttons at the bottom right." />
+            <FAQItem q="Bulk Selection? [DRAG]" a="Drag your mouse on the empty canvas to create a Marquee Selection, or hold Shift while clicking individual elements." />
           </Section>
 
-          <Section icon={Box} title="Shapes & Elements">
-            <FAQItem q="Where are the complex shapes?" a="Click the Hexagon icon in the toolbar. We have 20+ geometric shapes like Stars, Kites, and Arrows." />
-            <FAQItem q="How to use Asset Vault?" a="Click the Layers/Assets icon to browse premium UI components and gradients. Drag them directly onto the canvas." />
+          <Section icon={Box} title="Shapes & Asset Vault">
+            <FAQItem q="Where are the complex shapes? [H]" a="Click the Hexagon icon in the toolbar. We have 20+ geometric shapes including Stars, Kites, Arrows, and Polygons." />
+            <FAQItem q="How to use the Vault?" a="Browse the Assets flyout for premium UI components, icons, and curated gradients. Drag-and-drop them directly onto your field." />
           </Section>
 
-          <Section icon={Layers} title="The Inspector (Properties)">
-            <FAQItem q="Styling elements?" a="Select any element to see the Properties Panel on the right. You can change colors, opacity, border-radius, and shadows." />
-            <FAQItem q="Gradients & Blends?" a="Use the fill section to apply linear or radial gradients. You can even paste CSS gradient strings." />
+          <Section icon={Layers} title="The Inspector & Groups">
+            <FAQItem q="What is Grouping? [CTRL + G]" a="Select multiple items and press CTRL + G to lock them into a group. They will now move and behave as a single entity till ungrouped." />
+            <FAQItem q="Bulk Styling?" a="If you have multiple items selected, any change in the Properties Panel—color, stroke, or rotation—applies to all of them instantly." />
+            <FAQItem q="Responsive Colors?" a="Our engine features 'Theme-Aware' logic. Default text elements automatically flip between Black and White when you switch UI themes [T]." />
           </Section>
 
-          <Section icon={Command} title="Keyboard Shortcuts">
-            <div className="grid grid-cols-2 gap-4">
-              <div className={`p-3 rounded-xl ${isLight ? 'bg-gray-50' : 'bg-white/5'} flex justify-between items-center`}>
-                <span className={`text-xs ${theme.text}`}>Duplicate</span>
-                <kbd className={`px-2 py-0.5 rounded border ${isLight ? 'bg-white border-gray-300' : 'bg-black border-white/20'} text-[10px]`}>CTRL + D</kbd>
+          <Section icon={Command} title="Keyboard Master List">
+            <div className="grid grid-cols-2 gap-3">
+              <div className={`p-3 rounded-xl ${isLight ? 'bg-gray-50' : 'bg-white/5'} flex justify-between items-center border ${theme.border}`}>
+                <span className={`text-[11px] font-bold uppercase tracking-wider ${theme.text}`}>Undo Action</span>
+                <kbd className={`px-2 py-0.5 rounded border ${isLight ? 'bg-white border-gray-300' : 'bg-black border-white/20'} text-[10px] font-mono`}>CTRL Z</kbd>
               </div>
-              <div className={`p-3 rounded-xl ${isLight ? 'bg-gray-50' : 'bg-white/5'} flex justify-between items-center`}>
-                <span className={`text-xs ${theme.text}`}>Delete</span>
-                <kbd className={`px-2 py-0.5 rounded border ${isLight ? 'bg-white border-gray-300' : 'bg-black border-white/20'} text-[10px]`}>DEL / BKSP</kbd>
+              <div className={`p-3 rounded-xl ${isLight ? 'bg-gray-50' : 'bg-white/5'} flex justify-between items-center border ${theme.border}`}>
+                <span className={`text-[11px] font-bold uppercase tracking-wider ${theme.text}`}>Redo Action</span>
+                <kbd className={`px-2 py-0.5 rounded border ${isLight ? 'bg-white border-gray-300' : 'bg-black border-white/20'} text-[10px] font-mono`}>CTRL SHIFT Z</kbd>
               </div>
-              <div className={`p-3 rounded-xl ${isLight ? 'bg-gray-50' : 'bg-white/5'} flex justify-between items-center`}>
-                <span className={`text-xs ${theme.text}`}>Search Overlay</span>
-                <kbd className={`px-2 py-0.5 rounded border ${isLight ? 'bg-white border-gray-300' : 'bg-black border-white/20'} text-[10px]`}>CTRL + K</kbd>
+              <div className={`p-3 rounded-xl ${isLight ? 'bg-gray-50' : 'bg-white/5'} flex justify-between items-center border ${theme.border}`}>
+                <span className={`text-[11px] font-bold uppercase tracking-wider ${theme.text}`}>Group Selection</span>
+                <kbd className={`px-2 py-0.5 rounded border ${isLight ? 'bg-white border-gray-300' : 'bg-black border-white/20'} text-[10px] font-mono`}>CTRL G</kbd>
               </div>
-              <div className={`p-3 rounded-xl ${isLight ? 'bg-gray-50' : 'bg-white/5'} flex justify-between items-center`}>
-                <span className={`text-xs ${theme.text}`}>Toggle Theme</span>
-                <kbd className={`px-2 py-0.5 rounded border ${isLight ? 'bg-white border-gray-300' : 'bg-black border-white/20'} text-[10px]`}>T</kbd>
+              <div className={`p-3 rounded-xl ${isLight ? 'bg-gray-50' : 'bg-white/5'} flex justify-between items-center border ${theme.border}`}>
+                <span className={`text-[11px] font-bold uppercase tracking-wider ${theme.text}`}>Ungroup Items</span>
+                <kbd className={`px-2 py-0.5 rounded border ${isLight ? 'bg-white border-gray-300' : 'bg-black border-white/20'} text-[10px] font-mono`}>CTRL SHIFT G</kbd>
+              </div>
+              <div className={`p-3 rounded-xl ${isLight ? 'bg-gray-50' : 'bg-white/5'} flex justify-between items-center border ${theme.border}`}>
+                <span className={`text-[11px] font-bold uppercase tracking-wider ${theme.text}`}>Duplicate</span>
+                <kbd className={`px-2 py-0.5 rounded border ${isLight ? 'bg-white border-gray-300' : 'bg-black border-white/20'} text-[10px] font-mono`}>CTRL D</kbd>
+              </div>
+              <div className={`p-3 rounded-xl ${isLight ? 'bg-gray-50' : 'bg-white/5'} flex justify-between items-center border ${theme.border}`}>
+                <span className={`text-[11px] font-bold uppercase tracking-wider ${theme.text}`}>Delete</span>
+                <kbd className={`px-2 py-0.5 rounded border ${isLight ? 'bg-white border-gray-300' : 'bg-black border-white/20'} text-[10px] font-mono`}>DEL</kbd>
+              </div>
+              <div className={`p-3 rounded-xl ${isLight ? 'bg-gray-50' : 'bg-white/5'} flex justify-between items-center border ${theme.border}`}>
+                <span className={`text-[11px] font-bold uppercase tracking-wider ${theme.text}`}>Toggle Theme</span>
+                <kbd className={`px-2 py-0.5 rounded border ${isLight ? 'bg-white border-gray-300' : 'bg-black border-white/20'} text-[10px] font-mono`}>T</kbd>
+              </div>
+              <div className={`p-3 rounded-xl ${isLight ? 'bg-gray-50' : 'bg-white/5'} flex justify-between items-center border ${theme.border}`}>
+                <span className={`text-[11px] font-bold uppercase tracking-wider ${theme.text}`}>Quick Search</span>
+                <kbd className={`px-2 py-0.5 rounded border ${isLight ? 'bg-white border-gray-300' : 'bg-black border-white/20'} text-[10px] font-mono`}>CTRL K</kbd>
               </div>
             </div>
           </Section>

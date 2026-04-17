@@ -34,7 +34,7 @@ const Toolbar = () => {
         p-2.5 rounded-xl transition-all duration-200 group relative
         ${active 
           ? 'bg-blue-600 text-white shadow-lg' 
-          : `${theme.text} hover:${isLight ? 'bg-blue-50 text-blue-600' : 'bg-white/10 text-white'}`}
+          : `${theme.text} ${isLight ? 'hover:bg-blue-50 hover:text-blue-600' : 'hover:bg-white/10 hover:text-white'}`}
       `}
     >
       <Icon size={18} className={active ? '' : 'group-hover:scale-110 transition-transform'} />
@@ -82,27 +82,28 @@ const Toolbar = () => {
           <button 
             onClick={() => setUiTheme('light')} 
             aria-label="Light Theme"
-            className={`p-1.5 rounded-lg transition-colors ${uiTheme === 'light' ? 'bg-blue-600 text-white shadow-sm' : `text-gray-500 hover:${isLight ? 'text-blue-600 bg-blue-50' : 'text-white bg-white/5'}`}`}
+            className={`p-1.5 rounded-lg transition-colors ${uiTheme === 'light' ? 'bg-blue-600 text-white shadow-sm' : `text-gray-500 ${isLight ? 'hover:text-blue-600 hover:bg-blue-50' : 'hover:text-white hover:bg-white/5'}`}`}
           >
             <Sun size={14} />
           </button>
           <button 
             onClick={() => setUiTheme('gray')} 
             aria-label="Gray Theme"
-            className={`p-1.5 rounded-lg transition-colors ${uiTheme === 'gray' ? (isLight ? 'bg-gray-800 text-white' : 'bg-white/20 text-white') : `text-gray-500 hover:${isLight ? 'text-gray-800 bg-gray-100' : 'text-white'}`}`}
+            className={`p-1.5 rounded-lg transition-colors ${uiTheme === 'gray' ? (isLight ? 'bg-gray-800 text-white' : 'bg-white/20 text-white') : `text-gray-500 ${isLight ? 'hover:text-gray-800 hover:bg-gray-200' : 'hover:text-white hover:bg-white/10'}`}`}
           >
             <Monitor size={14} />
           </button>
           <button 
             onClick={() => setUiTheme('dark')} 
             aria-label="Dark Theme"
-            className={`p-1.5 rounded-lg transition-colors ${uiTheme === 'dark' ? 'bg-blue-600 text-white shadow-sm' : `text-gray-500 hover:${isLight ? 'text-blue-600 bg-blue-50' : 'text-white bg-white/5'}`}`}
+            className={`p-1.5 rounded-lg transition-colors ${uiTheme === 'dark' ? 'bg-blue-600 text-white shadow-sm' : `text-gray-500 ${isLight ? 'hover:text-blue-600 hover:bg-blue-50' : 'hover:text-white hover:bg-white/5'}`}`}
           >
             <Moon size={14} />
           </button>
         </div>
 
-        <ToolButton id="tool-help" icon={HelpCircle} title="Help" onClick={() => setHelpOpen(true)} active={isHelpOpen} />
+        <ToolButton id="tool-shortcuts" icon={Monitor} title="Shortcuts" onClick={() => setHelpOpen(true)} active={isHelpOpen} />
+        <ToolButton id="tool-help" icon={HelpCircle} title="Expert Guide" onClick={() => setHelpOpen(true)} />
         <ToolButton id="tool-settings" icon={Settings} title="Settings" onClick={() => setSettingsOpen(true)} />
       </div>
     </div>

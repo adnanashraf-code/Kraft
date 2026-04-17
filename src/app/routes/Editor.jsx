@@ -16,13 +16,47 @@ import { THEMES } from '../../utils/themes';
 import { useEffect } from 'react';
 
 const Editor = () => {
-  const { uiTheme, setOnboardingOpen } = useEditorStore();
+  const { 
+    uiTheme, setOnboardingOpen, selectedElementIds, 
+    groupElements, ungroupElements, deleteElements, duplicateElements,
+    undo, redo
+  } = useEditorStore();
   const theme = THEMES[uiTheme];
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Ignore if typing in an input or textarea
+      if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+
+      const isCtrl = e.ctrlKey || e.metaKey;
+      const isShift = e.shiftKey;
+
+      if (isCtrl && e.key.toLowerCase() === 'z') {
+        e.preventDefault();
+        if (isShift) redo();
+        else undo();
+      } else if (isCtrl && e.key.toLowerCase() === 'y') {
+        e.preventDefault();
+        redo();
+      } else if (isCtrl && e.key.toLowerCase() === 'g') {
+        e.preventDefault();
+        if (isShift) ungroupElements(selectedElementIds);
+        else groupElements(selectedElementIds);
+      } else if (isCtrl && e.key.toLowerCase() === 'd') {
+        e.preventDefault();
+        duplicateElements(selectedElementIds);
+      } else if (e.key === 'Delete' || e.key === 'Backspace') {
+        deleteElements(selectedElementIds);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedElementIds, groupElements, ungroupElements, deleteElements, duplicateElements]);
 
   useEffect(() => {
     const hasOnboarded = localStorage.getItem('kraft_onboarded');
     if (!hasOnboarded) {
-      // Small delay to ensure UI is ready
       setTimeout(() => setOnboardingOpen(true), 1000);
     }
   }, [setOnboardingOpen]);

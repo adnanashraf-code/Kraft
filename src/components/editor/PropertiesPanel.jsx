@@ -9,7 +9,7 @@ const Section = ({ title, children, defaultOpen = true, theme, isLight }) => {
     <div className={`border-b ${theme.border} last:border-0`}>
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full flex items-center justify-between py-4 px-4 hover:${isLight ? 'bg-gray-100' : 'bg-white/5'} transition-all`}
+        className={`w-full flex items-center justify-between py-4 px-4 transition-all ${isLight ? 'hover:bg-gray-100' : 'hover:bg-white/5'}`}
       >
         <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${theme.title}`}>{title}</span>
         {isOpen ? <ChevronDown size={14} className={theme.title} /> : <ChevronRight size={14} className={theme.title} />}
@@ -20,7 +20,7 @@ const Section = ({ title, children, defaultOpen = true, theme, isLight }) => {
 };
 
 const PropertiesPanel = () => {
-  const { elements, selectedElementIds, updateElement, uiTheme } = useEditorStore();
+  const { elements, selectedElementIds, updateElement, updateElements, uiTheme } = useEditorStore();
   const theme = THEMES[uiTheme];
   const isLight = uiTheme === 'light' || uiTheme === 'gray';
   
@@ -52,7 +52,7 @@ const PropertiesPanel = () => {
       if (name === 'w') updates.h = parsedValue / ratio;
       if (name === 'h') updates.w = parsedValue * ratio;
     }
-    updateElement(selectedElement.id, updates);
+    updateElements(selectedElementIds, updates);
   };
 
   const InputBox = ({ label, name, value, onChange, type = "number", suffix = "" }) => (
@@ -93,7 +93,7 @@ const PropertiesPanel = () => {
             
             <button 
               className={`absolute top-[48px] left-[calc(50%-12px)] z-20 w-6 h-6 rounded-full flex items-center justify-center border transition-all ${selectedElement.aspectRatioLocked ? 'bg-blue-600 border-blue-400 text-white shadow-lg' : (isLight ? 'bg-white border-gray-200 text-gray-400' : 'bg-[#1a1a1a] border-white/10 text-white/30 hover:text-white/60')}`}
-              onClick={() => updateElement(selectedElement.id, { aspectRatioLocked: !selectedElement.aspectRatioLocked })}
+              onClick={() => updateElements(selectedElementIds, { aspectRatioLocked: !selectedElement.aspectRatioLocked })}
             >
               <LayoutList size={10} />
             </button>
@@ -142,8 +142,13 @@ const PropertiesPanel = () => {
               {['solid', 'dashed'].map(style => (
                 <button 
                   key={style}
-                  onClick={() => updateElement(selectedElement.id, { strokeStyle: style })}
-                  className={`flex-1 py-1.5 text-[10px] uppercase font-black tracking-widest transition-all rounded-lg ${selectedElement.strokeStyle === style ? 'bg-blue-600 text-white shadow-lg' : `${theme.title} hover:text-white hover:bg-white/5`}`}
+                  onClick={() => updateElements(selectedElementIds, { strokeStyle: style })}
+                  className={`flex-1 py-1.5 text-[10px] uppercase font-black tracking-widest transition-all rounded-lg 
+                    ${selectedElement.strokeStyle === style 
+                      ? 'bg-blue-600 text-white shadow-lg' 
+                      : (isLight 
+                          ? 'text-gray-500 hover:bg-gray-200 hover:text-gray-900' 
+                          : 'text-white/40 hover:bg-white/10 hover:text-white')}`}
                 >
                   {style}
                 </button>
@@ -158,7 +163,7 @@ const PropertiesPanel = () => {
               <div className="flex items-center justify-between">
                 <span className={`text-[11px] font-bold uppercase tracking-widest ${theme.title}`}>Enable Shadow</span>
                 <button 
-                  onClick={() => updateElement(selectedElement.id, { shadowEnabled: !selectedElement.shadowEnabled })}
+                  onClick={() => updateElements(selectedElementIds, { shadowEnabled: !selectedElement.shadowEnabled })}
                   className={`w-10 h-5 rounded-full relative transition-all ${selectedElement.shadowEnabled ? 'bg-blue-600' : 'bg-gray-300'}`}
                 >
                   <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${selectedElement.shadowEnabled ? 'right-1' : 'left-1'}`} />
@@ -210,7 +215,7 @@ const PropertiesPanel = () => {
                 {['left', 'center', 'right'].map(align => (
                   <button 
                     key={align}
-                    onClick={() => updateElement(selectedElement.id, { textAlign: align })}
+                    onClick={() => updateElements(selectedElementIds, { textAlign: align })}
                     className={`flex-1 py-2 flex justify-center transition-all rounded-lg ${selectedElement.textAlign === align ? (isLight ? 'bg-white text-blue-600 shadow-md ring-1 ring-gray-200' : 'bg-white/10 text-blue-500 shadow-md ring-1 ring-white/10') : theme.title}`}
                   >
                     {align === 'left' && <AlignLeft size={14} />}

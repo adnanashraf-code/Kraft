@@ -74,7 +74,7 @@ const LayersPanel = () => {
                 group flex items-center justify-between p-3 rounded-2xl cursor-pointer transition-all border
                 ${isSelected 
                   ? 'bg-blue-600 border-blue-600 shadow-lg shadow-blue-500/20 translate-x-1' 
-                  : `border-transparent hover:${isLight ? 'bg-gray-100' : 'bg-white/5'}`}
+                  : `border-transparent ${isLight ? 'hover:bg-gray-100' : 'hover:bg-white/5'}`}
               `}
             >
               <div className="flex items-center min-w-0 flex-1">

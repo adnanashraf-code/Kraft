@@ -12,15 +12,21 @@ export const useDraggable = (id) => {
   const startPos = useRef({ x: 0, y: 0 });
   const originalPos = useRef({ x: 0, y: 0 });
 
+  const groupOriginalPos = useRef({});
+
   const handleMouseDown = (e) => {
     // Only left click
     if (e.button !== 0) return;
     
     e.stopPropagation();
     
-    // Auto-select on drag start
-    selectElement(id);
+    // Auto-select on drag start if NOT already selected
+    const state = useEditorStore.getState();
+    if (!state.selectedElementIds.includes(id)) {
+      selectElement(id);
+    }
 
+    const { elements, selectedElementIds } = useEditorStore.getState();
     const el = elements.find(e => e.id === id);
     if (!el || el.locked) return;
 
@@ -28,6 +34,16 @@ export const useDraggable = (id) => {
     setDraggingGlobal(true);
     startPos.current = { x: e.clientX, y: e.clientY };
     originalPos.current = { x: el.x, y: el.y };
+    
+    // Store original positions for the entire selection group
+    const initialPositions = {};
+    selectedElementIds.forEach(selId => {
+      const selectedEl = elements.find(e => e.id === selId);
+      if (selectedEl) {
+        initialPositions[selId] = { x: selectedEl.x, y: selectedEl.y };
+      }
+    });
+    groupOriginalPos.current = initialPositions;
 
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
@@ -36,32 +52,28 @@ export const useDraggable = (id) => {
   const handleMouseMove = (e) => {
     if (!isDragging.current) return;
     
-    // We get the zoom level to scale the drag distance correctly
-    const zoom = useEditorStore.getState().canvas.zoom / 100;
+    const state = useEditorStore.getState();
+    const zoom = state.canvas.zoom / 100;
 
     const dx = (e.clientX - startPos.current.x) / zoom;
     const dy = (e.clientY - startPos.current.y) / zoom;
 
-    // Optional: Snap to grid if shift key is held (simple implementation)
+    // --- SNAPPING LOGIC (Primary element only) ---
     let newX = originalPos.current.x + dx;
     let newY = originalPos.current.y + dy;
     
     if (e.shiftKey) {
-      const snap = useEditorStore.getState().canvas.gridSnap;
+      const snap = state.canvas.gridSnap;
       newX = Math.round(newX / snap) * snap;
       newY = Math.round(newY / snap) * snap;
     }
 
-    // High performance update directly to store without causing whole app re-renders
-    // --- SMART GUIDES LOGIC ---
     let finalX = newX;
     let finalY = newY;
     const guides = [];
     const SNAP_THRESHOLD = 5;
     
-    // Only snap if shift is NOT held (shift forces grid snap)
     if (!e.shiftKey) {
-      const state = useEditorStore.getState();
       const otherElements = state.elements.filter(e => !state.selectedElementIds.includes(e.id) && e.visible);
       const el = state.elements.find(e => e.id === id);
       
@@ -80,19 +92,16 @@ export const useDraggable = (id) => {
         const oLeft = other.x;
         const oCenter = other.x + other.w / 2;
         const oRight = other.x + other.w;
-        
         const oTop = other.y;
         const oMiddle = other.y + other.h / 2;
         const oBottom = other.y + other.h;
 
-        // X Axis Snapping
         if (Math.abs(tLeft - oLeft) < SNAP_THRESHOLD) { finalX = oLeft; guides.push({ axis: 'x', pos: oLeft }); }
         else if (Math.abs(tLeft - oRight) < SNAP_THRESHOLD) { finalX = oRight; guides.push({ axis: 'x', pos: oRight }); }
         else if (Math.abs(tCenter - oCenter) < SNAP_THRESHOLD) { finalX = oCenter - targetW / 2; guides.push({ axis: 'x', pos: oCenter }); }
         else if (Math.abs(tRight - oLeft) < SNAP_THRESHOLD) { finalX = oLeft - targetW; guides.push({ axis: 'x', pos: oLeft }); }
         else if (Math.abs(tRight - oRight) < SNAP_THRESHOLD) { finalX = oRight - targetW; guides.push({ axis: 'x', pos: oRight }); }
 
-        // Y Axis Snapping
         if (Math.abs(tTop - oTop) < SNAP_THRESHOLD) { finalY = oTop; guides.push({ axis: 'y', pos: oTop }); }
         else if (Math.abs(tTop - oBottom) < SNAP_THRESHOLD) { finalY = oBottom; guides.push({ axis: 'y', pos: oBottom }); }
         else if (Math.abs(tMiddle - oMiddle) < SNAP_THRESHOLD) { finalY = oMiddle - targetH / 2; guides.push({ axis: 'y', pos: oMiddle }); }
@@ -101,8 +110,19 @@ export const useDraggable = (id) => {
       }
     }
     
-    useEditorStore.getState().setSmartGuides(guides);
-    updateElement(id, { x: finalX, y: finalY });
+    state.setSmartGuides(guides);
+
+    // Apply the exact final movements to ALL selected elements
+    const actualDx = finalX - originalPos.current.x;
+    const actualDy = finalY - originalPos.current.y;
+
+    Object.keys(groupOriginalPos.current).forEach(selId => {
+      const startPos = groupOriginalPos.current[selId];
+      updateElement(selId, { 
+        x: startPos.x + actualDx, 
+        y: startPos.y + actualDy 
+      });
+    });
   };
 
   const handleMouseUp = (e) => {
