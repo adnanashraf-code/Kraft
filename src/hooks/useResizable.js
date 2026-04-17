@@ -2,7 +2,9 @@ import { useState, useCallback } from 'react';
 import useEditorStore from '../store/useEditorStore';
 
 export const useResizable = (id) => {
-  const { elements, updateElement } = useEditorStore();
+  const { pages, activePageId, updateElement } = useEditorStore();
+  const activePage = pages.find(p => p.id === activePageId) || pages[0];
+  const elements = activePage.elements;
   const element = elements.find(el => el.id === id);
 
   const onResizeStart = useCallback((e, direction) => {

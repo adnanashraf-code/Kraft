@@ -4,7 +4,11 @@ import { THEMES } from '../../utils/themes';
 import { Undo2, Redo2 } from 'lucide-react';
 
 const HistoryControls = () => {
-  const { elements, past, future, undo, redo, uiTheme } = useEditorStore();
+  const { pages, activePageId, past, future, undo, redo, uiTheme } = useEditorStore();
+  
+  const activePage = pages.find(p => p.id === activePageId) || pages[0];
+  const elements = activePage.elements;
+
   const theme = THEMES[uiTheme];
   const isLight = uiTheme === 'light' || uiTheme === 'gray';
 

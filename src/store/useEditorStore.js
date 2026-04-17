@@ -2,7 +2,8 @@ import { create } from 'zustand';
 
 const useEditorStore = create((set, get) => ({
   // --- STATE ---
-  elements: [], // Array of element objects
+  pages: [{ id: 'page-1', name: 'Page 1', elements: [], layoutGrids: [] }],
+  activePageId: 'page-1',
   selectedElementIds: [], // IDs of currently selected elements
   
   canvas: {
@@ -10,6 +11,7 @@ const useEditorStore = create((set, get) => ({
     panX: 0,
     panY: 0,
     gridSnap: 20, // 20px snapping
+    isRulersVisible: false,
   },
   smartGuides: [], // Array of { axis: 'x'|'y', pos: number }
   
@@ -30,46 +32,49 @@ const useEditorStore = create((set, get) => ({
   activeFlyout: 'none', // 'none', 'templates', 'assets'
   isTemplatesOpen: false,
   isAssetsOpen: false,
+  isExportOpen: false,
   isDraggingGlobal: false,
   searchQuery: '',
+  projectName: 'KRAFT',
+  isSaving: false,
 
   // --- HISTORY STATE ---
   past: [],
   future: [],
 
   saveHistory: () => {
-    const { elements, past } = get();
+    const { pages, past } = get();
     // Max history depth of 50
-    const newPast = [...past, JSON.stringify(elements)];
+    const newPast = [...past, JSON.stringify(pages)];
     if (newPast.length > 50) newPast.shift();
     set({ past: newPast, future: [] });
   },
 
   undo: () => {
-    const { past, future, elements } = get();
+    const { past, future, pages } = get();
     if (past.length === 0) return;
 
     const previous = JSON.parse(past[past.length - 1]);
     const remainingPast = past.slice(0, past.length - 1);
 
     set({
-      elements: previous,
+      pages: previous,
       past: remainingPast,
-      future: [JSON.stringify(elements), ...future],
+      future: [JSON.stringify(pages), ...future],
       selectedElementIds: [] // Clear selection for safety
     });
   },
 
   redo: () => {
-    const { past, future, elements } = get();
+    const { past, future, pages } = get();
     if (future.length === 0) return;
 
     const next = JSON.parse(future[0]);
     const remainingFuture = future.slice(1);
 
     set({
-      elements: next,
-      past: [...past, JSON.stringify(elements)],
+      pages: next,
+      past: [...past, JSON.stringify(pages)],
       future: remainingFuture,
       selectedElementIds: []
     });
@@ -81,21 +86,23 @@ const useEditorStore = create((set, get) => ({
     const isNowLight = theme === 'light' || theme === 'gray';
     const isWasLight = state.uiTheme === 'light' || state.uiTheme === 'gray';
 
-    let updatedElements = state.elements;
+    let updatedPages = state.pages;
     if (isNowLight !== isWasLight) {
-      updatedElements = state.elements.map(el => {
-        if (el.type === 'text') {
-           // If it was white on dark, make it black on light
-           if (!isNowLight && (el.color === '#000000' || !el.color)) return { ...el, color: '#ffffff' };
-           if (isNowLight && (el.color === '#ffffff' || !el.color)) return { ...el, color: '#000000' };
-        }
-        return el;
-      });
+      updatedPages = state.pages.map(page => ({
+        ...page,
+        elements: page.elements.map(el => {
+          if (el.type === 'text') {
+             if (!isNowLight && (el.color === '#000000' || !el.color)) return { ...el, color: '#ffffff' };
+             if (isNowLight && (el.color === '#ffffff' || !el.color)) return { ...el, color: '#000000' };
+          }
+          return el;
+        })
+      }));
     }
 
     return { 
       uiTheme: theme,
-      elements: updatedElements
+      pages: updatedPages
     };
   }),
   setSearchOpen: (open) => set({ isSearchOpen: open }),
@@ -107,234 +114,437 @@ const useEditorStore = create((set, get) => ({
   setOnboardingStep: (step) => set({ currentOnboardingStep: step }),
   setTemplatesOpen: (open) => set({ isTemplatesOpen: open }),
   setAssetsOpen: (open) => set({ isAssetsOpen: open }),
+  setExportOpen: (open) => set({ isExportOpen: open }),
   setDraggingGlobal: (dragging) => set({ isDraggingGlobal: dragging }),
   setFlyout: (type) => set((state) => ({ 
     activeFlyout: state.activeFlyout === type ? 'none' : type 
   })),
   
-  // Add a new element to the canvas
+  setProjectName: (name) => set({ projectName: name }),
+  setSaving: (saving) => set({ isSaving: saving }),
+
+  loadProject: (data) => {
+    if (!data) return;
+    
+    // Migration: Migrate legacy 'elements' projects to 'pages' structure
+    let pages = data.pages || [];
+    let activePageId = data.activePageId;
+    if (pages.length === 0 && data.elements) {
+      const defaultId = (typeof window !== 'undefined' && window.crypto?.randomUUID) 
+        ? window.crypto.randomUUID() : 'page-' + Math.random().toString(36).substr(2, 9);
+      pages = [{ id: defaultId, name: 'Page 1', elements: data.elements, layoutGrids: [] }];
+      activePageId = defaultId;
+    } else if (pages.length === 0) {
+      activePageId = 'page-1';
+      pages = [{ id: activePageId, name: 'Page 1', elements: [], layoutGrids: [] }];
+    }
+
+    set({
+      pages,
+      activePageId,
+      uiTheme: data.uiTheme || 'light',
+      projectName: data.projectName || 'KRAFT',
+      canvas: {
+        ...get().canvas,
+        ...(data.canvas || {})
+      },
+      selectedElementIds: [],
+      past: [],
+      future: []
+    });
+  },
+  
+  // Add a new element to the active page
   addElement: (element) => {
     get().saveHistory();
     set((state) => {
-      // Generate ID once to use for both creation and selection
       const newId = (typeof window !== 'undefined' && window.crypto?.randomUUID) 
         ? window.crypto.randomUUID() 
         : Math.random().toString(36).substring(2, 11);
 
-      // Determine default sizing based on type
       let defaultW = element.type === 'text' ? 200 : 100;
       let defaultH = element.type === 'text' ? 40 : 100;
       
-      return {
-        elements: [...state.elements, {
-          id: newId,
-          name: element.name || (element.type === 'text' ? 'Text' : 'Rectangle'),
-          // Core defaults
-          type: element.type || 'rectangle', 
-          x: 0, y: 0, 
-          w: defaultW, h: defaultH,
-          rotation: 0,
-          fill: element.type === 'text' ? 'transparent' : '#D1E8E2',
-          opacity: 1,
-          visible: true,
-          locked: false,
-          clipPath: 'none',
-          
-          // Advanced Design Defaults
-          strokeColor: '#000000',
-          strokeWidth: 0, // 0 means no stroke
-          strokeStyle: 'solid',
-          borderRadius: 0,
-          shadowEnabled: false,
-          shadowOffsetX: 0,
-          shadowOffsetY: 4,
-          shadowBlur: 10,
-          shadowColor: 'rgba(0,0,0,0.15)',
-          aspectRatioLocked: false,
+      const newElement = {
+        id: newId,
+        name: element.name || (element.type === 'text' ? 'Text' : 'Rectangle'),
+        type: element.type || 'rectangle', 
+        x: 0, y: 0, 
+        w: defaultW, h: defaultH,
+        rotation: 0,
+        fill: element.type === 'text' ? 'transparent' : '#D1E8E2',
+        opacity: 1,
+        visible: true,
+        locked: false,
+        clipPath: 'none',
+        strokeColor: '#000000',
+        strokeWidth: 0,
+        strokeStyle: 'solid',
+        borderRadius: 0,
+        shadowEnabled: false,
+        shadowOffsetX: 0,
+        shadowOffsetY: 4,
+        shadowBlur: 10,
+        shadowColor: 'rgba(0,0,0,0.15)',
+        aspectRatioLocked: false,
+        flipX: false,
+        flipY: false,
+        borderRadiusTL: 0,
+        borderRadiusTR: 0,
+        borderRadiusBR: 0,
+        borderRadiusBL: 0,
+        independentRadius: false,
+        ...(element.type === 'text' && {
+          fontFamily: 'Inter',
+          fontWeight: '400',
+          fontSize: 24,
+          textAlign: 'left',
+          color: undefined,
+          lineHeight: 1.5,
+          letterSpacing: 0,
+          textTransform: 'none',
+          textDecoration: 'none',
+          fontStyle: 'normal',
+          content: 'New Text'
+        }),
+        ...element,
+        id: newId
+      };
 
-          // Text specific defaults
-          ...(element.type === 'text' && {
-            fontFamily: 'Inter',
-            fontWeight: '400',
-            fontSize: 24,
-            textAlign: 'left',
-            color: undefined, // Theme-aware by default
-            lineHeight: 1.5,
-            letterSpacing: 0,
-            textTransform: 'none',
-            textDecoration: 'none',
-            fontStyle: 'normal',
-            content: 'New Text'
-          }),
-          ...element,
-          id: newId // Ensure generated ID wins
-        }],
-        // Auto-select the newly created element
+      return {
+        pages: state.pages.map(page => 
+          page.id === state.activePageId 
+            ? { ...page, elements: [...page.elements, newElement] }
+            : page
+        ),
         selectedElementIds: [newId] 
       };
     });
   },
 
-  // Update properties of a specific element
-  updateElement: (id, updates) => {
-    // Note: We don't save history on EVERY micro-drag update to avoid flooding the stack.
-    // History should be saved on DRAG START or STYLE CHANGE.
+  // Page Management
+  addPage: (name) => {
+    get().saveHistory();
+    const newId = (typeof window !== 'undefined' && window.crypto?.randomUUID) 
+        ? window.crypto.randomUUID() : 'page-' + Math.random().toString(36).substr(2, 9);
     set((state) => ({
-      elements: state.elements.map(el => 
-        el.id === id ? { ...el, ...updates } : el
-      )
+      pages: [...state.pages, { id: newId, name: name || `Page ${state.pages.length + 1}`, elements: [], layoutGrids: [] }],
+      activePageId: newId,
+      selectedElementIds: []
     }));
   },
 
-  // Update properties for multiple elements at once (Bulk Action 6.2)
-  updateElements: (ids, updates) => set((state) => ({
-    elements: state.elements.map(el => 
-      ids.includes(el.id) ? { ...el, ...updates } : el
-    )
-  })),
+  switchPage: (id) => {
+    set({ activePageId: id, selectedElementIds: [] });
+  },
 
-  commitChange: () => get().saveHistory(),
+  renamePage: (id, name) => {
+    get().saveHistory();
+    set((state) => ({
+      pages: state.pages.map(p => p.id === id ? { ...p, name } : p)
+    }));
+  },
 
-  // Group multiple elements (Phase 6.3)
-  groupElements: (ids) => {
+  removePage: (id) => {
+    const { pages } = get();
+    if (pages.length <= 1) return; // Prevent deleting last page
+    
     get().saveHistory();
     set((state) => {
-      const groupId = (typeof window !== 'undefined' && window.crypto?.randomUUID) 
-        ? window.crypto.randomUUID() 
-        : Math.random().toString(36).substring(2, 11);
-      
+      const newPages = state.pages.filter(p => p.id !== id);
+      const newActiveId = state.activePageId === id ? newPages[0].id : state.activePageId;
       return {
-        elements: state.elements.map(el => 
-          ids.includes(el.id) ? { ...el, groupId } : el
-        )
+        pages: newPages,
+        activePageId: newActiveId,
+        selectedElementIds: []
       };
     });
   },
 
-  // Ungroup elements
-  ungroupElements: (ids) => {
+  duplicatePage: (id) => {
+    get().saveHistory();
+    set((state) => {
+      const targetPage = state.pages.find(p => p.id === id);
+      if (!targetPage) return state;
+      
+      const newId = (typeof window !== 'undefined' && window.crypto?.randomUUID) 
+        ? window.crypto.randomUUID() : 'page-' + Math.random().toString(36).substr(2, 9);
+      
+      const newElements = targetPage.elements.map(el => ({
+        ...el,
+        id: (typeof window !== 'undefined' && window.crypto?.randomUUID) 
+          ? window.crypto.randomUUID() : Math.random().toString(36).substr(2, 9)
+      }));
+
+      return {
+        pages: [...state.pages, { id: newId, name: `${targetPage.name} (Copy)`, elements: newElements, layoutGrids: targetPage.layoutGrids ? [...targetPage.layoutGrids] : [] }],
+        activePageId: newId,
+        selectedElementIds: []
+      };
+    });
+  },
+
+  updatePage: (id, updates) => {
     get().saveHistory();
     set((state) => ({
-      elements: state.elements.map(el => 
-        ids.includes(el.id) ? { ...el, groupId: undefined } : el
+      pages: state.pages.map(p => p.id === id ? { ...p, ...updates } : p)
+    }));
+  },
+
+  // Element actions refactored for page-safety
+  updateElement: (id, updates) => {
+    set((state) => ({
+      pages: state.pages.map(page => 
+        page.id === state.activePageId 
+          ? { ...page, elements: page.elements.map(el => el.id === id ? { ...el, ...updates } : el) }
+          : page
       )
     }));
   },
 
-  // Delete elements by their IDs
+  updateElements: (ids, updates) => {
+    set((state) => ({
+      pages: state.pages.map(page => 
+        page.id === state.activePageId 
+          ? { ...page, elements: page.elements.map(el => ids.includes(el.id) ? { ...el, ...updates } : el) }
+          : page
+      )
+    }));
+  },
+
+  groupElements: (ids) => {
+    get().saveHistory();
+    const groupId = (typeof window !== 'undefined' && window.crypto?.randomUUID) 
+      ? window.crypto.randomUUID() : Math.random().toString(36).substring(2, 11);
+      
+    set((state) => ({
+      pages: state.pages.map(page => 
+        page.id === state.activePageId 
+          ? { ...page, elements: page.elements.map(el => ids.includes(el.id) ? { ...el, ...groupId } : el) }
+          : page
+      )
+    }));
+  },
+
+  rotate90: (ids) => {
+    get().saveHistory();
+    set((state) => ({
+      pages: state.pages.map(page => 
+        page.id === state.activePageId 
+          ? { ...page, elements: page.elements.map(el => ids.includes(el.id) ? { ...el, rotation: ((el.rotation || 0) + 90) % 360 } : el) }
+          : page
+      )
+    }));
+  },
+
+  flipElement: (ids, axis) => {
+    get().saveHistory();
+    set((state) => ({
+      pages: state.pages.map(page => 
+        page.id === state.activePageId 
+          ? { ...page, elements: page.elements.map(el => ids.includes(el.id) ? (axis === 'x' ? { ...el, flipX: !el.flipX } : { ...el, flipY: !el.flipY }) : el) }
+          : page
+      )
+    }));
+  },
+
+  ungroupElements: (ids) => {
+    get().saveHistory();
+    set((state) => ({
+      pages: state.pages.map(page => 
+        page.id === state.activePageId 
+          ? { ...page, elements: page.elements.map(el => ids.includes(el.id) ? { ...el, groupId: undefined } : el) }
+          : page
+      )
+    }));
+  },
+
   deleteElements: (ids) => {
     if (ids.length === 0) return;
     get().saveHistory();
     set((state) => ({
-      elements: state.elements.filter(el => !ids.includes(el.id)),
-      // Remove from selection if they were selected
+      pages: state.pages.map(page => 
+        page.id === state.activePageId 
+          ? { ...page, elements: page.elements.filter(el => !ids.includes(el.id)) }
+          : page
+      ),
       selectedElementIds: state.selectedElementIds.filter(id => !ids.includes(id))
     }));
   },
 
-  // Duplicate elements by their IDs
   duplicateElements: (ids) => {
     if (ids.length === 0) return;
     get().saveHistory();
     set((state) => {
-      const elementsToDuplicate = state.elements.filter(el => ids.includes(el.id));
+      const activePage = state.pages.find(p => p.id === state.activePageId);
+      const elementsToDuplicate = activePage?.elements.filter(el => ids.includes(el.id)) || [];
       const newElements = elementsToDuplicate.map(el => ({
         ...el,
         id: (typeof window !== 'undefined' && window.crypto?.randomUUID) 
           ? window.crypto.randomUUID() 
           : Math.random().toString(36).substring(2, 11),
         name: `${el.name} (Copy)`,
-        x: el.x + 20, // Offset so they don't exactly overlap
+        x: el.x + 20,
         y: el.y + 20
       }));
       
       return {
-        elements: [...state.elements, ...newElements],
+        pages: state.pages.map(page => 
+          page.id === state.activePageId 
+            ? { ...page, elements: [...page.elements, ...newElements] }
+            : page
+        ),
         selectedElementIds: newElements.map(el => el.id)
       };
     });
   },
 
-  // Reorder an element in the layers stack (drag and drop)
   reorderElement: (dragId, hoverId) => {
     get().saveHistory();
     set((state) => {
-      const dragIndex = state.elements.findIndex(el => el.id === dragId);
-      const hoverIndex = state.elements.findIndex(el => el.id === hoverId);
+      const activePageIndex = state.pages.findIndex(p => p.id === state.activePageId);
+      if (activePageIndex === -1) return state;
+      
+      const pageElements = [...state.pages[activePageIndex].elements];
+      const dragIndex = pageElements.findIndex(el => el.id === dragId);
+      const hoverIndex = pageElements.findIndex(el => el.id === hoverId);
       
       if (dragIndex === -1 || hoverIndex === -1) return state;
 
-      const newElements = [...state.elements];
-      const draggedEl = newElements[dragIndex];
+      const [draggedEl] = pageElements.splice(dragIndex, 1);
+      pageElements.splice(hoverIndex, 0, draggedEl);
       
-      newElements.splice(dragIndex, 1);
-      newElements.splice(hoverIndex, 0, draggedEl);
+      const newPages = [...state.pages];
+      newPages[activePageIndex] = { ...newPages[activePageIndex], elements: pageElements };
       
-      return { elements: newElements };
+      return { pages: newPages };
     });
   },
 
-  // --- ACTIONS: Power Tools ---
-  
-  styleClipboard: null,
-  
   copyStyle: (id) => set((state) => {
-    const el = state.elements.find(e => e.id === id);
+    const activePage = state.pages.find(p => p.id === state.activePageId);
+    const el = activePage?.elements.find(e => e.id === id);
     if (!el) return state;
     
-    // Extract purely stylistic properties (ignore position, size, id, content, and locked states)
-    const { 
-      id: _id, name, type, x, y, w, h, content, locked, visible, 
-      ...styles 
-    } = el;
-    
+    const { id: _id, name, type, x, y, w, h, content, locked, visible, ...styles } = el;
     return { styleClipboard: styles };
   }),
 
   pasteStyle: (ids) => set((state) => {
     if (!state.styleClipboard) return state;
-    
     return {
-      elements: state.elements.map(el => 
-        ids.includes(el.id) 
-          ? { ...el, ...state.styleClipboard, type: el.type } // Keep original type
-          : el
+      pages: state.pages.map(page => 
+        page.id === state.activePageId 
+          ? { ...page, elements: page.elements.map(el => ids.includes(el.id) ? { ...el, ...state.styleClipboard, type: el.type } : el) }
+          : page
       )
     };
   }),
 
-  // --- ACTIONS: Selection ---
-  
-  // Select a single element (clears previous selection)
-  // Auto-selects entire group if element belongs to one (Phase 6.3)
+  // Layer Ordering Actions
+  bringToFront: (ids) => {
+    get().saveHistory();
+    set((state) => {
+      const activePageIndex = state.pages.findIndex(p => p.id === state.activePageId);
+      if (activePageIndex === -1) return state;
+      const pageElements = [...state.pages[activePageIndex].elements];
+      
+      const selected = pageElements.filter(el => ids.includes(el.id));
+      const others = pageElements.filter(el => !ids.includes(el.id));
+      
+      const newPages = [...state.pages];
+      newPages[activePageIndex] = { ...newPages[activePageIndex], elements: [...others, ...selected] };
+      return { pages: newPages };
+    });
+  },
+
+  sendToBack: (ids) => {
+    get().saveHistory();
+    set((state) => {
+      const activePageIndex = state.pages.findIndex(p => p.id === state.activePageId);
+      if (activePageIndex === -1) return state;
+      const pageElements = [...state.pages[activePageIndex].elements];
+      
+      const selected = pageElements.filter(el => ids.includes(el.id));
+      const others = pageElements.filter(el => !ids.includes(el.id));
+      
+      const newPages = [...state.pages];
+      newPages[activePageIndex] = { ...newPages[activePageIndex], elements: [...selected, ...others] };
+      return { pages: newPages };
+    });
+  },
+
+  moveForward: (ids) => {
+    get().saveHistory();
+    set((state) => {
+      const activePageIndex = state.pages.findIndex(p => p.id === state.activePageId);
+      if (activePageIndex === -1) return state;
+      const pageElements = [...state.pages[activePageIndex].elements];
+      
+      // Moving forward means moving to a higher index (bottom of array in our .reverse() rendering)
+      // Actually, we render [...elements].reverse(), so "Front" is higher index.
+      // Let's settle: higher index = appearing on top.
+      const newElements = [...pageElements];
+      for (let i = newElements.length - 2; i >= 0; i--) {
+        if (ids.includes(newElements[i].id) && !ids.includes(newElements[i+1].id)) {
+          const temp = newElements[i];
+          newElements[i] = newElements[i+1];
+          newElements[i+1] = temp;
+        }
+      }
+
+      const newPages = [...state.pages];
+      newPages[activePageIndex] = { ...newPages[activePageIndex], elements: newElements };
+      return { pages: newPages };
+    });
+  },
+
+  moveBackward: (ids) => {
+    get().saveHistory();
+    set((state) => {
+      const activePageIndex = state.pages.findIndex(p => p.id === state.activePageId);
+      if (activePageIndex === -1) return state;
+      const pageElements = [...state.pages[activePageIndex].elements];
+      
+      const newElements = [...pageElements];
+      for (let i = 1; i < newElements.length; i++) {
+        if (ids.includes(newElements[i].id) && !ids.includes(newElements[i-1].id)) {
+          const temp = newElements[i];
+          newElements[i] = newElements[i-1];
+          newElements[i-1] = temp;
+        }
+      }
+
+      const newPages = [...state.pages];
+      newPages[activePageIndex] = { ...newPages[activePageIndex], elements: newElements };
+      return { pages: newPages };
+    });
+  },
+
   selectElement: (id) => set((state) => {
     if (!id) return { selectedElementIds: [] };
-    
-    const element = state.elements.find(el => el.id === id);
+    const activePage = state.pages.find(p => p.id === state.activePageId);
+    const element = activePage?.elements.find(el => el.id === id);
     if (element?.groupId) {
-      const groupIds = state.elements
-        .filter(el => el.groupId === element.groupId)
-        .map(el => el.id);
+      const groupIds = activePage.elements.filter(el => el.groupId === element.groupId).map(el => el.id);
       return { selectedElementIds: groupIds };
     }
-    
     return { selectedElementIds: [id] };
   }),
 
-  // Add to selection (for Shift+Click)
   toggleSelection: (id) => set((state) => {
-    const element = state.elements.find(el => el.id === id);
+    const activePage = state.pages.find(p => p.id === state.activePageId);
+    const element = activePage?.elements.find(el => el.id === id);
     const idsToToggle = element?.groupId 
-      ? state.elements.filter(el => el.groupId === element.groupId).map(el => el.id)
+      ? activePage.elements.filter(el => el.groupId === element.groupId).map(el => el.id)
       : [id];
 
     const isAlreadySelected = idsToToggle.every(tid => state.selectedElementIds.includes(tid));
-    
-    if (isAlreadySelected) {
-      return { selectedElementIds: state.selectedElementIds.filter(sid => !idsToToggle.includes(sid)) };
-    } else {
-      return { selectedElementIds: [...new Set([...state.selectedElementIds, ...idsToToggle])] };
-    }
+    return {
+      selectedElementIds: isAlreadySelected 
+        ? state.selectedElementIds.filter(sid => !idsToToggle.includes(sid))
+        : [...new Set([...state.selectedElementIds, ...idsToToggle])]
+    };
   }),
 
   // Clear all selections
@@ -345,6 +555,30 @@ const useEditorStore = create((set, get) => ({
   setZoom: (zoom) => set((state) => ({
     canvas: { ...state.canvas, zoom: Math.max(10, Math.min(zoom, 500)) } // Limit zoom 10% to 500%
   })),
+
+  zoomTo100: () => set((state) => ({
+    canvas: { ...state.canvas, zoom: 100, panX: 0, panY: 0 }
+  })),
+
+  zoomToFit: (viewportWidth, viewportHeight) => set((state) => {
+    // Designer artboard is 1000x700. Add 100px padding.
+    const padding = 100;
+    const targetW = 1000 + padding;
+    const targetH = 700 + padding;
+    
+    const zoomX = (viewportWidth / targetW) * 100;
+    const zoomY = (viewportHeight / targetH) * 100;
+    const zoom = Math.min(zoomX, zoomY, 150); // Cap at 150% for safety
+    
+    return {
+      canvas: {
+        ...state.canvas,
+        zoom,
+        panX: 0,
+        panY: 0
+      }
+    };
+  }),
 
   setPan: (x, y) => set((state) => ({
     canvas: { ...state.canvas, panX: x, panY: y }
@@ -361,6 +595,115 @@ const useEditorStore = create((set, get) => ({
   closeContextMenu: () => set((state) => ({ 
     contextMenu: { ...state.contextMenu, isOpen: false } 
   })),
+
+  toggleRulers: () => set((state) => ({
+    canvas: { ...state.canvas, isRulersVisible: !state.canvas.isRulersVisible }
+  })),
+
+  alignElements: (direction) => {
+    get().saveHistory();
+    set((state) => {
+      const activePage = state.pages.find(p => p.id === state.activePageId);
+      const elements = activePage?.elements || [];
+      const selectedIds = state.selectedElementIds;
+      if (selectedIds.length === 0) return state;
+
+      const selectedElements = elements.filter(el => selectedIds.includes(el.id));
+      
+      let targetX, targetY, targetW, targetH;
+
+      if (selectedIds.length === 1) {
+        // Align to Canvas (1000x700)
+        targetX = 0; targetY = 0; targetW = 1000; targetH = 700;
+      } else {
+        // Align to Selection Bounds
+        const minX = Math.min(...selectedElements.map(el => el.x));
+        const minY = Math.min(...selectedElements.map(el => el.y));
+        const maxX = Math.max(...selectedElements.map(el => el.x + el.w));
+        const maxY = Math.max(...selectedElements.map(el => el.y + el.h));
+        targetX = minX; targetY = minY; targetW = maxX - minX; targetH = maxY - minY;
+      }
+
+      return {
+        pages: state.pages.map(page => 
+          page.id === state.activePageId 
+            ? { 
+                ...page, 
+                elements: page.elements.map(el => {
+                  if (!selectedIds.includes(el.id)) return el;
+                  const updates = {};
+                  if (direction === 'left') updates.x = targetX;
+                  if (direction === 'right') updates.x = targetX + targetW - el.w;
+                  if (direction === 'top') updates.y = targetY;
+                  if (direction === 'bottom') updates.y = targetY + targetH - el.h;
+                  if (direction === 'centerX') updates.x = targetX + (targetW / 2) - (el.w / 2);
+                  if (direction === 'centerY') updates.y = targetY + (targetH / 2) - (el.h / 2);
+                  return { ...el, ...updates };
+                }) 
+              }
+            : page
+        )
+      };
+    });
+  },
+
+  distributeElements: (axis) => {
+    get().saveHistory();
+    set((state) => {
+      const activePage = state.pages.find(p => p.id === state.activePageId);
+      const elements = activePage?.elements || [];
+      const selectedIds = state.selectedElementIds;
+      if (selectedIds.length < 3) return state;
+
+      const selectedElements = [...elements.filter(el => selectedIds.includes(el.id))];
+      
+      if (axis === 'horizontal') {
+        selectedElements.sort((a, b) => a.x - b.x);
+        const minX = selectedElements[0].x;
+        const maxX = selectedElements[selectedElements.length - 1].x + selectedElements[selectedElements.length - 1].w;
+        const totalW = maxX - minX;
+        const sumW = selectedElements.reduce((s, el) => s + el.w, 0);
+        const gutter = (totalW - sumW) / (selectedElements.length - 1);
+        
+        let currentX = minX;
+        const updates = {};
+        selectedElements.forEach(el => {
+          updates[el.id] = { x: currentX };
+          currentX += el.w + gutter;
+        });
+
+        return {
+          pages: state.pages.map(page => 
+            page.id === state.activePageId 
+              ? { ...page, elements: page.elements.map(el => updates[el.id] ? { ...el, ...updates[el.id] } : el) }
+              : page
+          )
+        };
+      } else {
+        selectedElements.sort((a, b) => a.y - b.y);
+        const minY = selectedElements[0].y;
+        const maxY = selectedElements[selectedElements.length - 1].y + selectedElements[selectedElements.length - 1].h;
+        const totalH = maxY - minY;
+        const sumH = selectedElements.reduce((s, el) => s + el.h, 0);
+        const gutter = (totalH - sumH) / (selectedElements.length - 1);
+        
+        let currentY = minY;
+        const updates = {};
+        selectedElements.forEach(el => {
+          updates[el.id] = { y: currentY };
+          currentY += el.h + gutter;
+        });
+
+        return {
+          pages: state.pages.map(page => 
+            page.id === state.activePageId 
+              ? { ...page, elements: page.elements.map(el => updates[el.id] ? { ...el, ...updates[el.id] } : el) }
+              : page
+          )
+        };
+      }
+    });
+  },
 }));
 
 export default useEditorStore;

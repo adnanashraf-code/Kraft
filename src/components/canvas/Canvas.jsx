@@ -5,6 +5,7 @@ import { useResizable } from '../../hooks/useResizable';
 import { THEMES } from '../../utils/themes';
 import ZoomControls from './ZoomControls';
 import HistoryControls from './HistoryControls';
+import ArtboardGrid from './ArtboardGrid';
 
 const DraggableElement = React.memo(({ el }) => {
   const isSelected = useEditorStore(state => state.selectedElementIds.includes(el.id));
@@ -32,7 +33,7 @@ const DraggableElement = React.memo(({ el }) => {
         top: `${el.y}px`,
         width: `${el.w}px`,
         height: `${el.h}px`,
-        transform: `rotate(${el.rotation || 0}deg)`,
+        transform: `rotate(${el.rotation || 0}deg) scale(${el.flipX ? -1 : 1}, ${el.flipY ? -1 : 1})`,
         opacity: el.opacity,
         display: el.visible ? 'block' : 'none',
         cursor: el.locked ? 'not-allowed' : (isSelected ? 'default' : 'move')
@@ -42,7 +43,9 @@ const DraggableElement = React.memo(({ el }) => {
         <div 
           className="absolute inset-0 pointer-events-none"
           style={{
-            borderRadius: `${el.borderRadius || 0}px`,
+            borderRadius: el.independentRadius 
+              ? `${el.borderRadiusTL || 0}px ${el.borderRadiusTR || 0}px ${el.borderRadiusBR || 0}px ${el.borderRadiusBL || 0}px`
+              : `${el.borderRadius || 0}px`,
             border: el.strokeWidth ? `${el.strokeWidth}px ${el.strokeStyle || 'solid'} ${el.strokeColor || '#000'}` : 'none',
             boxShadow: el.shadowEnabled ? `${el.shadowOffsetX || 0}px ${el.shadowOffsetY || 4}px ${el.shadowBlur || 10}px ${el.shadowColor || 'rgba(0,0,0,0.15)'}` : 'none',
             background: el.type === 'rectangle' ? el.fill : 'transparent',
@@ -83,9 +86,12 @@ const DraggableElement = React.memo(({ el }) => {
 
 const Canvas = () => {
   const { 
-    elements, selectedElementIds, canvas, setZoom, setPan, 
+    pages, activePageId, selectedElementIds, canvas, setZoom, setPan, 
     smartGuides, selectElement, clearSelection, deleteElements, uiTheme 
   } = useEditorStore();
+  
+  const activePage = pages.find(p => p.id === activePageId) || pages[0];
+  const elements = activePage.elements;
   const canvasRef = useRef(null);
   const theme = THEMES[uiTheme];
   const isLight = uiTheme === 'light' || uiTheme === 'gray';
@@ -254,6 +260,8 @@ const Canvas = () => {
             <DraggableElement el={el} />
           </div>
         ))}
+
+        <ArtboardGrid grids={activePage.layoutGrids} />
 
         {smartGuides.map((guide, i) => (
           <div

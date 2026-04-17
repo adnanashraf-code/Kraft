@@ -7,7 +7,11 @@ import TemplateThumbnail from './TemplateThumbnail';
 
 const TemplatesModal = () => {
   const [searchTerm, setSearchTerm] = React.useState('');
-  const { isTemplatesOpen, setTemplatesOpen, uiTheme, addElement, elements, clearSelection } = useEditorStore();
+  const { isTemplatesOpen, setTemplatesOpen, uiTheme, addElement, pages, activePageId, clearSelection } = useEditorStore();
+  
+  const activePage = pages.find(p => p.id === activePageId) || pages[0];
+  const elements = activePage.elements;
+
   const theme = THEMES[uiTheme];
   const isLight = uiTheme === 'light' || uiTheme === 'gray';
 

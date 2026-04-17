@@ -35,13 +35,23 @@ const TOUR_STEPS = [
     target: "#tool-search",
   },
   {
+    title: "Multi-Page Engine",
+    content: "Manage multiple artboards at once. Design your entire project workflow across different pages here.",
+    target: "#pages-panel",
+  },
+  {
     title: "Shortcuts & Guide",
-    content: "Master the KRAFT hotkeys (Ctrl+G, Ctrl+D, Ctrl+Z) to design 10x faster. You can find the full list here!",
+    content: "Master hotkeys (V, R, T, L, [, ]) to design 10x faster. Full list available here!",
     target: "#tool-shortcuts",
   },
   {
+    title: "Production Studio",
+    content: "Export as high-fidelity images or download standalone HTML/CSS websites ready for live launch.",
+    target: "#tool-export",
+  },
+  {
     title: "Infinite Canvas",
-    content: "You're all set! Drag with Space to pan, use the wheel to zoom, and build something beautiful.",
+    content: "You're all set! Use Ctrl+0 to fit your design, and build something beautiful.",
     target: "center",
   }
 ];
@@ -62,10 +72,32 @@ const OnboardingTour = () => {
     const el = document.querySelector(step.target);
     if (el) {
       const rect = el.getBoundingClientRect();
+      let topValue = rect.top + rect.height / 2;
+      let transformValue = 'translateY(-50%)';
+      let arrowTop = '50%';
+
+      // Boundary check: If too close to the top, stick to a margin
+      if (topValue < 180) {
+        topValue = 20;
+        transformValue = 'none';
+        // Calculate relative arrow position
+        const relativeCenter = rect.top + (rect.height / 2) - 20;
+        arrowTop = `${relativeCenter}px`;
+      } 
+      // Boundary check: If too close to the bottom
+      else if (topValue > window.innerHeight - 180) {
+        const boxHeight = 280; // Approximate
+        topValue = window.innerHeight - boxHeight - 20;
+        transformValue = 'none';
+        const relativeCenter = rect.top + (rect.height / 2) - topValue;
+        arrowTop = `${relativeCenter}px`;
+      }
+
       setCoords({
-        top: rect.top + rect.height / 2,
+        top: typeof topValue === 'string' ? topValue : `${topValue}px`,
         left: rect.right + 20,
-        transform: 'translateY(-50%)'
+        transform: transformValue,
+        arrowTop: arrowTop
       });
     }
   }, [currentOnboardingStep]);
@@ -155,7 +187,8 @@ const OnboardingTour = () => {
         {/* Arrow (only if not centered) */}
         {step.target !== "center" && (
           <div 
-            className={`absolute w-4 h-4 rotate-45 -left-2 top-1/2 -translateY-1/2 border-l border-b ${isLight ? 'bg-white border-gray-200' : 'bg-[#1a1a1a] border-white/10'}`}
+            className={`absolute w-4 h-4 rotate-45 -left-2 border-l border-b ${isLight ? 'bg-white border-gray-200' : 'bg-[#1a1a1a] border-white/10'}`}
+            style={{ top: coords.arrowTop }}
           />
         )}
       </div>

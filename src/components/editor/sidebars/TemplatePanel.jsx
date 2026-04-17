@@ -6,7 +6,11 @@ import { TEMPLATES } from '../../../data/templatesData';
 import TemplateThumbnail from '../overlays/TemplateThumbnail';
 
 const TemplatePanel = () => {
-  const { setFlyout, uiTheme, addElement, elements, clearSelection } = useEditorStore();
+  const { setFlyout, uiTheme, addElement, pages, activePageId, clearSelection } = useEditorStore();
+  
+  const activePage = pages.find(p => p.id === activePageId) || pages[0];
+  const elements = activePage.elements;
+
   const theme = THEMES[uiTheme];
   const isLight = uiTheme === 'light' || uiTheme === 'gray';
 

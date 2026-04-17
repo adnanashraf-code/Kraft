@@ -7,7 +7,10 @@ import useEditorStore from '../store/useEditorStore';
  * @returns {object} { isDragging, handleMouseDown }
  */
 export const useDraggable = (id) => {
-  const { updateElement, elements, selectElement, deleteElements, setDraggingGlobal } = useEditorStore();
+  const { updateElement, pages, activePageId, selectElement, deleteElements, setDraggingGlobal } = useEditorStore();
+  const activePage = pages.find(p => p.id === activePageId) || pages[0];
+  const elements = activePage.elements;
+  
   const isDragging = useRef(false);
   const startPos = useRef({ x: 0, y: 0 });
   const originalPos = useRef({ x: 0, y: 0 });
@@ -22,12 +25,15 @@ export const useDraggable = (id) => {
     
     // Auto-select on drag start if NOT already selected
     const state = useEditorStore.getState();
+    const curActivePage = state.pages.find(p => p.id === state.activePageId) || state.pages[0];
+    const curElements = curActivePage.elements;
+
     if (!state.selectedElementIds.includes(id)) {
       selectElement(id);
     }
 
-    const { elements, selectedElementIds } = useEditorStore.getState();
-    const el = elements.find(e => e.id === id);
+    const { selectedElementIds } = useEditorStore.getState();
+    const el = curElements.find(e => e.id === id);
     if (!el || el.locked) return;
 
     isDragging.current = true;
@@ -38,7 +44,7 @@ export const useDraggable = (id) => {
     // Store original positions for the entire selection group
     const initialPositions = {};
     selectedElementIds.forEach(selId => {
-      const selectedEl = elements.find(e => e.id === selId);
+      const selectedEl = curElements.find(e => e.id === selId);
       if (selectedEl) {
         initialPositions[selId] = { x: selectedEl.x, y: selectedEl.y };
       }
@@ -74,8 +80,10 @@ export const useDraggable = (id) => {
     const SNAP_THRESHOLD = 5;
     
     if (!e.shiftKey) {
-      const otherElements = state.elements.filter(e => !state.selectedElementIds.includes(e.id) && e.visible);
-      const el = state.elements.find(e => e.id === id);
+      const curActivePage = state.pages.find(p => p.id === state.activePageId) || state.pages[0];
+      const curElements = curActivePage.elements;
+      const otherElements = curElements.filter(e => !state.selectedElementIds.includes(e.id) && e.visible);
+      const el = curElements.find(e => e.id === id);
       
       const targetW = el.w;
       const targetH = el.h;
@@ -131,13 +139,13 @@ export const useDraggable = (id) => {
     setDraggingGlobal(false);
     
     // DELETE ZONE DETECTION
-    // If released in bottom-center area (Trash Bin zone)
-    const thresholdY = window.innerHeight - 100;
-    const centerX = window.innerWidth / 2;
-    const rangeX = 150; // 300px total width zone
+    const trashCenterX = window.innerWidth - 372;
+    const trashCenterY = window.innerHeight - 72;
+    const distToTrash = Math.hypot(e.clientX - trashCenterX, e.clientY - trashCenterY);
 
-    if (e.clientY > thresholdY && Math.abs(e.clientX - centerX) < rangeX) {
-      deleteElements([id]);
+    if (distToTrash < 90) {
+      const { selectedElementIds } = useEditorStore.getState();
+      deleteElements(selectedElementIds.includes(id) ? selectedElementIds : [id]);
     }
 
     useEditorStore.getState().setSmartGuides([]);

@@ -5,11 +5,14 @@ import { THEMES } from '../../utils/themes';
 
 const LayersPanel = () => {
   const { 
-    elements, selectElement, selectedElementIds, toggleSelection, updateElement, 
+    pages, activePageId, selectElement, selectedElementIds, toggleSelection, updateElement, 
     deleteElements, reorderElement, uiTheme, isSearchOpen, setSearchOpen,
     searchQuery, setSearchQuery
   } = useEditorStore();
 
+  const activePage = pages.find(p => p.id === activePageId) || pages[0];
+  const elements = activePage.elements;
+  
   const theme = THEMES[uiTheme];
   const isLight = uiTheme === 'light' || uiTheme === 'gray';
 
@@ -87,13 +90,21 @@ const LayersPanel = () => {
               {/* Power Tools Row on Hover or Selection */}
               <div className={`flex items-center space-x-1 transition-opacity ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
                 <button 
-                  onClick={(e) => { e.stopPropagation(); updateElement(el.id, { visible: !el.visible }); }}
+                  onClick={(e) => { 
+                    e.stopPropagation(); 
+                    useEditorStore.getState().saveHistory();
+                    updateElement(el.id, { visible: !el.visible }); 
+                  }}
                   className={`p-1.5 rounded-lg transition-colors ${isSelected ? 'hover:bg-white/20 text-white' : (isLight ? 'hover:bg-gray-200 text-gray-500' : 'hover:bg-white/10 text-gray-400')}`}
                 >
                   {el.visible ? <Eye size={12} /> : <EyeOff size={12} />}
                 </button>
                 <button 
-                  onClick={(e) => { e.stopPropagation(); updateElement(el.id, { locked: !el.locked }); }}
+                  onClick={(e) => { 
+                    e.stopPropagation(); 
+                    useEditorStore.getState().saveHistory();
+                    updateElement(el.id, { locked: !el.locked }); 
+                  }}
                   className={`p-1.5 rounded-lg transition-colors ${isSelected ? 'hover:bg-white/20 text-white' : (isLight ? 'hover:bg-gray-200 text-gray-500' : 'hover:bg-white/10 text-gray-400')}`}
                 >
                   {el.locked ? <Lock size={12} /> : <Unlock size={12} />}

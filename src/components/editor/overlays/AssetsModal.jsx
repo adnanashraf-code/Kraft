@@ -5,7 +5,11 @@ import { X, Search, FileDown, Layers } from 'lucide-react';
 import { ASSETS } from '../../../data/assetsData';
 
 const AssetsModal = () => {
-  const { isAssetsOpen, setAssetsOpen, uiTheme, addElement } = useEditorStore();
+  const { isAssetsOpen, setAssetsOpen, uiTheme, addElement, pages, activePageId } = useEditorStore();
+  
+  const activePage = pages.find(p => p.id === activePageId) || pages[0];
+  const elements = activePage.elements;
+
   const theme = THEMES[uiTheme];
   const isLight = uiTheme === 'light' || uiTheme === 'gray';
   const [activeCategory, setActiveCategory] = useState(ASSETS[0].category);

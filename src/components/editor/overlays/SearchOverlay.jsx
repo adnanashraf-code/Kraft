@@ -5,7 +5,11 @@ import { Search, Library, FileText, Square } from 'lucide-react';
 import { TEMPLATES } from '../../../data/templatesData';
 
 const SearchOverlay = () => {
-  const { isSearchOpen, setSearchOpen, uiTheme, elements, selectElement } = useEditorStore();
+  const { isSearchOpen, setSearchOpen, uiTheme, pages, activePageId, selectElement } = useEditorStore();
+  
+  const activePage = pages.find(p => p.id === activePageId) || pages[0];
+  const elements = activePage.elements;
+
   const [query, setQuery] = useState('');
   const inputRef = useRef(null);
 

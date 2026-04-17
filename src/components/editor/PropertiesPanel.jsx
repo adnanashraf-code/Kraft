@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import useEditorStore from '../../store/useEditorStore';
-import { SlidersHorizontal, ChevronDown, ChevronRight, AlignLeft, AlignCenter, AlignRight, Type, Square, Lock, Unlock, Hash, LayoutList } from 'lucide-react';
+import { Plus, Eye, EyeOff, Trash2, SlidersHorizontal, ChevronDown, ChevronRight, AlignLeft, AlignCenter, AlignRight, Type, Square, Lock, Unlock, Hash, LayoutList, FlipHorizontal, FlipVertical, RotateCw, LayoutGrid, Zap } from 'lucide-react';
 import { THEMES } from '../../utils/themes';
 
 const Section = ({ title, children, defaultOpen = true, theme, isLight }) => {
@@ -19,23 +19,113 @@ const Section = ({ title, children, defaultOpen = true, theme, isLight }) => {
   );
 };
 
+const ArtboardProperties = ({ theme, isLight, activePage }) => {
+  const { updatePage } = useEditorStore();
+  
+  const addGrid = () => {
+    const newGrids = [...(activePage.layoutGrids || []), { id: Date.now().toString(), type: 'columns', count: 12, gutter: 20, margin: 0, color: 'rgba(255, 0, 0, 0.1)', visible: true }];
+    updatePage(activePage.id, { layoutGrids: newGrids });
+  };
+
+  const updateGrid = (id, updates) => {
+    const newGrids = (activePage.layoutGrids || []).map(g => g.id === id ? { ...g, ...updates } : g);
+    updatePage(activePage.id, { layoutGrids: newGrids });
+  };
+
+  const removeGrid = (id) => {
+    const newGrids = (activePage.layoutGrids || []).filter(g => g.id !== id);
+    updatePage(activePage.id, { layoutGrids: newGrids });
+  };
+
+  const InputBoxMinimal = ({ label, value, onChange, type = "number" }) => (
+    <div className={`flex items-center space-x-2 w-full`}>
+      <span className={`text-[10px] uppercase font-bold ${isLight ? 'text-gray-400' : 'text-white/40'} w-10 shrink-0`}>{label}</span>
+      <input 
+        type={type} 
+        value={value} 
+        onChange={onChange}
+        className={`w-full text-[11px] p-1 rounded outline-none font-bold ${isLight ? 'bg-gray-100 text-gray-900 border-transparent focus:border-blue-500' : 'bg-white/5 text-white border-transparent focus:border-blue-500'} border transition-all hover:bg-black/5 dark:hover:bg-white/10`} 
+      />
+    </div>
+  );
+
+  return (
+    <div className={`w-[320px] ${theme.sidebar} border-l ${theme.border} flex flex-col h-full shrink-0 relative z-10 transition-colors duration-500`}>
+      <div className={`h-14 border-b ${theme.border} flex items-center px-4 justify-between shrink-0`}>
+        <div className="flex items-center">
+            <LayoutGrid size={15} className="mr-2 text-indigo-500" strokeWidth={3} />
+            <span className={`font-editorial font-black text-[14px] uppercase tracking-widest ${isLight ? 'text-gray-900' : 'text-white/90'}`}>Artboard Setup</span>
+        </div>
+      </div>
+      
+      <div className="flex-1 overflow-y-auto custom-scrollbar">
+        <div className={`p-4 border-b ${theme.border}`}>
+            <h3 className={`text-[11px] font-black uppercase tracking-widest mb-1 ${theme.title}`}>Active Page</h3>
+            <p className={`text-sm font-bold truncate ${isLight ? 'text-gray-900' : 'text-white'}`}>{activePage.name}</p>
+        </div>
+
+        {/* LAYOUT GRIDS SECTION */}
+        <div className={`border-b ${theme.border}`}>
+          <div className={`flex items-center justify-between p-4`}>
+            <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${theme.title}`}>Layout Grids</span>
+            <button onClick={addGrid} className={`p-1 rounded-md transition-colors ${isLight ? 'hover:bg-gray-200 text-gray-500' : 'hover:bg-white/10 text-white/50'}`}>
+              <Plus size={14} />
+            </button>
+          </div>
+          
+          <div className="px-4 pb-4 space-y-4">
+            {!(activePage.layoutGrids?.length > 0) && (
+              <p className={`text-[11px] italic opacity-50 ${theme.text}`}>No grids added. Click + to add columns or rows.</p>
+            )}
+            
+            {(activePage.layoutGrids || []).map((grid, idx) => (
+              <div key={grid.id} className={`p-3 rounded-xl border ${isLight ? 'border-gray-200 bg-gray-50' : 'border-white/10 bg-white/5'} space-y-3`}>
+                <div className="flex items-center justify-between mb-2">
+                  <select 
+                    value={grid.type} 
+                    onChange={(e) => updateGrid(grid.id, { type: e.target.value })}
+                    className={`text-[11px] font-bold uppercase rounded p-1 outline-none cursor-pointer ${isLight ? 'bg-white border-gray-200 text-gray-900' : 'bg-[#1a1a1a] border-white/10 text-white'}`}
+                  >
+                    <option value="columns">Columns</option>
+                    <option value="rows">Rows</option>
+                  </select>
+
+                  <div className="flex items-center space-x-1">
+                     <button onClick={() => updateGrid(grid.id, { visible: !grid.visible })} className={`p-1.5 rounded transition-colors ${isLight ? 'hover:bg-gray-200 text-gray-500' : 'hover:bg-white/10 text-white/50'}`}>
+                        {grid.visible ? <Eye size={12} /> : <EyeOff size={12} />}
+                     </button>
+                     <button onClick={() => removeGrid(grid.id)} className={`p-1.5 rounded transition-colors text-red-500 hover:bg-red-500/10`}>
+                        <Trash2 size={12} />
+                     </button>
+                  </div>
+                </div>
+
+                <InputBoxMinimal label="Count" value={grid.count} onChange={(e) => updateGrid(grid.id, { count: parseInt(e.target.value) || 1 })} />
+                <InputBoxMinimal label="Gutter" value={grid.gutter} onChange={(e) => updateGrid(grid.id, { gutter: parseInt(e.target.value) || 0 })} />
+                <InputBoxMinimal label="Margin" value={grid.margin} onChange={(e) => updateGrid(grid.id, { margin: parseInt(e.target.value) || 0 })} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const PropertiesPanel = () => {
-  const { elements, selectedElementIds, updateElement, updateElements, uiTheme } = useEditorStore();
+  const { 
+    pages, activePageId, selectedElementIds, updateElement, updateElements, 
+    uiTheme, rotate90, flipElement, alignElements, distributeElements 
+  } = useEditorStore();
   const theme = THEMES[uiTheme];
   const isLight = uiTheme === 'light' || uiTheme === 'gray';
   
+  const activePage = pages.find(p => p.id === activePageId) || pages[0];
+  const elements = activePage.elements;
   const selectedElement = elements.find(el => el.id === selectedElementIds[0]);
 
   if (!selectedElement) {
-    return (
-      <div className={`w-[320px] ${theme.sidebar} border-l ${theme.border} flex flex-col h-full shrink-0 justify-center items-center text-center p-8 transition-colors duration-500`}>
-        <div className={`w-16 h-16 rounded-3xl ${isLight ? 'bg-gray-200' : 'bg-white/5'} flex items-center justify-center mb-6`}>
-          <SlidersHorizontal size={24} className={theme.title} />
-        </div>
-        <h3 className={`${isLight ? 'text-gray-900' : 'text-white/80'} font-bold mb-2 uppercase tracking-widest text-[13px]`}>Inspector</h3>
-        <p className={`text-[11px] ${isLight ? 'text-gray-500' : 'text-gray-500'} leading-relaxed max-w-[180px]`}>Select an element to view and manipulate its properties.</p>
-      </div>
-    );
+    return <ArtboardProperties theme={theme} isLight={isLight} activePage={activePage} />;
   }
 
   const handleChange = (e) => {
@@ -69,6 +159,16 @@ const PropertiesPanel = () => {
     </div>
   );
 
+  const AlignButton = ({ onClick, icon: Icon, title }) => (
+    <button 
+      onClick={onClick}
+      className={`p-2 rounded-lg transition-all ${isLight ? 'hover:bg-gray-100 text-gray-500 hover:text-blue-600' : 'hover:bg-white/10 text-white/40 hover:text-white'}`}
+      title={title}
+    >
+      <Icon size={16} />
+    </button>
+  );
+
   return (
     <div className={`w-[320px] ${theme.sidebar} border-l ${theme.border} flex flex-col h-full shrink-0 relative z-10 transition-colors duration-500`}>
       <div className={`h-14 border-b ${theme.border} flex items-center px-4 justify-between ${isLight ? 'bg-gray-50' : 'bg-black/20'} shrink-0`}>
@@ -83,6 +183,28 @@ const PropertiesPanel = () => {
       
       <div className="flex-1 overflow-y-auto custom-scrollbar bg-transparent">
         
+        {/* ALIGNMENT */}
+        <div className={`p-4 border-b ${theme.border}`}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-0.5">
+              <AlignButton icon={AlignLeft} title="Align Left" onClick={() => alignElements('left')} />
+              <AlignButton icon={AlignCenter} title="Align Horizontal Center" onClick={() => alignElements('centerX')} />
+              <AlignButton icon={AlignRight} title="Align Right" onClick={() => alignElements('right')} />
+            </div>
+            <div className="w-px h-4 bg-gray-200 mx-1 opacity-50" />
+            <div className="flex items-center space-x-0.5">
+              <AlignButton icon={LayoutList} title="Align Top" onClick={() => alignElements('top')} />
+              <AlignButton icon={LayoutList} title="Align Vertical Center" onClick={() => alignElements('centerY')} />
+              <AlignButton icon={LayoutList} title="Align Bottom" onClick={() => alignElements('bottom')} />
+            </div>
+            <div className="w-px h-4 bg-gray-200 mx-1 opacity-50" />
+            <div className="flex items-center space-x-0.5">
+              <AlignButton icon={SlidersHorizontal} title="Distribute Horizontal" onClick={() => distributeElements('horizontal')} />
+              <AlignButton icon={SlidersHorizontal} title="Distribute Vertical" onClick={() => distributeElements('vertical')} />
+            </div>
+          </div>
+        </div>
+
         {/* LAYOUT */}
         <Section title="Layout & Pos" theme={theme} isLight={isLight}>
           <div className="grid grid-cols-2 gap-3 relative">
@@ -101,12 +223,45 @@ const PropertiesPanel = () => {
             <div className="col-span-2">
                 <InputBox label="R" name="rotation" value={Math.round(selectedElement.rotation || 0)} onChange={handleChange} suffix="°" />
             </div>
+
+            {/* TRANSFORM BUTTONS */}
+            <div className={`col-span-2 flex items-center justify-between p-1 rounded-xl border ${theme.border} ${isLight ? 'bg-gray-100' : 'bg-white/5'}`}>
+              <button 
+                onClick={() => flipElement(selectedElementIds, 'x')}
+                className={`flex-1 py-1.5 flex justify-center rounded-lg transition-all ${selectedElement.flipX ? 'bg-blue-600 text-white shadow-md' : theme.title + ' hover:bg-white/10'}`}
+                title="Flip Horizontal"
+              >
+                <FlipHorizontal size={14} />
+              </button>
+              <button 
+                onClick={() => flipElement(selectedElementIds, 'y')}
+                className={`flex-1 py-1.5 flex justify-center rounded-lg transition-all ${selectedElement.flipY ? 'bg-blue-600 text-white shadow-md' : theme.title + ' hover:bg-white/10'}`}
+                title="Flip Vertical"
+              >
+                <FlipVertical size={14} />
+              </button>
+              <button 
+                onClick={() => rotate90(selectedElementIds)}
+                className={`flex-1 py-1.5 flex justify-center rounded-lg transition-all ${isLight ? 'hover:bg-white' : 'hover:bg-white/10'} ${theme.title}`}
+                title="Rotate 90°"
+              >
+                <RotateCw size={14} />
+              </button>
+            </div>
           </div>
         </Section>
 
         {/* APPEARANCE */}
         <Section title="Appearance" theme={theme} isLight={isLight}>
           <div className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className={`text-[11px] font-bold uppercase tracking-widest ${theme.title}`}>Opacity</span>
+                <span className="text-[11px] font-mono text-blue-500 font-bold">{Math.round((selectedElement.opacity ?? 1) * 100)}%</span>
+              </div>
+              <input type="range" name="opacity" min="0" max="1" step="0.01" value={selectedElement.opacity ?? 1} onChange={handleChange} className={`w-full accent-blue-600 h-1.5 ${isLight ? 'bg-gray-200' : 'bg-white/10'} rounded-full appearance-none cursor-pointer transition-all hover:h-2`} />
+            </div>
+
             <div className="flex items-center justify-between">
               <span className={`text-[11px] font-bold uppercase tracking-widest ${theme.title}`}>Base Color</span>
               <div className={`flex items-center space-x-2 ${isLight ? 'bg-white border-gray-200 shadow-sm' : 'bg-white/5 border-white/5'} border p-1 rounded-xl`}>
@@ -115,15 +270,29 @@ const PropertiesPanel = () => {
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className={`text-[11px] font-bold uppercase tracking-widest ${theme.title}`}>Opacity</span>
-                <span className="text-[11px] font-mono text-blue-500 font-bold">{Math.round((selectedElement.opacity ?? 1) * 100)}%</span>
+                <span className={`text-[11px] font-bold uppercase tracking-widest ${theme.title}`}>Corner Radius</span>
+                <button 
+                  onClick={() => updateElements(selectedElementIds, { independentRadius: !selectedElement.independentRadius })}
+                  className={`p-1.5 rounded-lg transition-all ${selectedElement.independentRadius ? 'bg-blue-600 text-white shadow-md' : (isLight ? 'text-gray-400 hover:bg-gray-100' : 'text-white/30 hover:bg-white/10')}`}
+                  title="Independent Corners"
+                >
+                  <LayoutGrid size={12} />
+                </button>
               </div>
-              <input type="range" name="opacity" min="0" max="1" step="0.01" value={selectedElement.opacity ?? 1} onChange={handleChange} className={`w-full accent-blue-600 h-1 ${isLight ? 'bg-gray-200' : 'bg-white/5'} rounded-full appearance-none cursor-pointer`} />
-            </div>
 
-            <InputBox label="R" name="borderRadius" value={selectedElement.borderRadius || 0} onChange={handleChange} suffix="PX" />
+              {!selectedElement.independentRadius ? (
+                <InputBox label="R" name="borderRadius" value={selectedElement.borderRadius || 0} onChange={handleChange} suffix="PX" />
+              ) : (
+                <div className="grid grid-cols-2 gap-2 animate-in fade-in zoom-in-95 duration-200">
+                  <InputBox label="TL" name="borderRadiusTL" value={selectedElement.borderRadiusTL || 0} onChange={handleChange} />
+                  <InputBox label="TR" name="borderRadiusTR" value={selectedElement.borderRadiusTR || 0} onChange={handleChange} />
+                  <InputBox label="BR" name="borderRadiusBR" value={selectedElement.borderRadiusBR || 0} onChange={handleChange} />
+                  <InputBox label="BL" name="borderRadiusBL" value={selectedElement.borderRadiusBL || 0} onChange={handleChange} />
+                </div>
+              )}
+            </div>
           </div>
         </Section>
 
@@ -132,10 +301,18 @@ const PropertiesPanel = () => {
           <div className="space-y-4">
             <div className="grid grid-cols-[1fr_80px] gap-3">
               <div className={`flex items-center ${isLight ? 'bg-white border-gray-200 shadow-sm' : 'bg-white/5 border-white/5'} border p-1 rounded-xl`}>
-                 <input type="color" name="strokeColor" value={selectedElement.strokeColor || '#000000'} onChange={handleChange} className="w-6 h-6 rounded-lg cursor-pointer bg-transparent border-none p-0" />
-                 <span className={`text-[11px] font-mono px-2 uppercase truncate ${isLight ? 'text-gray-900' : 'text-white/80'}`}>{selectedElement.strokeColor}</span>
+                <input type="color" name="strokeColor" value={selectedElement.strokeColor || '#000000'} onChange={handleChange} className="w-6 h-6 rounded-lg cursor-pointer bg-transparent border-none p-0" />
+                <span className={`text-[11px] font-mono px-2 uppercase truncate ${isLight ? 'text-gray-900' : 'text-white/80'}`}>{selectedElement.strokeColor}</span>
               </div>
-              <InputBox label="S" name="strokeWidth" value={selectedElement.strokeWidth || 0} onChange={handleChange} />
+              <InputBox label="W" name="strokeWidth" value={selectedElement.strokeWidth || 0} onChange={handleChange} />
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className={`text-[11px] font-bold uppercase tracking-widest ${theme.title}`}>Weight</span>
+                <span className="text-[11px] font-mono text-blue-500 font-bold">{selectedElement.strokeWidth || 0}px</span>
+              </div>
+              <input type="range" name="strokeWidth" min="0" max="20" step="1" value={selectedElement.strokeWidth || 0} onChange={handleChange} className={`w-full accent-blue-600 h-1 ${isLight ? 'bg-gray-200' : 'bg-white/5'} rounded-full appearance-none cursor-pointer`} />
             </div>
             
             <div className={`flex ${isLight ? 'bg-gray-100' : 'bg-white/5'} p-1 rounded-xl`}>
@@ -238,6 +415,37 @@ const PropertiesPanel = () => {
             </div>
           </Section>
         )}
+
+        {/* PROTOTYPING */}
+        <Section title="Prototyping" defaultOpen={false} theme={theme} isLight={isLight}>
+          <div className="space-y-4">
+             <div className="space-y-2">
+               <span className={`text-[11px] font-bold uppercase tracking-widest flex items-center ${theme.title}`}><Zap size={10} className="mr-1 text-yellow-500"/> On Click Action</span>
+               <select 
+                  value={selectedElement.action?.type || 'none'} 
+                  onChange={(e) => updateElements(selectedElementIds, { action: e.target.value === 'none' ? null : { type: e.target.value, targetPageId: pages[0]?.id } })}
+                  className={`w-full text-xs font-bold border rounded-xl px-3 py-2.5 outline-none cursor-pointer transition-colors appearance-none ${isLight ? 'bg-white border-gray-200 text-gray-900 shadow-sm' : 'bg-white/5 border-white/5 text-white/90 hover:bg-white/10'}`}
+                >
+                  <option value="none" className={isLight ? 'bg-white text-black' : 'bg-[#0c0c0c] text-white'}>None</option>
+                  <option value="navigate" className={isLight ? 'bg-white text-black' : 'bg-[#0c0c0c] text-white'}>Navigate to Page</option>
+                </select>
+             </div>
+
+             {selectedElement.action?.type === 'navigate' && (
+                <div className="space-y-2 animate-in fade-in zoom-in-95 duration-200">
+                  <span className={`text-[11px] font-bold uppercase tracking-widest ${theme.title}`}>Target Page</span>
+                  <select 
+                    value={selectedElement.action.targetPageId || ''} 
+                    onChange={(e) => updateElements(selectedElementIds, { action: { ...selectedElement.action, targetPageId: e.target.value } })}
+                    className={`w-full text-xs font-bold border rounded-xl px-3 py-2.5 outline-none cursor-pointer transition-colors appearance-none text-blue-600 ${isLight ? 'bg-white border-blue-200 shadow-sm' : 'bg-blue-900/20 border-blue-500/30'}`}
+                  >
+                    {pages.map(p => <option key={p.id} value={p.id} className={isLight ? 'bg-white text-black' : 'bg-[#0c0c0c] text-white'}>{p.name}</option>)}
+                  </select>
+                </div>
+             )}
+          </div>
+        </Section>
+
       </div>
     </div>
   );

@@ -21,11 +21,12 @@ const TrashBin = () => {
     }
 
     const handleGlobalMove = (e) => {
-      const thresholdY = window.innerHeight - 100;
-      const centerX = window.innerWidth / 2;
-      const rangeX = 150;
+      const centerX = window.innerWidth - 372; // Adjusted for right-[340px] and w-16
+      const centerY = window.innerHeight - 72; // Adjusted for bottom-10 and h-16
+      
+      const distance = Math.hypot(e.clientX - centerX, e.clientY - centerY);
 
-      if (e.clientY > thresholdY && Math.abs(e.clientX - centerX) < rangeX) {
+      if (distance < 90) {
         setIsHovered(true);
       } else {
         setIsHovered(false);
@@ -41,7 +42,7 @@ const TrashBin = () => {
   return (
     <div 
       className={`
-        fixed bottom-10 left-1/2 -translate-x-1/2 z-[100]
+        fixed bottom-10 right-[340px] z-[100]
         flex flex-col items-center justify-center
         transition-all duration-500 ease-out
         ${isDraggingGlobal ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-20 opacity-0 scale-90'}
@@ -49,7 +50,7 @@ const TrashBin = () => {
     >
       <div 
         className={`
-          relative flex items-center justify-center w-24 h-24 rounded-full border-4
+          relative flex items-center justify-center w-16 h-16 rounded-full border-[3px]
           transition-all duration-300
           ${isHovered 
             ? 'bg-red-500 border-red-600 scale-110 shadow-[0_0_40px_rgba(239,68,68,0.4)]' 
@@ -66,7 +67,7 @@ const TrashBin = () => {
         )}
 
         <Trash2 
-          size={32} 
+          size={24} 
           className={`transition-all duration-300 ${isHovered ? 'text-white scale-125 rotate-12' : 'text-red-500'}`} 
         />
       </div>

@@ -2,8 +2,10 @@ import React from 'react';
 import useEditorStore from '../../store/useEditorStore';
 import Toolbar from '../../components/editor/Toolbar';
 import LayersPanel from '../../components/editor/LayersPanel';
+import PagesPanel from '../../components/editor/PagesPanel';
 import PropertiesPanel from '../../components/editor/PropertiesPanel';
 import Canvas from '../../components/canvas/Canvas';
+import { HorizontalRuler, VerticalRuler, RulerCorner } from '../../components/canvas/Rulers';
 import ContextMenu from '../../components/common/ContextMenu';
 import SettingsModal from '../../components/editor/overlays/SettingsModal';
 import TemplatesModal from '../../components/editor/overlays/TemplatesModal';
@@ -13,15 +15,18 @@ import HelpModal from '../../components/editor/overlays/HelpModal';
 import OnboardingTour from '../../components/editor/overlays/OnboardingTour';
 import TrashBin from '../../components/canvas/TrashBin';
 import { THEMES } from '../../utils/themes';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 const Editor = () => {
   const { 
     uiTheme, setOnboardingOpen, selectedElementIds, 
-    groupElements, ungroupElements, deleteElements, duplicateElements,
-    undo, redo
+    groupElements, ungroupElements, deleteElements, duplicateElements, addElement,
+    undo, redo, pages, activePageId, canvas, projectName, loadProject, setSaving, toggleRulers,
+    zoomToFit, zoomTo100, updateElement, saveHistory,
+    bringToFront, sendToBack, moveForward, moveBackward
   } = useEditorStore();
   const theme = THEMES[uiTheme];
+  const isFirstLoad = useRef(true);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -45,6 +50,50 @@ const Editor = () => {
       } else if (isCtrl && e.key.toLowerCase() === 'd') {
         e.preventDefault();
         duplicateElements(selectedElementIds);
+      } else if (isCtrl && e.key.toLowerCase() === 'r') {
+        e.preventDefault();
+        toggleRulers();
+      } else if (isCtrl && e.key === '0') {
+        e.preventDefault();
+        const container = document.getElementById('canvas-container');
+        if (container) zoomToFit(container.clientWidth, container.clientHeight);
+      } else if (isCtrl && e.key === '1') {
+        e.preventDefault();
+        zoomTo100();
+      } else if (isCtrl && e.key === '[') {
+        e.preventDefault();
+        if (isShift) sendToBack(selectedElementIds);
+        else moveBackward(selectedElementIds);
+      } else if (isCtrl && e.key === ']') {
+        e.preventDefault();
+        if (isShift) bringToFront(selectedElementIds);
+        else moveForward(selectedElementIds);
+      } else if (e.key.toLowerCase() === 'l' && !isCtrl) {
+        // Toggle Lock
+        if (selectedElementIds.length > 0) {
+          saveHistory();
+          const activePage = pages.find(p => p.id === activePageId);
+          selectedElementIds.forEach(id => {
+            const el = activePage.elements.find(e => e.id === id);
+            if (el) updateElement(id, { locked: !el.locked });
+          });
+        }
+      } else if (e.key.toLowerCase() === 'h' && isShift) {
+        // Toggle Visibility (Shift + H)
+        if (selectedElementIds.length > 0) {
+          saveHistory();
+          const activePage = pages.find(p => p.id === activePageId);
+          selectedElementIds.forEach(id => {
+            const el = activePage.elements.find(e => e.id === id);
+            if (el) updateElement(id, { visible: !el.visible });
+          });
+        }
+      } else if (e.key.toLowerCase() === 't' && !isCtrl) {
+        // Add Text
+        addElement({ type: 'text', content: 'New Text', x: 100, y: 100 });
+      } else if (e.key.toLowerCase() === 'r' && !isCtrl) {
+        // Add Rectangle
+        addElement({ type: 'rectangle', x: 100, y: 100 });
       } else if (e.key === 'Delete' || e.key === 'Backspace') {
         deleteElements(selectedElementIds);
       }
@@ -59,7 +108,53 @@ const Editor = () => {
     if (!hasOnboarded) {
       setTimeout(() => setOnboardingOpen(true), 1000);
     }
-  }, [setOnboardingOpen]);
+    
+    // Recovery Logic: Load last project from localStorage
+    const savedProject = localStorage.getItem('kraft_saved_project');
+    if (savedProject) {
+      try {
+        const data = JSON.parse(savedProject);
+        
+        // Expiration Logic: 7 Days (604,800,000 ms)
+        const lastSaved = new Date(data.lastSaved).getTime();
+        const now = new Date().getTime();
+        const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+
+        if (now - lastSaved > sevenDaysMs) {
+          console.log('Saved project expired ( > 7 days). Clearing storage.');
+          localStorage.removeItem('kraft_saved_project');
+        } else {
+          loadProject(data);
+        }
+      } catch (e) {
+        console.error('Failed to recover project', e);
+      }
+    }
+    isFirstLoad.current = false;
+  }, [setOnboardingOpen, loadProject]);
+
+  // Auto-Save Effect
+  useEffect(() => {
+    if (isFirstLoad.current) return;
+    
+    const saveTimeout = setTimeout(() => {
+      setSaving(true);
+      const projectData = {
+        pages,
+        activePageId,
+        uiTheme,
+        canvas,
+        projectName,
+        lastSaved: new Date().toISOString()
+      };
+      localStorage.setItem('kraft_saved_project', JSON.stringify(projectData));
+      
+      // Flash the saving indicator for 500ms
+      setTimeout(() => setSaving(false), 500);
+    }, 1000); // 1s debounce
+
+    return () => clearTimeout(saveTimeout);
+  }, [pages, activePageId, uiTheme, canvas, projectName, setSaving]);
 
   // Safety check for theme
   if (!theme) return <div className="p-10 text-red-500 font-bold">Error: Theme '{uiTheme}' not found.</div>;
@@ -70,12 +165,22 @@ const Editor = () => {
       <Toolbar />
 
       <div className="flex flex-1 overflow-hidden relative">
-        {/* Layer Stack */}
-        <LayersPanel />
+        {/* Left Sidebar: Pages + Layers */}
+        <div className={`w-[300px] flex flex-col h-full border-r ${theme.sidebar} ${theme.border}`}>
+            <PagesPanel />
+            <LayersPanel />
+        </div>
         
         {/* Main Canvas Area */}
-        <div className={`flex-1 relative overflow-hidden ${theme.canvas}`}>
-          <Canvas />
+        <div className={`flex-1 relative overflow-hidden flex flex-col ${theme.canvas}`}>
+          <RulerCorner />
+          <HorizontalRuler />
+          <div className="flex-1 flex overflow-hidden">
+             <VerticalRuler />
+             <div id="canvas-container" className="flex-1 relative overflow-hidden">
+                <Canvas />
+             </div>
+          </div>
         </div>
 
         {/* Property Controls */}

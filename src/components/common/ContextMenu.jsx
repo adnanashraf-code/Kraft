@@ -3,7 +3,11 @@ import useEditorStore from '../../store/useEditorStore';
 import { Type, Copy, Trash2, Lock, Unlock, EyeOff, Eye, ArrowUp, ArrowDown } from 'lucide-react';
 
 const ContextMenu = ({ onRename }) => {
-  const { contextMenu, closeContextMenu, elements, deleteElements, updateElement, duplicateElements, reorderElement, styleClipboard, copyStyle, pasteStyle } = useEditorStore();
+  const { contextMenu, closeContextMenu, pages, activePageId, deleteElements, updateElement, duplicateElements, reorderElement, styleClipboard, copyStyle, pasteStyle } = useEditorStore();
+  
+  const activePage = pages.find(p => p.id === activePageId) || pages[0];
+  const elements = activePage.elements;
+  
   const menuRef = useRef(null);
 
   useEffect(() => {

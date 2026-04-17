@@ -85,28 +85,36 @@ const HelpModal = () => {
                 <kbd className={`px-2 py-0.5 rounded border ${isLight ? 'bg-white border-gray-300' : 'bg-black border-white/20'} text-[10px] font-mono`}>CTRL SHIFT Z</kbd>
               </div>
               <div className={`p-3 rounded-xl ${isLight ? 'bg-gray-50' : 'bg-white/5'} flex justify-between items-center border ${theme.border}`}>
+                <span className={`text-[11px] font-bold uppercase tracking-wider ${theme.text}`}>Layer Forward</span>
+                <kbd className={`px-2 py-0.5 rounded border ${isLight ? 'bg-white border-gray-300' : 'bg-black border-white/20'} text-[10px] font-mono`}>CTRL ]</kbd>
+              </div>
+              <div className={`p-3 rounded-xl ${isLight ? 'bg-gray-50' : 'bg-white/5'} flex justify-between items-center border ${theme.border}`}>
+                <span className={`text-[11px] font-bold uppercase tracking-wider ${theme.text}`}>Layer Backward</span>
+                <kbd className={`px-2 py-0.5 rounded border ${isLight ? 'bg-white border-gray-300' : 'bg-black border-white/20'} text-[10px] font-mono`}>CTRL [</kbd>
+              </div>
+              <div className={`p-3 rounded-xl ${isLight ? 'bg-gray-50' : 'bg-white/5'} flex justify-between items-center border ${theme.border}`}>
                 <span className={`text-[11px] font-bold uppercase tracking-wider ${theme.text}`}>Group Selection</span>
                 <kbd className={`px-2 py-0.5 rounded border ${isLight ? 'bg-white border-gray-300' : 'bg-black border-white/20'} text-[10px] font-mono`}>CTRL G</kbd>
               </div>
               <div className={`p-3 rounded-xl ${isLight ? 'bg-gray-50' : 'bg-white/5'} flex justify-between items-center border ${theme.border}`}>
-                <span className={`text-[11px] font-bold uppercase tracking-wider ${theme.text}`}>Ungroup Items</span>
-                <kbd className={`px-2 py-0.5 rounded border ${isLight ? 'bg-white border-gray-300' : 'bg-black border-white/20'} text-[10px] font-mono`}>CTRL SHIFT G</kbd>
+                <span className={`text-[11px] font-bold uppercase tracking-wider ${theme.text}`}>Hide Layer</span>
+                <kbd className={`px-2 py-0.5 rounded border ${isLight ? 'bg-white border-gray-300' : 'bg-black border-white/20'} text-[10px] font-mono`}>SHIFT H</kbd>
               </div>
               <div className={`p-3 rounded-xl ${isLight ? 'bg-gray-50' : 'bg-white/5'} flex justify-between items-center border ${theme.border}`}>
-                <span className={`text-[11px] font-bold uppercase tracking-wider ${theme.text}`}>Duplicate</span>
-                <kbd className={`px-2 py-0.5 rounded border ${isLight ? 'bg-white border-gray-300' : 'bg-black border-white/20'} text-[10px] font-mono`}>CTRL D</kbd>
+                <span className={`text-[11px] font-bold uppercase tracking-wider ${theme.text}`}>Lock Layer</span>
+                <kbd className={`px-2 py-0.5 rounded border ${isLight ? 'bg-white border-gray-300' : 'bg-black border-white/20'} text-[10px] font-mono`}>L</kbd>
               </div>
               <div className={`p-3 rounded-xl ${isLight ? 'bg-gray-50' : 'bg-white/5'} flex justify-between items-center border ${theme.border}`}>
-                <span className={`text-[11px] font-bold uppercase tracking-wider ${theme.text}`}>Delete</span>
-                <kbd className={`px-2 py-0.5 rounded border ${isLight ? 'bg-white border-gray-300' : 'bg-black border-white/20'} text-[10px] font-mono`}>DEL</kbd>
+                <span className={`text-[11px] font-bold uppercase tracking-wider ${theme.text}`}>Add Rectangle</span>
+                <kbd className={`px-2 py-0.5 rounded border ${isLight ? 'bg-white border-gray-300' : 'bg-black border-white/20'} text-[10px] font-mono`}>R</kbd>
               </div>
               <div className={`p-3 rounded-xl ${isLight ? 'bg-gray-50' : 'bg-white/5'} flex justify-between items-center border ${theme.border}`}>
-                <span className={`text-[11px] font-bold uppercase tracking-wider ${theme.text}`}>Toggle Theme</span>
+                <span className={`text-[11px] font-bold uppercase tracking-wider ${theme.text}`}>Add Text</span>
                 <kbd className={`px-2 py-0.5 rounded border ${isLight ? 'bg-white border-gray-300' : 'bg-black border-white/20'} text-[10px] font-mono`}>T</kbd>
               </div>
               <div className={`p-3 rounded-xl ${isLight ? 'bg-gray-50' : 'bg-white/5'} flex justify-between items-center border ${theme.border}`}>
-                <span className={`text-[11px] font-bold uppercase tracking-wider ${theme.text}`}>Quick Search</span>
-                <kbd className={`px-2 py-0.5 rounded border ${isLight ? 'bg-white border-gray-300' : 'bg-black border-white/20'} text-[10px] font-mono`}>CTRL K</kbd>
+                <span className={`text-[11px] font-bold uppercase tracking-wider ${theme.text}`}>Zoom to Fit</span>
+                <kbd className={`px-2 py-0.5 rounded border ${isLight ? 'bg-white border-gray-300' : 'bg-black border-white/20'} text-[10px] font-mono`}>CTRL 0</kbd>
               </div>
             </div>
           </Section>
