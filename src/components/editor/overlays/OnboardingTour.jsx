@@ -35,8 +35,13 @@ const TOUR_STEPS = [
     target: "#tool-search",
   },
   {
+    title: "Shortcuts & Guide",
+    content: "Master the KRAFT hotkeys (Ctrl+G, Ctrl+D, Ctrl+Z) to design 10x faster. You can find the full list here!",
+    target: "#tool-shortcuts",
+  },
+  {
     title: "Infinite Canvas",
-    content: "You're all set! Drag to pan, scroll to zoom, and build something beautiful.",
+    content: "You're all set! Drag with Space to pan, use the wheel to zoom, and build something beautiful.",
     target: "center",
   }
 ];
