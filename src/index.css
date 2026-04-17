@@ -41,20 +41,77 @@
     background-size: 24px 24px;
     background-image: radial-gradient(circle, #D1D5DB 1px, transparent 1px);
   }
+
+  /* Space Theme Animations */
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-tilt {
+    animation: tilt 6s ease-in-out infinite;
+  }
+
+  .animate-fall-topLeft {
+    animation: fallTopLeft 5s linear infinite;
+  }
+
+  .animate-fall-topRight {
+    animation: fallTopRight 5s linear infinite;
+  }
+
+  .bg-space {
+    background: url("https://hebbkx1anhila5yf.public.blob.vercel-storage.com/9770934.jpg-Wl31ERQfbntJABIblVId5PIBjqP5Gx.jpeg") no-repeat center center/cover;
+  }
+
+  /* Neo-Brutalist Tokens */
+  .neo-border-sm {
+    border: 2px solid #000000;
+  }
+
+  .neo-border {
+    border: 3px solid #000000;
+  }
+
+  .neo-shadow {
+    box-shadow: 4px 4px 0px 0px #000000;
+  }
+
+  .neo-shadow-lg {
+    box-shadow: 6px 6px 0px 0px #000000;
+  }
+
+  .neo-interactive:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0px 0px #000000;
+  }
+
+  .neo-interactive:active {
+    transform: translate(2px, 2px);
+    box-shadow: 0px 0px 0px 0px #000000;
+  }
 }
 
-/* Custom Scrollbars */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+/* Keyframes (keep outside as they are shared) */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
 }
-::-webkit-scrollbar-track {
-  background: transparent;
+
+@keyframes tilt {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
 }
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
+
+@keyframes fallTopLeft {
+  0% { transform: translate(0, 0); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translate(-100px, 100vh); opacity: 0; }
 }
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+
+@keyframes fallTopRight {
+  0% { transform: translate(0, 0); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translate(100px, 100vh); opacity: 0; }
 }

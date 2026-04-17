@@ -13,7 +13,16 @@ const useEditorStore = create((set, get) => ({
     gridSnap: 20, // 20px snapping
     isRulersVisible: false,
   },
+  preferences: {
+    snapEnabled: true,
+    highFidelity: true,
+  },
   smartGuides: [], // Array of { axis: 'x'|'y', pos: number }
+  
+  library: {
+    images: [], // { id, name, src, w, h }
+    components: [] // { id, name, elements, w, h }
+  },
   
   contextMenu: {
     isOpen: false,
@@ -122,36 +131,121 @@ const useEditorStore = create((set, get) => ({
   
   setProjectName: (name) => set({ projectName: name }),
   setSaving: (saving) => set({ isSaving: saving }),
+  
+  updatePreferences: (updates) => set((state) => ({
+    preferences: { ...state.preferences, ...updates }
+  })),
+
+  clearProjectData: () => {
+    localStorage.removeItem('kraft-save');
+    window.location.reload();
+  },
+
+  // --- LIBRARY ACTIONS ---
+  uploadImage: (dataUrl, name, w, h) => {
+    set((state) => ({
+      library: {
+        ...state.library,
+        images: [...state.library.images, { id: 'img-' + Date.now(), name, src: dataUrl, w, h }]
+      }
+    }));
+  },
+
+  createComponent: (name) => {
+    const { pages, activePageId, selectedElementIds, saveHistory } = get();
+    if (selectedElementIds.length === 0) return;
+    
+    saveHistory();
+    const activePage = pages.find(p => p.id === activePageId);
+    const selectedElements = activePage.elements.filter(el => selectedElementIds.includes(el.id));
+    
+    // Calculate bounding box
+    const minX = Math.min(...selectedElements.map(el => el.x));
+    const minY = Math.min(...selectedElements.map(el => el.y));
+    const maxX = Math.max(...selectedElements.map(el => el.x + el.w));
+    const maxY = Math.max(...selectedElements.map(el => el.y + el.h));
+    
+    const w = maxX - minX;
+    const h = maxY - minY;
+
+    // Create normalized elements relative to (0,0)
+    const normalizedElements = selectedElements.map(el => ({
+      ...el,
+      x: el.x - minX,
+      y: el.y - minY,
+      id: 'comp-el-' + Math.random().toString(36).substr(2, 9)
+    }));
+
+    const newComponent = {
+      id: 'comp-' + Date.now(),
+      name: name || 'Component ' + (get().library.components.length + 1),
+      elements: normalizedElements,
+      w,
+      h
+    };
+
+    set((state) => ({
+      library: {
+        ...state.library,
+        components: [...state.library.components, newComponent]
+      }
+    }));
+
+    return newComponent;
+  },
+
+  updateComponent: (id, elements) => {
+    set((state) => ({
+      library: {
+        ...state.library,
+        components: state.library.components.map(c => c.id === id ? { ...c, elements } : c)
+      }
+    }));
+  },
 
   loadProject: (data) => {
-    if (!data) return;
-    
-    // Migration: Migrate legacy 'elements' projects to 'pages' structure
-    let pages = data.pages || [];
-    let activePageId = data.activePageId;
-    if (pages.length === 0 && data.elements) {
-      const defaultId = (typeof window !== 'undefined' && window.crypto?.randomUUID) 
-        ? window.crypto.randomUUID() : 'page-' + Math.random().toString(36).substr(2, 9);
-      pages = [{ id: defaultId, name: 'Page 1', elements: data.elements, layoutGrids: [] }];
-      activePageId = defaultId;
-    } else if (pages.length === 0) {
-      activePageId = 'page-1';
-      pages = [{ id: activePageId, name: 'Page 1', elements: [], layoutGrids: [] }];
-    }
+    try {
+      if (!data) return;
+      
+      // Migration: Migrate legacy 'elements' projects to 'pages' structure
+      let pages = Array.isArray(data.pages) ? data.pages : [];
+      let activePageId = data.activePageId;
+      
+      if (pages.length === 0 && data.elements) {
+        const defaultId = (typeof window !== 'undefined' && window.crypto?.randomUUID) 
+          ? window.crypto.randomUUID() : 'page-' + Math.random().toString(36).substr(2, 9);
+        pages = [{ id: defaultId, name: 'Page 1', elements: data.elements || [], layoutGrids: [] }];
+        activePageId = defaultId;
+      } else if (pages.length === 0) {
+        activePageId = 'page-1';
+        pages = [{ id: activePageId, name: 'Page 1', elements: [], layoutGrids: [] }];
+      }
 
-    set({
-      pages,
-      activePageId,
-      uiTheme: data.uiTheme || 'light',
-      projectName: data.projectName || 'KRAFT',
-      canvas: {
-        ...get().canvas,
-        ...(data.canvas || {})
-      },
-      selectedElementIds: [],
-      past: [],
-      future: []
-    });
+      set({
+        pages,
+        activePageId: activePageId || (pages.length > 0 ? pages[0].id : null),
+        uiTheme: data.uiTheme || 'light',
+        projectName: data.projectName || 'KRAFT',
+        canvas: {
+          ...get().canvas,
+          ...(data.canvas || {})
+        },
+        preferences: {
+          ...get().preferences,
+          ...(data.preferences || {})
+        },
+        library: {
+          images: Array.isArray(data.library?.images) ? data.library.images : [],
+          components: Array.isArray(data.library?.components) ? data.library.components : []
+        },
+        selectedElementIds: [],
+        past: [],
+        future: []
+      });
+    } catch (err) {
+      console.error("CRITICAL_LOAD_ERROR:", err);
+      // Fallback to fresh state if everything fails
+    }
   },
   
   // Add a new element to the active page
@@ -208,7 +302,19 @@ const useEditorStore = create((set, get) => ({
           content: 'New Text'
         }),
         ...element,
-        id: newId
+        id: newId,
+        // Image support
+        ...(element.type === 'image' && {
+          src: element.src,
+          w: element.w || 200,
+          h: element.h || 200
+        }),
+        // Component Instance support
+        ...(element.type === 'instance' && {
+          componentId: element.componentId,
+          w: element.w || 100,
+          h: element.h || 100
+        })
       };
 
       return {
@@ -702,6 +808,143 @@ const useEditorStore = create((set, get) => ({
           )
         };
       }
+    });
+  },
+
+  // --- LAYER ARRANGEMENT ---
+  bringToFront: (ids) => {
+    get().saveHistory();
+    set((state) => {
+      const activePage = state.pages.find(p => p.id === state.activePageId);
+      if (!activePage) return state;
+      
+      const elements = [...activePage.elements];
+      const selectedEls = elements.filter(el => ids.includes(el.id));
+      const remainingEls = elements.filter(el => !ids.includes(el.id));
+      
+      return {
+        pages: state.pages.map(p => 
+          p.id === state.activePageId 
+            ? { ...p, elements: [...remainingEls, ...selectedEls] } 
+            : p
+        )
+      };
+    });
+  },
+
+  sendToBack: (ids) => {
+    get().saveHistory();
+    set((state) => {
+      const activePage = state.pages.find(p => p.id === state.activePageId);
+      if (!activePage) return state;
+      
+      const elements = [...activePage.elements];
+      const selectedEls = elements.filter(el => ids.includes(el.id));
+      const remainingEls = elements.filter(el => !ids.includes(el.id));
+      
+      return {
+        pages: state.pages.map(p => 
+          p.id === state.activePageId 
+            ? { ...p, elements: [...selectedEls, ...remainingEls] } 
+            : p
+        )
+      };
+    });
+  },
+
+  moveForward: (ids) => {
+    get().saveHistory();
+    set((state) => {
+      const activePage = state.pages.find(p => p.id === state.activePageId);
+      if (!activePage) return state;
+      
+      const elements = [...activePage.elements];
+      ids.forEach(id => {
+        const index = elements.findIndex(el => el.id === id);
+        if (index < elements.length - 1) {
+          const temp = elements[index];
+          elements[index] = elements[index + 1];
+          elements[index + 1] = temp;
+        }
+      });
+      
+      return {
+        pages: state.pages.map(p => p.id === state.activePageId ? { ...p, elements } : p)
+      };
+    });
+  },
+
+  moveBackward: (ids) => {
+    get().saveHistory();
+    set((state) => {
+      const activePage = state.pages.find(p => p.id === state.activePageId);
+      if (!activePage) return state;
+      
+      const elements = [...activePage.elements];
+      ids.forEach(id => {
+        const index = elements.findIndex(el => el.id === id);
+        if (index > 0) {
+          const temp = elements[index];
+          elements[index] = elements[index - 1];
+          elements[index - 1] = temp;
+        }
+      });
+      
+      return {
+        pages: state.pages.map(p => p.id === state.activePageId ? { ...p, elements } : p)
+      };
+    });
+  },
+
+  // --- GROUPING ---
+  groupElements: (ids) => {
+    if (ids.length < 2) return;
+    const { createComponent } = get();
+    // In our system, Grouping reuse the Component engine but we can add specialized logic if needed.
+    // For now, let's treat Group as creating a reusable component named "Grouped"
+    const name = "Group " + Math.floor(Math.random() * 1000);
+    createComponent(name);
+  },
+
+  ungroupElements: (ids) => {
+    // Ungrouping in an Atomic system means replacing the instance with its children
+    get().saveHistory();
+    set((state) => {
+      const activePage = state.pages.find(p => p.id === state.activePageId);
+      if (!activePage) return state;
+      
+      let newElements = [...activePage.elements];
+      let selectedIds = [...state.selectedElementIds];
+      
+      ids.forEach(id => {
+        const instance = activePage.elements.find(el => el.id === id);
+        if (instance?.type === 'instance') {
+          const master = state.library.components.find(c => c.id === instance.componentId);
+          if (master) {
+            // Explode children back into the canvas
+            const scaleX = instance.w / master.w;
+            const scaleY = instance.h / master.h;
+            
+            const children = master.elements.map(child => ({
+              ...child,
+              id: Math.random().toString(36).substr(2, 9),
+              x: instance.x + (child.x * scaleX),
+              y: instance.y + (child.y * scaleY),
+              w: child.w * scaleX,
+              h: child.h * scaleY
+            }));
+            
+            newElements = newElements.filter(el => el.id !== id);
+            newElements = [...newElements, ...children];
+            selectedIds = selectedIds.filter(sid => sid !== id);
+          }
+        }
+      });
+      
+      return {
+        pages: state.pages.map(p => p.id === state.activePageId ? { ...p, elements: newElements } : p),
+        selectedElementIds: selectedIds
+      };
     });
   },
 }));

@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import { useParams } from 'react-router-dom';
 import useEditorStore from '../../store/useEditorStore';
 import Toolbar from '../../components/editor/Toolbar';
 import LayersPanel from '../../components/editor/LayersPanel';
@@ -15,14 +16,15 @@ import HelpModal from '../../components/editor/overlays/HelpModal';
 import OnboardingTour from '../../components/editor/overlays/OnboardingTour';
 import TrashBin from '../../components/canvas/TrashBin';
 import { THEMES } from '../../utils/themes';
-import { useEffect, useRef } from 'react';
+import { TEMPLATE_SEEDS } from '../../utils/templateSeeds';
 
 const Editor = () => {
+  const { id } = useParams();
   const { 
     uiTheme, setOnboardingOpen, selectedElementIds, 
     groupElements, ungroupElements, deleteElements, duplicateElements, addElement,
     undo, redo, pages, activePageId, canvas, projectName, loadProject, setSaving, toggleRulers,
-    zoomToFit, zoomTo100, updateElement, saveHistory,
+    zoomToFit, zoomTo100, updateElement, saveHistory, library, setProjectName,
     bringToFront, sendToBack, moveForward, moveBackward
   } = useEditorStore();
   const theme = THEMES[uiTheme];
@@ -69,7 +71,6 @@ const Editor = () => {
         if (isShift) bringToFront(selectedElementIds);
         else moveForward(selectedElementIds);
       } else if (e.key.toLowerCase() === 'l' && !isCtrl) {
-        // Toggle Lock
         if (selectedElementIds.length > 0) {
           saveHistory();
           const activePage = pages.find(p => p.id === activePageId);
@@ -79,7 +80,6 @@ const Editor = () => {
           });
         }
       } else if (e.key.toLowerCase() === 'h' && isShift) {
-        // Toggle Visibility (Shift + H)
         if (selectedElementIds.length > 0) {
           saveHistory();
           const activePage = pages.find(p => p.id === activePageId);
@@ -89,10 +89,8 @@ const Editor = () => {
           });
         }
       } else if (e.key.toLowerCase() === 't' && !isCtrl) {
-        // Add Text
         addElement({ type: 'text', content: 'New Text', x: 100, y: 100 });
       } else if (e.key.toLowerCase() === 'r' && !isCtrl) {
-        // Add Rectangle
         addElement({ type: 'rectangle', x: 100, y: 100 });
       } else if (e.key === 'Delete' || e.key === 'Backspace') {
         deleteElements(selectedElementIds);
@@ -101,7 +99,7 @@ const Editor = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedElementIds, groupElements, ungroupElements, deleteElements, duplicateElements]);
+  }, [selectedElementIds, groupElements, ungroupElements, deleteElements, duplicateElements, redo, undo, toggleRulers, zoomToFit, zoomTo100, bringToFront, sendToBack, moveForward, moveBackward, saveHistory, pages, activePageId, updateElement, addElement]);
 
   useEffect(() => {
     const hasOnboarded = localStorage.getItem('kraft_onboarded');
@@ -109,29 +107,26 @@ const Editor = () => {
       setTimeout(() => setOnboardingOpen(true), 1000);
     }
     
-    // Recovery Logic: Load last project from localStorage
+    if (id && TEMPLATE_SEEDS[id]) {
+      loadProject(TEMPLATE_SEEDS[id]);
+      isFirstLoad.current = false;
+      return;
+    }
+
     const savedProject = localStorage.getItem('kraft_saved_project');
-    if (savedProject) {
+    if (savedProject && !id) {
       try {
         const data = JSON.parse(savedProject);
-        
-        // Expiration Logic: 7 Days (604,800,000 ms)
         const lastSaved = new Date(data.lastSaved).getTime();
         const now = new Date().getTime();
         const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
-
-        if (now - lastSaved > sevenDaysMs) {
-          console.log('Saved project expired ( > 7 days). Clearing storage.');
-          localStorage.removeItem('kraft_saved_project');
-        } else {
-          loadProject(data);
-        }
+        if (now - lastSaved < sevenDaysMs) loadProject(data);
       } catch (e) {
         console.error('Failed to recover project', e);
       }
     }
     isFirstLoad.current = false;
-  }, [setOnboardingOpen, loadProject]);
+  }, [id, setOnboardingOpen, loadProject]);
 
   // Auto-Save Effect
   useEffect(() => {
@@ -144,6 +139,7 @@ const Editor = () => {
         activePageId,
         uiTheme,
         canvas,
+        library, // Critical: Include library in auto-save
         projectName,
         lastSaved: new Date().toISOString()
       };

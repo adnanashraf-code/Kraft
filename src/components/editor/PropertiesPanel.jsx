@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import useEditorStore from '../../store/useEditorStore';
-import { Plus, Eye, EyeOff, Trash2, SlidersHorizontal, ChevronDown, ChevronRight, AlignLeft, AlignCenter, AlignRight, Type, Square, Lock, Unlock, Hash, LayoutList, FlipHorizontal, FlipVertical, RotateCw, LayoutGrid, Zap } from 'lucide-react';
+import { Plus, Eye, EyeOff, Trash2, SlidersHorizontal, ChevronDown, ChevronRight, AlignLeft, AlignCenter, AlignRight, Type, Square, Lock, Unlock, Hash, LayoutList, FlipHorizontal, FlipVertical, RotateCw, LayoutGrid, Zap, Box } from 'lucide-react';
 import { THEMES } from '../../utils/themes';
 
 const Section = ({ title, children, defaultOpen = true, theme, isLight }) => {
@@ -115,7 +115,7 @@ const ArtboardProperties = ({ theme, isLight, activePage }) => {
 const PropertiesPanel = () => {
   const { 
     pages, activePageId, selectedElementIds, updateElement, updateElements, 
-    uiTheme, rotate90, flipElement, alignElements, distributeElements 
+    uiTheme, rotate90, flipElement, alignElements, distributeElements, createComponent 
   } = useEditorStore();
   const theme = THEMES[uiTheme];
   const isLight = uiTheme === 'light' || uiTheme === 'gray';
@@ -444,6 +444,35 @@ const PropertiesPanel = () => {
                 </div>
              )}
           </div>
+        </Section>
+
+        {/* COMPONENT SYSTEM */}
+        <Section title="Components" defaultOpen={true} theme={theme} isLight={isLight}>
+           <div className="space-y-4">
+              {selectedElement.type !== 'instance' ? (
+                <div className="space-y-3">
+                  <p className={`text-[10px] leading-tight opacity-50 ${theme.text}`}>Convert this selection into a reusable component. Changes to the main component will sync to all instances.</p>
+                  <button 
+                    onClick={() => {
+                      const name = window.prompt("Enter Component Name", "New Component");
+                      if (name) createComponent(name);
+                    }}
+                    className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-indigo-600/20 transition-all flex items-center justify-center"
+                  >
+                    <Box size={14} className="mr-2" />
+                    Create Component
+                  </button>
+                </div>
+              ) : (
+                <div className="p-3 rounded-xl border border-indigo-500/20 bg-indigo-500/5 space-y-2">
+                   <div className="flex items-center text-indigo-500 space-x-2">
+                      <Box size={14} />
+                      <span className="text-[10px] font-black uppercase tracking-widest">Instance of {selectedElement.name}</span>
+                   </div>
+                   <p className={`text-[10px] leading-tight opacity-60 ${theme.text}`}>This is a linked instance. To edit the master source, go to the Assets Vault.</p>
+                </div>
+              )}
+           </div>
         </Section>
 
       </div>

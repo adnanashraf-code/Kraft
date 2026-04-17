@@ -17,6 +17,7 @@ import {
   Monitor,
   Hexagon,
   Download,
+  Upload,
 } from "lucide-react";
 import { THEMES } from "../../utils/themes";
 import logo from "../../assets/logo.png";
@@ -44,7 +45,40 @@ const Toolbar = () => {
     projectName,
     setProjectName,
     isSaving,
+    uploadImage,
   } = useEditorStore();
+
+  const fileInputRef = React.useRef(null);
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const dataUrl = event.target.result;
+        uploadImage(dataUrl, file.name, img.width, img.height);
+        // Also add it directly to canvas for better UX
+        addElement({
+          type: 'image',
+          name: file.name,
+          src: dataUrl,
+          w: img.width > 800 ? 800 : img.width, // Cap initial size
+          h: img.height > 800 ? 800 : img.height,
+          x: 100,
+          y: 100
+        });
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
   const theme = THEMES[uiTheme];
   const isLight = uiTheme === "light" || uiTheme === "gray";
 
@@ -141,6 +175,20 @@ const Toolbar = () => {
           icon={Type}
           title="Text (T)"
           onClick={handleAddText}
+        />
+        <ToolButton
+          id="tool-upload"
+          icon={Upload}
+          title="Upload Image"
+          onClick={handleUploadClick}
+        />
+
+        <input
+          type="file"
+          ref={fileInputRef}
+          className="hidden"
+          accept="image/*"
+          onChange={handleFileChange}
         />
 
         <div className={`w-8 h-px ${theme.border} border-b my-2`} />

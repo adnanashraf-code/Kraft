@@ -68,8 +68,10 @@ export const useDraggable = (id) => {
     let newX = originalPos.current.x + dx;
     let newY = originalPos.current.y + dy;
     
-    if (e.shiftKey) {
-      const snap = state.canvas.gridSnap;
+    const isSnappingToGrid = e.shiftKey || state.preferences?.snapEnabled;
+
+    if (isSnappingToGrid) {
+      const snap = state.canvas.gridSnap || 20;
       newX = Math.round(newX / snap) * snap;
       newY = Math.round(newY / snap) * snap;
     }
@@ -79,7 +81,7 @@ export const useDraggable = (id) => {
     const guides = [];
     const SNAP_THRESHOLD = 5;
     
-    if (!e.shiftKey) {
+    if (!isSnappingToGrid) {
       const curActivePage = state.pages.find(p => p.id === state.activePageId) || state.pages[0];
       const curElements = curActivePage.elements;
       const otherElements = curElements.filter(e => !state.selectedElementIds.includes(e.id) && e.visible);

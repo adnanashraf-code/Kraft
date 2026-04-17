@@ -10,8 +10,10 @@ import ArtboardGrid from './ArtboardGrid';
 const DraggableElement = React.memo(({ el }) => {
   const isSelected = useEditorStore(state => state.selectedElementIds.includes(el.id));
   const uiTheme = useEditorStore(state => state.uiTheme);
+  const preferences = useEditorStore(state => state.preferences) || { highFidelity: true };
   const { handleMouseDown } = useDraggable(el.id);
   const { onResizeStart } = useResizable(el.id);
+  const library = useEditorStore(state => state.library) || { components: [] };
   const isLight = uiTheme === 'light' || uiTheme === 'gray';
 
   const handles = [
@@ -34,8 +36,8 @@ const DraggableElement = React.memo(({ el }) => {
         width: `${el.w}px`,
         height: `${el.h}px`,
         transform: `rotate(${el.rotation || 0}deg) scale(${el.flipX ? -1 : 1}, ${el.flipY ? -1 : 1})`,
-        opacity: el.opacity,
-        display: el.visible ? 'block' : 'none',
+        opacity: el.opacity ?? 1,
+        display: el.visible !== false ? 'block' : 'none',
         cursor: el.locked ? 'not-allowed' : (isSelected ? 'default' : 'move')
       }}
       onMouseDown={el.locked ? undefined : handleMouseDown}
@@ -47,7 +49,7 @@ const DraggableElement = React.memo(({ el }) => {
               ? `${el.borderRadiusTL || 0}px ${el.borderRadiusTR || 0}px ${el.borderRadiusBR || 0}px ${el.borderRadiusBL || 0}px`
               : `${el.borderRadius || 0}px`,
             border: el.strokeWidth ? `${el.strokeWidth}px ${el.strokeStyle || 'solid'} ${el.strokeColor || '#000'}` : 'none',
-            boxShadow: el.shadowEnabled ? `${el.shadowOffsetX || 0}px ${el.shadowOffsetY || 4}px ${el.shadowBlur || 10}px ${el.shadowColor || 'rgba(0,0,0,0.15)'}` : 'none',
+            boxShadow: (el.shadowEnabled && preferences.highFidelity) ? `${el.shadowOffsetX || 0}px ${el.shadowOffsetY || 4}px ${el.shadowBlur || 10}px ${el.shadowColor || 'rgba(0,0,0,0.15)'}` : 'none',
             background: el.type === 'rectangle' ? el.fill : 'transparent',
             clipPath: el.clipPath || 'none'
           }}
@@ -70,6 +72,52 @@ const DraggableElement = React.memo(({ el }) => {
               {el.content || 'Text'}
             </span>
           )}
+
+          {el.type === 'image' && (
+            <img src={el.src} alt={el.name} className="w-full h-full object-cover pointer-events-none" />
+          )}
+
+          {el.type === 'instance' && (() => {
+            const comp = library.components.find(c => c.id === el.componentId);
+            if (!comp) return <div className="w-full h-full bg-red-500/10 border border-red-500/20 flex items-center justify-center text-[8px] text-red-500 font-bold uppercase">Missing Component</div>;
+            
+            const scaleX = el.w / comp.w;
+            const scaleY = el.h / comp.h;
+
+            return (
+              <div 
+                className="absolute inset-0 origin-top-left"
+                style={{ transform: `scale(${scaleX}, ${scaleY})` }}
+              >
+                {(comp.elements || []).map(compEl => (
+                   <div 
+                    key={compEl.id}
+                    className="absolute"
+                    style={{
+                      left: compEl.x,
+                      top: compEl.y,
+                      width: compEl.w,
+                      height: compEl.h,
+                      background: compEl.fill,
+                      borderRadius: compEl.borderRadius,
+                      border: compEl.strokeWidth ? `${compEl.strokeWidth}px ${compEl.strokeStyle} ${compEl.strokeColor}` : 'none',
+                      opacity: compEl.opacity,
+                      overflow: 'hidden'
+                    }}
+                   >
+                     {compEl.type === 'text' && (
+                        <span style={{ 
+                          fontFamily: compEl.fontFamily, fontSize: compEl.fontSize, fontWeight: compEl.fontWeight, 
+                          color: compEl.color, textAlign: compEl.textAlign, width: '100%', height: '100%', display: 'flex'
+                        }}>
+                          {compEl.content}
+                        </span>
+                     )}
+                   </div>
+                ))}
+              </div>
+            );
+          })()}
         </div>
 
         {isSelected && !el.locked && handles.map((h) => (
