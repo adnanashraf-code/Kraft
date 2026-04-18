@@ -98,7 +98,7 @@ const BRAND_CATEGORIES = {
   }
 };
 
-const CloudHub = () => {
+const CloudHub = ({ globalSearch = '' }) => {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
   
@@ -114,6 +114,15 @@ const CloudHub = () => {
   const [logoSearch, setLogoSearch] = useState('');
   const [activeLogoCategory, setActiveLogoCategory] = useState('tech');
   const [importStatus, setImportStatus] = useState(null); // { id, type }
+
+  // Multi-selection state from store
+  const { stagedAssets, toggleStageAsset, clearStagedAssets } = useEditorStore();
+
+  const isSelected = (asset, type) => {
+    return stagedAssets.some(a => 
+      (asset.id && a.id === asset.id) || (!asset.id && !a.id && a.name === asset.name && a.type === type)
+    );
+  };
 
   const [images, setImages] = useState([
     { id: 1, name: 'Fluid Gold', src: '/cloud/asset_1.png' },
@@ -196,7 +205,9 @@ const CloudHub = () => {
         : null;
       
       if (svg) {
-        elementData.src = `data:image/svg+xml;base64,${btoa(svg)}`;
+        // Robust encoding for non-ASCII SVG paths
+        const encoded = btoa(unescape(encodeURIComponent(svg)));
+        elementData.src = `data:image/svg+xml;base64,${encoded}`;
       } else if (asset.comp) {
         elementData.type = 'rectangle';
         elementData.name = `Icon: ${asset.name}`;
@@ -208,17 +219,77 @@ const CloudHub = () => {
     setTimeout(() => setImportStatus(null), 2000);
   };
 
+  const handleBatchImport = () => {
+    try {
+      const elements = stagedAssets.map((asset, index) => {
+        let el = { 
+          type: 'rectangle', 
+          name: asset.name, 
+          x: 100 + (index * 60), 
+          y: 100 + (index * 60),
+          w: 200,
+          h: 200
+        };
+
+        if (asset.type === 'image') {
+          el.type = 'image';
+          el.src = asset.src;
+        } else if (asset.type === 'font') {
+          // Fonts are now added as project-wide resources, not canvas elements
+          useEditorStore.getState().addProjectFont(asset.name);
+          useEditorStore.getState().addNotification(`Font "${asset.name}" updated to the editor`, 'success');
+          return null; // Don't create an element for fonts
+        } else if (asset.type === 'icon') {
+          el.type = 'icon';
+          el.iconName = asset.name;
+          el.library = asset.library || 'lucide';
+          el.w = 120;
+          el.h = 120;
+          el.fill = '#000000';
+        } else if (asset.type === 'logo') {
+          if (asset.path) {
+            try {
+              el.type = 'image';
+              const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${asset.hex ? '#' + asset.hex : 'black'}"><path d="${asset.path}"/></svg>`;
+              // Robust encoding for UTF-8 SVGs
+              const encoded = btoa(encodeURIComponent(svg).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1)));
+              el.src = `data:image/svg+xml;base64,${encoded}`;
+            } catch (e) {
+              console.error('Logo encoding failed', e);
+              el.type = 'rectangle';
+            }
+          }
+        }
+        return el;
+      }).filter(el => el !== null); // Filter out skipped elements (like fonts)
+
+      addElements(elements);
+      
+      const importedFonts = stagedAssets.filter(a => a.type === 'font').map(a => a.name);
+      if (importedFonts.length > 0) {
+        useEditorStore.getState().updatePreferences({ lastUsedFont: importedFonts[0] });
+      }
+
+      clearStagedAssets();
+      navigate('/editor');
+
+    } catch (criticalErr) {
+      console.error('Critical Build Error:', criticalErr);
+      alert('Project Build Error: Some assets might be incompatible. Try selecting fewer items.');
+    }
+  };
+
   const filteredFonts = allUniqueFonts.filter(f => f.toLowerCase().includes(fontSearch.toLowerCase()));
   
   const filteredIcons = useMemo(() => {
-    const query = iconSearch.toLowerCase();
+    const query = (globalSearch || iconSearch).toLowerCase();
     if (!query) return iconNames;
     const relevantKeywords = SMART_TAGS[query] || [query];
     return iconNames.filter(icon => 
       icon.keywords.some(k => relevantKeywords.some(rk => k.includes(rk))) ||
       icon.name.toLowerCase().includes(query)
     );
-  }, [iconSearch, iconNames]);
+  }, [iconSearch, iconNames, globalSearch]);
 
   const categories = [
     { id: 'images', label: 'Images', icon: ImageIcon, color: 'decoration-orange-400' },
@@ -280,12 +351,29 @@ const CloudHub = () => {
                  <div key={img.id} className="group relative">
                     <div className="aspect-square bg-white border-[4px] border-black neo-shadow overflow-hidden group-hover:rotate-1 transition-transform">
                        <img src={img.src} alt={img.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                       <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-3 p-4">
+                       <div className={`absolute inset-0 bg-black/60 transition-opacity flex flex-col items-center justify-center gap-3 p-4 ${isSelected(img, 'image') ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
                           <button 
-                            onClick={() => handleImport(img, 'image')}
-                            className={`bg-white border-2 border-black px-4 py-2 text-[10px] font-black uppercase tracking-widest neo-shadow-xs active:translate-y-1 transition-colors ${importStatus?.id === img.id ? 'bg-green-400' : ''}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const assetMetadata = {
+                                name: img.name,
+                                type: 'image',
+                                src: img.src
+                              };
+                              toggleStageAsset(assetMetadata);
+                            }}
+                            className={`border-2 border-black px-4 py-2 text-[10px] font-black uppercase tracking-widest neo-shadow-xs active:translate-y-1 transition-colors w-full ${isSelected(img, 'image') ? 'bg-yellow-400 text-black' : 'bg-white text-black hover:bg-yellow-400'}`}
                           >
-                            {importStatus?.id === img.id ? 'Imported! ✓' : 'Import to Canvas'}
+                            {isSelected(img, 'image') ? '✓ Selected' : 'Select Asset'}
+                          </button>
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleImport(img, 'image');
+                            }}
+                            className="bg-black text-white border-2 border-white/20 px-4 py-2 text-[10px] font-black uppercase tracking-widest hover:bg-gray-900 transition-colors w-full"
+                          >
+                            Quick Import
                           </button>
                        </div>
                     </div>
@@ -302,7 +390,7 @@ const CloudHub = () => {
         {activeCategory === 'fonts' && (
           <section className="animate-in fade-in slide-in-from-left-4 duration-300">
             <div className="flex items-center justify-between mb-10">
-               <h3 className={`text-3xl font-black uppercase tracking-tight underline decoration-8 ${categories[2].color}`}>Type Foundry</h3>
+               <h3 className={`text-3xl font-black uppercase tracking-tight underline decoration-8 ${categories[1].color}`}>Type Foundry</h3>
                <div className="flex items-center gap-3 bg-white border-[3px] border-black px-4 py-2 neo-shadow-xs">
                   <Search size={18} strokeWidth={3} />
                   <input 
@@ -316,10 +404,21 @@ const CloudHub = () => {
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
                {filteredFonts.map((font, i) => (
-                 <div key={i} className="bg-white border-2 border-black p-6 hover:bg-yellow-400 transition-all cursor-pointer neo-shadow-xs group">
+                 <div 
+                   key={i} 
+                   onClick={() => toggleStageAsset({ id: font, name: font, type: 'font' })}
+                   className={`bg-white border-2 border-black p-6 hover:bg-yellow-400 transition-all cursor-pointer neo-shadow-xs group relative ${isSelected({name: font}, 'font') ? 'bg-yellow-400 ring-4 ring-black ring-inset' : ''}`}
+                 >
                     <p className="text-xs font-black opacity-20 mb-3 tracking-widest">TYPE_{String(i+1).padStart(3,'0')}</p>
                     <p className="text-xl font-bold truncate leading-none" style={{ fontFamily: font }}>{font}</p>
-                    <p className="text-[9px] font-black opacity-0 group-hover:opacity-100 transition-opacity uppercase mt-4">Activate Typeface</p>
+                    <p className="text-[9px] font-black opacity-0 group-hover:opacity-100 transition-opacity uppercase mt-4">
+                       {isSelected({name: font}, 'font') ? 'Deselect Family' : 'Activate Typeface'}
+                    </p>
+                    {isSelected({name: font}, 'font') && (
+                      <div className="absolute top-2 right-2 w-6 h-6 bg-black text-yellow-400 flex items-center justify-center neo-shadow-xs">
+                        <Icons.Check size={14} strokeWidth={4} />
+                      </div>
+                    )}
                  </div>
                ))}
             </div>
@@ -329,7 +428,7 @@ const CloudHub = () => {
         {activeCategory === 'icons' && (
           <section className="animate-in fade-in slide-in-from-left-4 duration-300">
             <div className="flex items-center justify-between mb-10">
-               <h3 className={`text-3xl font-black uppercase tracking-tight underline decoration-8 ${categories[3].color}`}>Icon Vault</h3>
+               <h3 className={`text-3xl font-black uppercase tracking-tight underline decoration-8 ${categories[2].color}`}>Icon Vault</h3>
                <div className="flex items-center gap-3 bg-white border-[3px] border-black px-4 py-2 neo-shadow-xs">
                   <Search size={18} strokeWidth={3} />
                   <input 
@@ -344,22 +443,28 @@ const CloudHub = () => {
                   />
                </div>
             </div>
-            <div className="grid grid-cols-6 sm:grid-cols-10 md:grid-cols-12 lg:grid-cols-20 gap-3 p-1">
-               {filteredIcons.slice(0, iconLimit).map((icon, i) => {
-                 const IconComp = icon.comp;
-                 return (
-                   <div key={i} title={`${icon.name} (${icon.source})`} className="aspect-square bg-white border-2 border-black flex items-center justify-center hover:bg-black hover:text-white transition-all cursor-crosshair group neo-shadow-xs overflow-hidden relative" onClick={() => handleImport(icon, 'icon')}>
-                      {icon.source === 'brand' ? (
-                        <svg viewBox="0 0 24 24" className="w-5 h-5 group-hover:scale-125 transition-transform" fill="currentColor">
-                          <path d={icon.path} />
-                        </svg>
-                      ) : (
-                        <IconComp size={20} strokeWidth={icon.source === 'lucide' ? 2.5 : 2} className="group-hover:scale-125 transition-transform" />
-                      )}
-                      <div className={`absolute top-0 right-0 w-2 h-2 border-l border-b border-black ${icon.source === 'remix' ? 'bg-cyan-400' : icon.source === 'brand' ? 'bg-orange-500' : 'bg-gray-200 opacity-0'}`} />
-                   </div>
-                 );
-               })}
+              <div className="grid grid-cols-6 sm:grid-cols-10 md:grid-cols-12 lg:grid-cols-20 gap-3 p-1">
+                {filteredIcons.slice(0, iconLimit).map((icon, i) => {
+                  const IconComp = icon.comp;
+                  return (
+                    <div 
+                      key={i} 
+                      title={`${icon.name} (${icon.source})`} 
+                      className={`aspect-square bg-white border-2 border-black flex items-center justify-center hover:bg-black hover:text-white transition-all cursor-crosshair group neo-shadow-xs overflow-hidden relative ${isSelected(icon, 'icon') ? '!bg-black !text-white' : ''}`} 
+                      onClick={() => toggleStageAsset({ ...icon, type: 'icon' })}
+                    >
+                       {icon.source === 'brand' ? (
+                         <svg viewBox="0 0 24 24" className="w-5 h-5 group-hover:scale-125 transition-transform" fill="currentColor">
+                           <path d={icon.path} />
+                         </svg>
+                       ) : (
+                         <IconComp size={20} strokeWidth={icon.source === 'lucide' ? 2.5 : 2} className="group-hover:scale-125 transition-transform" />
+                       )}
+                       <div className={`absolute top-0 right-0 w-2 h-2 border-l border-b border-black ${isSelected(icon, 'icon') ? 'bg-yellow-400' : (icon.source === 'remix' ? 'bg-cyan-400' : icon.source === 'brand' ? 'bg-orange-500' : 'bg-gray-200 opacity-0')}`} />
+                       {isSelected(icon, 'icon') && <div className="absolute inset-0 bg-yellow-400/20 pointer-events-none" />}
+                    </div>
+                  );
+                })}
                {filteredIcons.length > iconLimit && (
                  <div className="col-span-full py-8 flex flex-col items-center gap-4 mt-6">
                     <button onClick={() => setIconLimit(prev => prev + 400)} className="px-10 py-3 bg-black text-white text-[10px] font-black uppercase neo-shadow-sm">Load More</button>
@@ -372,7 +477,7 @@ const CloudHub = () => {
         {activeCategory === 'logos' && (
           <section className="animate-in fade-in slide-in-from-left-4 duration-300">
             <div className="flex items-center justify-between mb-10">
-               <h3 className={`text-3xl font-black uppercase tracking-tight underline decoration-8 ${categories[4].color}`}>Brand Central</h3>
+               <h3 className={`text-3xl font-black uppercase tracking-tight underline decoration-8 ${categories[3].color}`}>Brand Central</h3>
                <div className="flex items-center gap-3 bg-white border-[3px] border-black px-4 py-2 neo-shadow-xs">
                   <Search size={18} strokeWidth={3} />
                   <input 
@@ -404,19 +509,31 @@ const CloudHub = () => {
                     if (!logo.icon) return null;
                     const iconHex = logo.icon.hex ? `#${logo.icon.hex}` : 'black';
                     return (
-                      <div key={i} className="bg-white border-[3px] border-black p-6 flex flex-col items-center justify-center gap-4 hover:-translate-y-1 transition-transform neo-shadow-xs group relative">
+                      <div 
+                        key={i} 
+                        onClick={() => toggleStageAsset({ name: logo.name, path: logo.icon.path, hex: logo.icon.hex, type: 'logo' })}
+                        className={`bg-white border-[3px] border-black p-6 flex flex-col items-center justify-center gap-4 hover:-translate-y-1 transition-transform neo-shadow-xs group relative ${isSelected({name: logo.name}, 'logo') ? 'ring-4 ring-black ring-inset' : ''}`}
+                      >
                         <div className="w-12 h-12 flex items-center justify-center group-hover:scale-110 transition-transform">
                             <svg viewBox="0 0 24 24" className="w-full h-full" fill={iconHex}>
                               <path d={logo.icon.path} />
                             </svg>
                         </div>
                         <p className="text-[9px] font-black uppercase tracking-tight text-center truncate w-full">{logo.name}</p>
-                        <button 
-                          onClick={() => handleImport({ name: logo.name, path: logo.icon.path, hex: logo.icon.hex }, 'logo')} 
-                          className="absolute inset-0 bg-black/90 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-[8px] text-white font-black uppercase tracking-widest p-2 text-center"
-                        >
-                          {importStatus?.id === logo.name ? 'Imported! ✓' : 'Import to Canvas'}
-                        </button>
+                        
+                        <div className={`absolute inset-0 bg-black/95 transition-opacity flex flex-col items-center justify-center gap-2 p-2 ${isSelected({name: logo.name}, 'logo') ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+                           <p className="text-white text-[10px] font-black uppercase tracking-tighter">
+                              {isSelected({name: logo.name}, 'logo') ? 'Selected ✓' : 'Add to Staging'}
+                           </p>
+                           {!isSelected({name: logo.name}, 'logo') && (
+                             <button 
+                               onClick={(e) => { e.stopPropagation(); handleImport({ name: logo.name, path: logo.icon.path, hex: logo.icon.hex }, 'logo') }}
+                               className="text-[8px] text-yellow-400 font-bold border border-yellow-400/30 px-2 py-1 hover:bg-yellow-400 hover:text-black transition-colors"
+                             >
+                               Quick Import
+                             </button>
+                           )}
+                        </div>
                       </div>
                     );
                   })}
@@ -434,14 +551,14 @@ const CloudHub = () => {
                     <div 
                       key={i} 
                       title={icon.name} 
-                      className="aspect-square bg-white border-2 border-black flex items-center justify-center hover:bg-black hover:text-white transition-all cursor-crosshair group neo-shadow-xs relative" 
-                      onClick={() => handleImport(icon, 'logo')}
+                      className={`aspect-square bg-white border-2 border-black flex items-center justify-center hover:bg-black hover:text-white transition-all cursor-crosshair group neo-shadow-xs relative ${isSelected(icon, 'logo') ? 'bg-black text-white' : ''}`} 
+                      onClick={() => toggleStageAsset({ ...icon, type: 'logo' })}
                     >
                       <svg viewBox="0 0 24 24" className="w-6 h-6 group-hover:scale-125 transition-transform" fill={icon.hex ? `#${icon.hex}` : 'currentColor'}>
                         <path d={icon.path} />
                       </svg>
-                      {importStatus?.id === icon.name && (
-                        <div className="absolute inset-0 bg-green-400/90 flex items-center justify-center text-[8px] font-black uppercase">✓</div>
+                      {isSelected(icon, 'logo') && (
+                        <div className="absolute inset-0 bg-yellow-400/90 flex items-center justify-center text-[10px] font-black text-black">SELECTED</div>
                       )}
                     </div>
                   ))
@@ -451,6 +568,62 @@ const CloudHub = () => {
           </section>
         )}
       </div>
+
+      {/* --- ASSET STAGING DOCK (REDESIGNED) --- */}
+      {stagedAssets.length > 0 && (
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] w-full max-w-4xl animate-in fade-in slide-in-from-bottom-8 duration-500 px-4">
+          <div className="bg-black text-white border-2 border-white/20 neo-shadow-lg p-4 flex items-center justify-between gap-6 rounded-none backdrop-blur-md">
+            
+            {/* Status & Count */}
+            <div className="flex items-center gap-4 shrink-0 pl-2">
+              <div className="relative">
+                <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" />
+                <div className="absolute inset-0 bg-yellow-400 opacity-20 scale-150 blur-sm animate-ping rounded-full" />
+              </div>
+              <div className="flex flex-col">
+                <h4 className="text-[11px] font-black uppercase tracking-widest leading-none">Docked_Assets</h4>
+                <p className="text-[9px] font-bold text-white/40 uppercase mt-1 tabular-nums">{stagedAssets.length} Units Ready</p>
+              </div>
+            </div>
+
+            {/* Scrollable Asset List */}
+            <div className="flex-1 flex gap-2 overflow-x-auto py-1 scrollbar-hide border-x border-white/10 px-6">
+               {stagedAssets.map((asset, i) => (
+                 <div key={i} className="h-10 w-10 shrink-0 bg-white/5 border border-white/20 flex items-center justify-center group relative overflow-hidden transition-all hover:border-yellow-400">
+                    {asset.type === 'image' && <img src={asset.src} className="w-full h-full object-cover" />}
+                    {asset.type === 'font' && <Type size={14} className="text-white/60" />}
+                    {asset.type === 'icon' && <Box size={14} className="text-cyan-400" />}
+                    {asset.type === 'logo' && <LayoutGrid size={14} className="text-magenta-400" />}
+                    
+                    <button 
+                      onClick={() => toggleStageAsset(asset)}
+                      className="absolute inset-0 bg-red-500/90 text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                    >
+                      <Icons.X size={14} strokeWidth={3} />
+                    </button>
+                 </div>
+               ))}
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center gap-3">
+               <button 
+                 onClick={clearStagedAssets}
+                 className="px-4 py-2 text-[9px] font-black uppercase tracking-widest text-white/50 hover:text-white transition-colors"
+               >
+                 Abort
+               </button>
+               <button 
+                 onClick={handleBatchImport}
+                 className="px-6 py-2.5 bg-yellow-400 text-black neo-shadow-sm hover:-translate-y-0.5 transition-all font-black uppercase text-[10px] tracking-widest flex items-center gap-2"
+               >
+                 <Zap size={14} strokeWidth={3} />
+                 Construct Layout
+               </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* --- MISSION CONTROL FOOTER --- */}
       <div className="mt-10 bg-[#0a0a0a] text-white p-5 border-[4px] border-black neo-shadow-lg relative overflow-hidden group">

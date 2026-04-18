@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import useEditorStore from '../../../store/useEditorStore';
 import { THEMES } from '../../../utils/themes';
-import { X, Grid, Monitor, Settings, Keyboard, Database, AlertCircle } from 'lucide-react';
+import { X, Grid, Monitor, Settings, Keyboard, Database, AlertCircle, ShieldCheck, Zap } from 'lucide-react';
 
 const ShortcutRow = ({ keys, description, isLight, theme }) => (
   <div className={`flex items-center justify-between p-3 rounded-lg border ${isLight ? 'bg-white border-gray-100 hover:border-gray-300' : 'bg-black/20 border-white/5 hover:border-white/20'} transition-colors`}>
@@ -17,108 +17,215 @@ const ShortcutRow = ({ keys, description, isLight, theme }) => (
 );
 
 const SettingsModal = () => {
-  const { isSettingsOpen, setSettingsOpen, uiTheme, preferences, updatePreferences, clearProjectData } = useEditorStore();
+  const { 
+    isSettingsOpen, setSettingsOpen, uiTheme, setUiTheme,
+    preferences, updatePreferences, clearProjectData,
+    userProfile, setUserProfile
+  } = useEditorStore();
   const theme = THEMES[uiTheme];
   const isLight = uiTheme === 'light' || uiTheme === 'gray';
   
-  const [activeTab, setActiveTab] = useState('preferences'); // 'preferences', 'shortcuts', 'data'
+  const [activeTab, setActiveTab] = useState('preferences');
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [tempName, setTempName] = useState(userProfile.name);
 
   if (!isSettingsOpen) return null;
 
+  const handleShuffleAvatar = () => {
+    const randomSeeds = ['Neon', 'Gravity', 'Cyber', 'Kraft', 'Studio', 'Pulse', 'Adnan', 'Vision'];
+    const newSeed = randomSeeds[Math.floor(Math.random() * randomSeeds.length)];
+    setUserProfile({ avatarSeed: newSeed + Math.floor(Math.random() * 100) });
+  };
+
+  const handleSaveProfile = () => {
+    setUserProfile({ name: tempName });
+    setIsEditingProfile(false);
+  };
+
   return (
-    <div className="fixed inset-0 z-[110] flex items-center justify-center">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
       {/* Backdrop */}
       <div 
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
-        onClick={() => setSettingsOpen(false)}
+        className="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity"
+        onClick={() => {
+            setSettingsOpen(false);
+            setIsEditingProfile(false);
+        }}
       />
 
       {/* Modal */}
-      <div className={`relative w-full max-w-2xl rounded-2xl overflow-hidden shadow-2xl border flex flex-col h-[500px] ${isLight ? 'bg-white border-gray-200' : 'bg-[#151515] border-white/10'}`}>
+      <div className={`relative w-full max-w-4xl rounded-3xl overflow-hidden shadow-2xl border flex flex-col h-[650px] animate-in fade-in zoom-in-95 duration-300 ${isLight ? 'bg-white border-gray-200' : 'bg-[#121212] border-white/10'}`}>
         
-        {/* Header */}
-        <div className={`flex items-center justify-between px-6 py-5 border-b shrink-0 ${theme.border}`}>
-          <div>
-            <h2 className={`font-black uppercase tracking-widest text-lg ${isLight ? 'text-gray-900' : 'text-white'}`}>Editor Preferences</h2>
-            <p className={`text-[10px] uppercase font-bold mt-1 tracking-widest ${theme.title}`}>Professional Control Center</p>
+        {/* Header (Same as before but responsive) */}
+        <div className={`flex items-center justify-between px-8 py-6 border-b shrink-0 ${theme.border}`}>
+          <div className="flex items-center gap-4">
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center neo-shadow-sm ${isLight ? 'bg-black text-white' : 'bg-yellow-400 text-black'}`}>
+               <Settings size={24} strokeWidth={2.5} />
+            </div>
+            <div>
+              <h2 className={`font-black uppercase tracking-widest text-xl ${isLight ? 'text-gray-900' : 'text-white'}`}>Control Center</h2>
+              <p className={`text-[10px] uppercase font-black mt-1 tracking-[0.2em] opacity-50 ${theme.title}`}>Workspace Configuration_0.1</p>
+            </div>
           </div>
-          <button onClick={() => setSettingsOpen(false)} className={`p-2 rounded-xl transition-all hover:rotate-90 ${isLight ? 'hover:bg-gray-100 text-gray-500' : 'hover:bg-white/5 text-white/50'}`}>
-            <X size={20} />
+          <button onClick={() => { setSettingsOpen(false); setIsEditingProfile(false); }} className={`p-2.5 rounded-2xl transition-all hover:rotate-90 ${isLight ? 'hover:bg-gray-100 text-gray-500' : 'hover:bg-white/10 text-white'}`}>
+            <X size={24} />
           </button>
         </div>
 
         <div className="flex flex-1 overflow-hidden">
-          {/* Sidebar */}
-          <div className={`w-48 shrink-0 p-4 border-r flex flex-col gap-2 ${theme.border} ${isLight ? 'bg-gray-50' : 'bg-black/20'}`}>
+          {/* Sidebar (Same as before) */}
+          <div className={`w-64 shrink-0 p-6 border-r flex flex-col gap-3 ${theme.border} ${isLight ? 'bg-gray-50/50' : 'bg-black/40'}`}>
             <button 
               onClick={() => setActiveTab('preferences')}
-              className={`flex items-center space-x-3 w-full p-3 rounded-xl text-xs font-bold transition-all ${activeTab === 'preferences' ? (isLight ? 'bg-white shadow-sm text-blue-600' : 'bg-white/10 text-white') : (isLight ? 'text-gray-500 hover:bg-gray-100' : 'text-white/40 hover:bg-white/5')}`}
+              className={`flex items-center gap-4 w-full px-5 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all ${activeTab === 'preferences' ? (isLight ? 'bg-white shadow-xl border-2 border-black text-black' : 'bg-yellow-400 text-black shadow-lg') : (isLight ? 'text-gray-400 hover:bg-gray-100' : 'text-white/30 hover:bg-white/5')}`}
             >
-              <Settings size={16} />
+              <Settings size={18} />
               <span>Workspace</span>
             </button>
             <button 
               onClick={() => setActiveTab('shortcuts')}
-              className={`flex items-center space-x-3 w-full p-3 rounded-xl text-xs font-bold transition-all ${activeTab === 'shortcuts' ? (isLight ? 'bg-white shadow-sm text-blue-600' : 'bg-white/10 text-white') : (isLight ? 'text-gray-500 hover:bg-gray-100' : 'text-white/40 hover:bg-white/5')}`}
+              className={`flex items-center gap-4 w-full px-5 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all ${activeTab === 'shortcuts' ? (isLight ? 'bg-white shadow-xl border-2 border-black text-black' : 'bg-yellow-400 text-black shadow-lg') : (isLight ? 'text-gray-400 hover:bg-gray-100' : 'text-white/30 hover:bg-white/5')}`}
             >
-              <Keyboard size={16} />
+              <Keyboard size={18} />
               <span>Shortcuts</span>
             </button>
             <button 
               onClick={() => setActiveTab('data')}
-              className={`flex items-center space-x-3 w-full p-3 rounded-xl text-xs font-bold transition-all ${activeTab === 'data' ? (isLight ? 'bg-white shadow-sm text-blue-600' : 'bg-white/10 text-white') : (isLight ? 'text-gray-500 hover:bg-gray-100' : 'text-white/40 hover:bg-white/5')}`}
+              className={`flex items-center gap-4 w-full px-5 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all ${activeTab === 'data' ? (isLight ? 'bg-white shadow-xl border-2 border-black text-black' : 'bg-yellow-400 text-black shadow-lg') : (isLight ? 'text-gray-400 hover:bg-gray-100' : 'text-white/30 hover:bg-white/5')}`}
             >
-              <Database size={16} />
-              <span>Memory & Data</span>
+              <Database size={18} />
+              <span>Data Engine</span>
             </button>
+
+            <div className="mt-auto">
+               <div className={`p-4 rounded-2xl border-2 border-dashed ${isLight ? 'border-gray-200' : 'border-white/10'}`}>
+                  <p className={`text-[9px] font-black uppercase tracking-widest mb-3 ${theme.title}`}>Vault Storage</p>
+                  <div className="h-2 bg-black/10 rounded-full overflow-hidden mb-2">
+                     <div className="h-full bg-cyan-400 w-[24%] rounded-full shadow-[0_0_10px_#22d3ee]"></div>
+                  </div>
+                  <p className={`text-[8px] font-bold ${theme.title}`}>1.2 GB / 5.0 GB used</p>
+               </div>
+            </div>
           </div>
 
           {/* Content Area */}
-          <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto p-10 custom-scrollbar relative">
             
             {/* TAB: PREFERENCES */}
             {activeTab === 'preferences' && (
-              <div className="space-y-6 animate-in fade-in zoom-in-95 duration-200">
-                <div>
-                  <h3 className={`text-[10px] font-black uppercase tracking-widest mb-4 ${theme.title}`}>Canvas Rendering</h3>
-                  <div className={`p-5 rounded-2xl border ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-white/5 border-white/5'} space-y-5`}>
-                    
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
-                        <div className={`p-2.5 rounded-xl ${isLight ? 'bg-white shadow-sm text-blue-600' : 'bg-blue-500/20 text-blue-500'}`}><Grid size={20} /></div>
-                        <div>
-                          <div className={`font-bold mb-1 ${isLight ? 'text-gray-900' : 'text-white/90'}`}>Grid Snapping</div>
-                          <div className={`text-xs ${theme.title}`}>Align elements automatically to the 20px grid</div>
+              <div className="space-y-10 animate-in fade-in slide-in-from-right-4 duration-500">
+                
+                {/* PROFILE SECTION EDITABLE */}
+                <div className={`p-6 rounded-3xl border-2 border-black neo-shadow-sm flex items-center justify-between ${isLight ? 'bg-ivory' : 'bg-white/5'}`}>
+                   <div className="flex items-center gap-6 flex-1">
+                      <div className="relative group/avatar">
+                        <div className="w-16 h-16 rounded-full border-4 border-black neo-shadow-xs overflow-hidden">
+                           <img 
+                              src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${userProfile.avatarSeed}`} 
+                              alt="Profile" 
+                              className="w-full h-full bg-yellow-400" 
+                           />
                         </div>
+                        {isEditingProfile && (
+                          <button 
+                            onClick={handleShuffleAvatar}
+                            className="absolute -bottom-1 -right-1 p-1.5 bg-black text-white rounded-full border-2 border-white hover:bg-cyan-500 hover:text-black transition-all"
+                          >
+                             <Zap size={10} fill="currentColor" />
+                          </button>
+                        )}
                       </div>
-                      <button 
-                        onClick={() => updatePreferences({ snapEnabled: !preferences.snapEnabled })}
-                        className={`w-12 h-6 rounded-full relative transition-colors ${preferences.snapEnabled ? 'bg-blue-600' : (isLight ? 'bg-gray-300' : 'bg-white/10')}`}
-                      >
-                        <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all shadow-sm ${preferences.snapEnabled ? 'right-1' : 'left-1'}`} />
-                      </button>
-                    </div>
 
+                      <div className="flex-1">
+                         {isEditingProfile ? (
+                            <input 
+                               type="text"
+                               value={tempName}
+                               onChange={(e) => setTempName(e.target.value)}
+                               className="bg-white border-2 border-black px-4 py-2 text-xl font-black uppercase tracking-tighter w-full focus:bg-yellow-50 outline-none"
+                               autoFocus
+                            />
+                         ) : (
+                            <h3 className={`text-xl font-black uppercase tracking-tighter ${isLight ? 'text-black' : 'text-white'}`}>{userProfile.name}</h3>
+                         )}
+                         <p className="text-[10px] font-black uppercase tracking-widest text-cyan-500 flex items-center gap-2 mt-1">
+                           <ShieldCheck size={12} /> {userProfile.role}
+                         </p>
+                      </div>
+                   </div>
+                   
+                   <div className="ml-6">
+                      {isEditingProfile ? (
+                        <button 
+                          onClick={handleSaveProfile}
+                          className="px-6 py-2.5 bg-green-500 text-black text-[10px] font-black uppercase tracking-widest border-2 border-black neo-shadow-xs hover:bg-green-400 transition-all flex items-center gap-2"
+                        >
+                           <ShieldCheck size={14} /> Save Profile
+                        </button>
+                      ) : (
+                        <button 
+                           onClick={() => { setIsEditingProfile(true); setTempName(userProfile.name); }}
+                           className="px-5 py-2.5 bg-black text-white text-[10px] font-black uppercase tracking-widest neo-shadow-xs hover:bg-gray-900 transition-all"
+                        >
+                           Edit Identity
+                        </button>
+                      )}
+                   </div>
+                </div>
+
+                <div>
+                  <h3 className={`text-[10px] font-black uppercase tracking-[0.3em] mb-6 ${theme.title}`}>Appearance Vault</h3>
+                  <div className="grid grid-cols-4 gap-4">
+                     {[
+                       { id: 'light', label: 'NEO LIGHT', color: 'bg-white', text: 'text-black' },
+                       { id: 'gray', label: 'STUDIO GRAY', color: 'bg-gray-100', text: 'text-gray-600' },
+                       { id: 'dark', label: 'DARK ONYX', color: 'bg-[#151515]', text: 'text-white' }
+                     ].map(t => (
+                       <button 
+                        key={t.id}
+                        onClick={() => setUiTheme(t.id)}
+                        className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-3 ${uiTheme === t.id ? 'border-black bg-yellow-400 ring-2 ring-yellow-400 ring-offset-2' : `border-transparent ${isLight ? 'bg-gray-100' : 'bg-white/5 opacity-50 hover:opacity-100'}`}`}
+                       >
+                          <div className={`w-10 h-10 rounded-xl border border-black/10 ${t.color}`}></div>
+                          <span className={`text-[9px] font-black tracking-widest ${uiTheme === t.id ? 'text-black' : theme.title}`}>{t.label}</span>
+                       </button>
+                     ))}
                   </div>
                 </div>
 
                 <div>
-                  <h3 className={`text-[10px] font-black uppercase tracking-widest mb-4 ${theme.title}`}>Engine Performance</h3>
-                  <div className={`p-5 rounded-2xl border ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-white/5 border-white/5'}`}>
+                  <h3 className={`text-[10px] font-black uppercase tracking-[0.3em] mb-6 ${theme.title}`}>Engine Preferences</h3>
+                  <div className={`p-8 rounded-3xl border-2 border-black neo-shadow-sm ${isLight ? 'bg-white' : 'bg-black/20'} space-y-8`}>
                     
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
-                        <div className={`p-2.5 rounded-xl ${isLight ? 'bg-white shadow-sm text-purple-600' : 'bg-purple-500/20 text-purple-500'}`}><Monitor size={20} /></div>
+                      <div className="flex items-center space-x-6">
+                        <div className={`p-3.5 rounded-2xl neo-shadow-xs ${isLight ? 'bg-black text-white' : 'bg-blue-500 text-black'}`}><Grid size={24} /></div>
                         <div>
-                          <div className={`font-bold mb-1 ${isLight ? 'text-gray-900' : 'text-white/90'}`}>High-Fidelity Rendering</div>
-                          <div className={`text-xs ${theme.title}`}>Enable complex shadows and effects. Turn off for better frame rates on huge boards.</div>
+                          <div className={`font-black uppercase text-sm tracking-tight mb-1 ${isLight ? 'text-gray-900' : 'text-white/90'}`}>Automatic Snapping</div>
+                          <div className={`text-[11px] font-bold ${theme.title}`}>Align elements to the 20px global grid architecture.</div>
+                        </div>
+                      </div>
+                      <button 
+                        onClick={() => updatePreferences({ snapEnabled: !preferences.snapEnabled })}
+                        className={`w-14 h-8 rounded-full border-2 border-black relative transition-colors ${preferences.snapEnabled ? 'bg-green-400' : (isLight ? 'bg-gray-200' : 'bg-white/10')}`}
+                      >
+                        <div className={`absolute top-1 w-5 h-5 bg-white border-2 border-black rounded-full transition-all ${preferences.snapEnabled ? 'right-1' : 'left-1'}`} />
+                      </button>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-6">
+                        <div className={`p-3.5 rounded-2xl neo-shadow-xs ${isLight ? 'bg-black text-white' : 'bg-purple-500 text-black'}`}><Monitor size={24} /></div>
+                        <div>
+                          <div className={`font-black uppercase text-sm tracking-tight mb-1 ${isLight ? 'text-gray-900' : 'text-white/90'}`}>High-Fidelity Mode</div>
+                          <div className={`text-[11px] font-bold ${theme.title}`}>Process complex shadows & glows. Disable for better FPS on older hardware.</div>
                         </div>
                       </div>
                       <button 
                         onClick={() => updatePreferences({ highFidelity: !preferences.highFidelity })}
-                        className={`w-12 h-6 rounded-full relative transition-colors ${preferences.highFidelity ? 'bg-purple-600' : (isLight ? 'bg-gray-300' : 'bg-white/10')}`}
+                        className={`w-14 h-8 rounded-full border-2 border-black relative transition-colors ${preferences.highFidelity ? 'bg-purple-400' : (isLight ? 'bg-gray-200' : 'bg-white/10')}`}
                       >
-                        <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all shadow-sm ${preferences.highFidelity ? 'right-1' : 'left-1'}`} />
+                        <div className={`absolute top-1 w-5 h-5 bg-white border-2 border-black rounded-full transition-all ${preferences.highFidelity ? 'right-1' : 'left-1'}`} />
                       </button>
                     </div>
 

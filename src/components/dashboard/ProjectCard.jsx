@@ -1,7 +1,7 @@
 import React from 'react';
 import { Copy, Trash2, MoreHorizontal, ExternalLink, Archive, Star } from 'lucide-react';
 
-const ProjectCard = ({ project, onClick, isFavorite, onToggleFavorite }) => {
+const ProjectCard = ({ project, onClick, isFavorite, onToggleFavorite, viewMode = 'grid' }) => {
   const getPreviewIcon = () => {
     switch (project.previewType) {
       case 'typography': return 'Aa';
@@ -11,6 +11,64 @@ const ProjectCard = ({ project, onClick, isFavorite, onToggleFavorite }) => {
       default: return '📐';
     }
   };
+
+  if (viewMode === 'list') {
+    return (
+      <div 
+        onClick={onClick}
+        className="group flex items-center gap-6 p-4 bg-white border-[3px] border-black neo-border-sm hover:translate-x-1 hover:-translate-y-1 hover:neo-shadow transition-all cursor-pointer"
+      >
+        {/* Horizontal Preview */}
+        <div className="w-24 h-24 bg-ivory border-2 border-black flex items-center justify-center relative overflow-hidden shrink-0">
+          <div className="absolute top-0 right-0 w-8 h-8 blur-xl opacity-20" style={{ backgroundColor: project.thumbnailColor }}></div>
+          <span className="text-3xl font-black opacity-20 group-hover:opacity-40 transition-opacity">
+            {getPreviewIcon()}
+          </span>
+        </div>
+
+        {/* Metadata Columns */}
+        <div className="flex-1 grid grid-cols-4 gap-4 items-center">
+          <div className="col-span-1">
+            <h3 className="font-black text-[13px] uppercase tracking-tighter mb-1 truncate">{project.title}</h3>
+            <div className="flex gap-1.5 flex-wrap">
+              {project.tags?.slice(0, 2).map(tag => (
+                <span key={tag} className="text-[7px] font-black uppercase tracking-widest text-black/40 border border-black/10 px-1 py-0.5">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">
+            {project.date}
+          </div>
+
+          <div className="text-[10px] font-black text-black uppercase tracking-tighter text-center">
+            {project.author}
+          </div>
+
+          <div className="flex justify-center">
+            <span className={`text-[8px] px-2 py-1 font-black uppercase border-2 border-black tracking-widest ${project.status === 'draft' ? 'bg-yellow-400' : 'bg-black text-white'}`}>
+              {project.status}
+            </span>
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all px-2" onClick={(e) => e.stopPropagation()}>
+           <button 
+            onClick={onToggleFavorite}
+            className={`p-2 border-2 border-black transition-all ${isFavorite ? 'bg-yellow-400' : 'bg-white hover:bg-yellow-200'}`}
+          >
+            <Star size={12} strokeWidth={3} fill={isFavorite ? "currentColor" : "none"} />
+          </button>
+          <button className="p-2 bg-black text-white border-2 border-black hover:bg-cyan-400 hover:text-black transition-all">
+            <ExternalLink size={12} strokeWidth={3}/>
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="group cursor-pointer">

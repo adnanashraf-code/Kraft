@@ -15,6 +15,8 @@ import ShapePicker from '../../components/editor/overlays/ShapePicker';
 import HelpModal from '../../components/editor/overlays/HelpModal';
 import OnboardingTour from '../../components/editor/overlays/OnboardingTour';
 import TrashBin from '../../components/canvas/TrashBin';
+import FontLoader from '../../components/common/FontLoader';
+import ToastContainer from '../../components/common/ToastContainer';
 import { THEMES } from '../../utils/themes';
 import { TEMPLATE_SEEDS } from '../../utils/templateSeeds';
 
@@ -158,6 +160,8 @@ const Editor = () => {
       <HelpModal />
       <OnboardingTour />
       <TrashBin />
+      <FontLoader />
+      <ToastContainer />
     </div>
   );
 };

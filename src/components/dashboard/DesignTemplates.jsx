@@ -125,10 +125,17 @@ const TEMPLATES_DATA = [
 ];
 
 // ─── COMPONENT ───────────────────────────────────────────────────────────────
-const DesignTemplates = () => {
+const DesignTemplates = ({ globalSearch = '' }) => {
   const navigate = useNavigate();
   const addElements = useEditorStore(state => state.addElements);
   const [importingId, setImportingId] = useState(null);
+
+  const filteredTemplates = TEMPLATES_DATA.filter(tpl => {
+    const query = globalSearch.toLowerCase();
+    return tpl.title.toLowerCase().includes(query) || 
+           tpl.team.toLowerCase().includes(query) ||
+           tpl.tags.some(t => t.toLowerCase().includes(query));
+  });
 
   const handleImport = (template) => {
     setImportingId(template.id);
@@ -158,7 +165,7 @@ const DesignTemplates = () => {
 
       {/* Template Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-12">
-        {TEMPLATES_DATA.map((tpl) => (
+        {filteredTemplates.length > 0 ? filteredTemplates.map((tpl) => (
           <div key={tpl.id} className="group flex flex-col">
 
             {/* ── Card ─────────────────────────────── */}
@@ -222,7 +229,14 @@ const DesignTemplates = () => {
             </div>
 
           </div>
-        ))}
+        )) : (
+          <div className="col-span-full py-40 text-center">
+            <div className="w-20 h-20 bg-ivory border-[3px] border-black neo-shadow flex items-center justify-center mx-auto mb-6 text-black/20">
+               <Zap size={40} />
+            </div>
+            <p className="text-xl font-black uppercase tracking-widest opacity-30 italic">No templates match your search</p>
+          </div>
+        )}
       </div>
     </div>
   );

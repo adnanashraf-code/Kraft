@@ -7,6 +7,21 @@ import ZoomControls from './ZoomControls';
 import HistoryControls from './HistoryControls';
 import ArtboardGrid from './ArtboardGrid';
 
+import * as LucideIcons from 'lucide-react';
+
+const DynamicIcon = ({ el, icons }) => {
+  try {
+    const Icon = icons[el.iconName || 'Box'];
+    if (!Icon || typeof Icon !== 'function') {
+      return <LucideIcons.Box size="100%" color={el.fill || '#000000'} className="opacity-20" />;
+    }
+    return <Icon size="100%" color={el.fill || '#000000'} strokeWidth={el.strokeWidth || 2} />;
+  } catch (err) {
+    console.error('Icon Render Error:', err);
+    return <LucideIcons.AlertCircle size="100%" color="#ff0000" />;
+  }
+};
+
 const DraggableElement = React.memo(({ el }) => {
   const isSelected = useEditorStore(state => state.selectedElementIds.includes(el.id));
   const uiTheme = useEditorStore(state => state.uiTheme);
@@ -15,6 +30,8 @@ const DraggableElement = React.memo(({ el }) => {
   const { onResizeStart } = useResizable(el.id);
   const library = useEditorStore(state => state.library) || { components: [] };
   const isLight = uiTheme === 'light' || uiTheme === 'gray';
+
+  const icons = LucideIcons;
 
   const handles = [
     { dir: 'nw', cursor: 'nwse-resize', style: { top: -4, left: -4 } },
@@ -43,7 +60,7 @@ const DraggableElement = React.memo(({ el }) => {
       onMouseDown={el.locked ? undefined : handleMouseDown}
     >
         <div 
-          className="absolute inset-0 pointer-events-none"
+          className="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden"
           style={{
             borderRadius: el.independentRadius 
               ? `${el.borderRadiusTL || 0}px ${el.borderRadiusTR || 0}px ${el.borderRadiusBR || 0}px ${el.borderRadiusBL || 0}px`
@@ -74,8 +91,10 @@ const DraggableElement = React.memo(({ el }) => {
           )}
 
           {el.type === 'image' && (
-            <img src={el.src} alt={el.name} className="w-full h-full object-cover pointer-events-none" />
+            <img src={el.src} alt={el.name} className="w-full h-full object-contain pointer-events-none" />
           )}
+
+          {el.type === 'icon' && <DynamicIcon el={el} icons={icons} />}
 
           {el.type === 'instance' && (() => {
             const comp = library.components.find(c => c.id === el.componentId);

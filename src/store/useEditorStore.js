@@ -49,6 +49,14 @@ const useEditorStore = create(
   searchQuery: '',
   projectName: 'KRAFT',
   isSaving: false,
+  stagedAssets: [], // Array of { id, name, type, src, etc. }
+  userProfile: {
+    name: 'Adnan Ashraf',
+    avatarSeed: 'Adnan',
+    role: 'PRO DESIGNER_KW'
+  },
+  notifications: [], // Array of { id, message, type: 'success' | 'error' | 'info' }
+  projectFonts: [], // Array of string font names
 
   // --- HISTORY STATE ---
   past: [],
@@ -131,6 +139,28 @@ const useEditorStore = create(
   setFlyout: (type) => set((state) => ({ 
     activeFlyout: state.activeFlyout === type ? 'none' : type 
   })),
+
+  setUserProfile: (profile) => set((state) => ({
+    userProfile: { ...state.userProfile, ...profile }
+  })),
+
+  addNotification: (message, type = 'success') => {
+    const id = Date.now().toString();
+    set((state) => ({
+      notifications: [...state.notifications, { id, message, type }]
+    }));
+    // Auto-remove after 4 seconds
+    setTimeout(() => {
+      set((state) => ({
+        notifications: state.notifications.filter(n => n.id !== id)
+      }));
+    }, 4000);
+  },
+
+  addProjectFont: (fontName) => set((state) => {
+    if (state.projectFonts.includes(fontName)) return state;
+    return { projectFonts: [...state.projectFonts, fontName] };
+  }),
   
   setProjectName: (name) => set({ projectName: name }),
   setSaving: (saving) => set({ isSaving: saving }),
@@ -143,6 +173,25 @@ const useEditorStore = create(
     localStorage.removeItem('kraft-save');
     window.location.reload();
   },
+
+  toggleStageAsset: (asset) => set((state) => {
+    const isSameType = (a, b) => a.type === b.type;
+    const isSameId = (a, b) => a.id && b.id && a.id === b.id;
+    const isSameName = (a, b) => a.name === b.name;
+
+    const exists = state.stagedAssets.find(a => 
+      isSameId(a, asset) || (!a.id && !asset.id && isSameName(a, asset) && isSameType(a, asset))
+    );
+
+    if (exists) {
+      return { stagedAssets: state.stagedAssets.filter(a => 
+        !(isSameId(a, asset) || (!a.id && !asset.id && isSameName(a, asset) && isSameType(a, asset)))
+      )};
+    }
+    return { stagedAssets: [...state.stagedAssets, asset] };
+  }),
+
+  clearStagedAssets: () => set({ stagedAssets: [] }),
 
   // --- LIBRARY ACTIONS ---
   uploadImage: (dataUrl, name, w, h) => {
