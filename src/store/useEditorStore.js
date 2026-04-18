@@ -1,6 +1,9 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
-const useEditorStore = create((set, get) => ({
+const useEditorStore = create(
+  persist(
+    (set, get) => ({
   // --- STATE ---
   pages: [{ id: 'page-1', name: 'Page 1', elements: [], layoutGrids: [] }],
   activePageId: 'page-1',
@@ -324,6 +327,76 @@ const useEditorStore = create((set, get) => ({
             : page
         ),
         selectedElementIds: [newId] 
+      };
+    });
+  },
+
+  addElements: (elementsArray) => {
+    get().saveHistory();
+    set((state) => {
+      const activePage = state.pages.find(p => p.id === state.activePageId);
+      if (!activePage) return state;
+
+      const newElements = elementsArray.map(element => {
+        const newId = (typeof window !== 'undefined' && window.crypto?.randomUUID) 
+          ? window.crypto.randomUUID() 
+          : Math.random().toString(36).substring(2, 11);
+
+        const isText = element.type === 'text';
+        const isImage = element.type === 'image';
+        
+        // Smart defaults: text height based on fontSize to prevent wrapping in tiny boxes
+        const fontSize = element.fontSize || 24;
+        const defaultW = isText ? Math.max(400, (element.w || 0)) : (isImage ? 300 : 150);
+        const defaultH = isText ? Math.ceil(fontSize * 1.6) : (isImage ? 300 : 150);
+
+        // Build the element: spread element FIRST, then apply computed/safe overrides
+        // This ensures explicit values win, but undefined fields get good defaults
+        const built = {
+          // Safe defaults (will be overridden by ...element if element has them)
+          rotation: 0,
+          fill: isText ? 'transparent' : '#E0E0E0',
+          strokeColor: '#000000',
+          strokeWidth: 0,
+          opacity: 1,
+          visible: true,
+          locked: false,
+
+          // Spread ALL element properties (explicit values take precedence)
+          ...element,
+
+          // These ALWAYS get set correctly (never left as undefined)
+          id: newId,
+          name: element.name || (isText ? 'Text' : isImage ? 'Image' : 'Rectangle'),
+          type: element.type || 'rectangle',
+          x: element.x ?? 0,
+          y: element.y ?? 0,
+          w: element.w ?? defaultW,
+          h: element.h ?? defaultH,
+          opacity: element.opacity ?? 1,
+
+          // Text-specific safe defaults (only applied if type is text)
+          ...(isText && {
+            fontFamily: element.fontFamily || 'Inter',
+            fontWeight: element.fontWeight || '400',
+            fontSize: fontSize,
+            textAlign: element.textAlign || 'left',
+            color: element.color || '#000000',
+            content: element.content || 'New Text',
+            lineHeight: element.lineHeight || 1.4,
+          }),
+        };
+
+        return built;
+      });
+
+      return {
+        pages: state.pages.map(page => 
+          page.id === state.activePageId 
+            ? { ...page, elements: [...page.elements, ...newElements] }
+            : page
+        ),
+        selectedElementIds: newElements.map(el => el.id)
       };
     });
   },
@@ -947,6 +1020,18 @@ const useEditorStore = create((set, get) => ({
       };
     });
   },
-}));
+}), {
+  name: 'kraft-saved-project', // unique name
+  partialize: (state) => ({ 
+    pages: state.pages,
+    activePageId: state.activePageId,
+    canvas: state.canvas,
+    preferences: state.preferences,
+    library: state.library,
+    uiTheme: state.uiTheme,
+    projectName: state.projectName
+  }),
+})
+);
 
 export default useEditorStore;

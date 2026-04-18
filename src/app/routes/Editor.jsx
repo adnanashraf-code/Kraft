@@ -106,51 +106,16 @@ const Editor = () => {
     if (!hasOnboarded) {
       setTimeout(() => setOnboardingOpen(true), 1000);
     }
-    
+  }, [setOnboardingOpen]);
+
+  // Restore Template Loading from URL
+  useEffect(() => {
     if (id && TEMPLATE_SEEDS[id]) {
       loadProject(TEMPLATE_SEEDS[id]);
-      isFirstLoad.current = false;
-      return;
     }
+  }, [id, loadProject]);
 
-    const savedProject = localStorage.getItem('kraft_saved_project');
-    if (savedProject && !id) {
-      try {
-        const data = JSON.parse(savedProject);
-        const lastSaved = new Date(data.lastSaved).getTime();
-        const now = new Date().getTime();
-        const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
-        if (now - lastSaved < sevenDaysMs) loadProject(data);
-      } catch (e) {
-        console.error('Failed to recover project', e);
-      }
-    }
-    isFirstLoad.current = false;
-  }, [id, setOnboardingOpen, loadProject]);
-
-  // Auto-Save Effect
-  useEffect(() => {
-    if (isFirstLoad.current) return;
-    
-    const saveTimeout = setTimeout(() => {
-      setSaving(true);
-      const projectData = {
-        pages,
-        activePageId,
-        uiTheme,
-        canvas,
-        library, // Critical: Include library in auto-save
-        projectName,
-        lastSaved: new Date().toISOString()
-      };
-      localStorage.setItem('kraft_saved_project', JSON.stringify(projectData));
-      
-      // Flash the saving indicator for 500ms
-      setTimeout(() => setSaving(false), 500);
-    }, 1000); // 1s debounce
-
-    return () => clearTimeout(saveTimeout);
-  }, [pages, activePageId, uiTheme, canvas, projectName, setSaving]);
+  // Redundant manual save logic removed. Zustand 'persist' handles this now.
 
   // Safety check for theme
   if (!theme) return <div className="p-10 text-red-500 font-bold">Error: Theme '{uiTheme}' not found.</div>;

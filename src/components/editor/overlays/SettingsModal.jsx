@@ -52,21 +52,21 @@ const SettingsModal = () => {
           <div className={`w-48 shrink-0 p-4 border-r flex flex-col gap-2 ${theme.border} ${isLight ? 'bg-gray-50' : 'bg-black/20'}`}>
             <button 
               onClick={() => setActiveTab('preferences')}
-              className={`flex items-center space-x-3 w-full p-3 rounded-xl text-xs font-bold transition-all ${activeTab === 'preferences' ? (isLight ? 'bg-white shadow-sm text-blue-600' : 'bg-white/10 text-white') : (isLight ? 'text-gray-500 hover:bg-gray-100' : 'text-white/40 hover:bg-white/5 text-white/40')}`}
+              className={`flex items-center space-x-3 w-full p-3 rounded-xl text-xs font-bold transition-all ${activeTab === 'preferences' ? (isLight ? 'bg-white shadow-sm text-blue-600' : 'bg-white/10 text-white') : (isLight ? 'text-gray-500 hover:bg-gray-100' : 'text-white/40 hover:bg-white/5')}`}
             >
               <Settings size={16} />
               <span>Workspace</span>
             </button>
             <button 
               onClick={() => setActiveTab('shortcuts')}
-              className={`flex items-center space-x-3 w-full p-3 rounded-xl text-xs font-bold transition-all ${activeTab === 'shortcuts' ? (isLight ? 'bg-white shadow-sm text-blue-600' : 'bg-white/10 text-white') : (isLight ? 'text-gray-500 hover:bg-gray-100' : 'text-white/40 hover:bg-white/5 text-white/40')}`}
+              className={`flex items-center space-x-3 w-full p-3 rounded-xl text-xs font-bold transition-all ${activeTab === 'shortcuts' ? (isLight ? 'bg-white shadow-sm text-blue-600' : 'bg-white/10 text-white') : (isLight ? 'text-gray-500 hover:bg-gray-100' : 'text-white/40 hover:bg-white/5')}`}
             >
               <Keyboard size={16} />
               <span>Shortcuts</span>
             </button>
             <button 
               onClick={() => setActiveTab('data')}
-              className={`flex items-center space-x-3 w-full p-3 rounded-xl text-xs font-bold transition-all ${activeTab === 'data' ? (isLight ? 'bg-white shadow-sm text-blue-600' : 'bg-white/10 text-white') : (isLight ? 'text-gray-500 hover:bg-gray-100' : 'text-white/40 hover:bg-white/5 text-white/40')}`}
+              className={`flex items-center space-x-3 w-full p-3 rounded-xl text-xs font-bold transition-all ${activeTab === 'data' ? (isLight ? 'bg-white shadow-sm text-blue-600' : 'bg-white/10 text-white') : (isLight ? 'text-gray-500 hover:bg-gray-100' : 'text-white/40 hover:bg-white/5')}`}
             >
               <Database size={16} />
               <span>Memory & Data</span>

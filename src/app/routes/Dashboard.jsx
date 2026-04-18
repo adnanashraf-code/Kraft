@@ -7,6 +7,7 @@ import {
 import Button from '../../components/common/Button';
 import ProjectCard from '../../components/dashboard/ProjectCard';
 import CloudHub from '../../components/dashboard/CloudHub';
+import DesignTemplates from '../../components/dashboard/DesignTemplates';
 import { PREMIUM_TEMPLATES } from '../../utils/workspaceData';
 
 const Dashboard = () => {
@@ -161,7 +162,8 @@ const Dashboard = () => {
 
         {/* Scrollable Grid */}
         <div className="flex-1 overflow-y-auto p-10 custom-scrollbar">
-           <div className="max-w-[1400px] mx-auto">
+          <div className="max-w-[1400px] mx-auto">
+            {activeTab !== 'templates' && (
               <div className="flex justify-between items-end mb-12">
                  <div>
                     <h1 className="text-4xl font-editorial font-bold capitalize mb-2 tracking-tighter underline decoration-yellow-400 decoration-4 underline-offset-4">{activeTab} Projects</h1>
@@ -172,9 +174,12 @@ const Dashboard = () => {
                     <button className="p-2.5 text-black hover:bg-yellow-400 transition-colors"><List size={20}/></button>
                  </div>
               </div>
+            )}
 
               {activeTab === 'shared' ? (
                  <CloudHub />
+               ) : activeTab === 'templates' ? (
+                 <DesignTemplates />
                ) : filteredProjects.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-12">
                   {filteredProjects.map(project => (
