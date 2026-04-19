@@ -88,14 +88,14 @@ const Dashboard = () => {
            </div>
 
            <div className="space-y-4">
-              <div className="px-3 text-[10px] font-black uppercase text-black tracking-[0.2em] mb-1 opacity-40">Main Menu</div>
+              <div className={`px-3 text-[10px] font-black uppercase tracking-[0.2em] mb-1 opacity-40 ${isLight ? 'text-black' : 'text-white'}`}>Main Menu</div>
               <div className="space-y-1">
                 <SidebarItem id="recent" icon={Clock} label="Recent Projects" />
                 <SidebarItem id="drafts" icon={FileEdit} label="Drafts" />
                 <SidebarItem id="archived" icon={Archive} label="Archive" />
               </div>
 
-              <div className="mt-8 px-3 text-[10px] font-black uppercase text-black tracking-[0.2em] mb-1 opacity-40">Library</div>
+              <div className={`mt-8 px-3 text-[10px] font-black uppercase tracking-[0.2em] mb-1 opacity-40 ${isLight ? 'text-black' : 'text-white'}`}>Library</div>
               <div className="space-y-1">
                 <SidebarItem id="templates" icon={LayoutGrid} label="Design Templates" />
                 <SidebarItem id="starred" icon={Star} label="Favorites" />
@@ -240,7 +240,7 @@ const Dashboard = () => {
                    <h3 className="text-3xl font-black uppercase tracking-tight mb-2">
                      {activeTab === 'drafts' ? 'No Work in Progress' : activeTab === 'archived' ? 'History is Empty' : 'Ghost Town...'}
                    </h3>
-                   <p className="text-gray-500 max-w-sm text-lg font-bold">
+                   <p className={`max-w-sm text-lg font-bold ${isLight ? 'text-gray-500' : 'text-white/40'}`}>
                      {activeTab === 'starred' ? "Bookmark your favorite templates to see them here." : "Nothing found in " + activeTab + ". Maybe try a different search?"}
                    </p>
                 </div>

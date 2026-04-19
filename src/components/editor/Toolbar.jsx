@@ -125,7 +125,7 @@ const Toolbar = () => {
       <div className="flex flex-col items-center mb-8 px-2 w-full">
         <div
           className="group cursor-pointer mb-2"
-          onClick={() => (window.location.href = "/")}
+          onClick={() => navigate('/')}
         >
           <div
             className={`w-10 h-10 rounded-xl overflow-hidden border ${theme.border} shadow-sm transition-transform group-hover:scale-110 duration-300`}

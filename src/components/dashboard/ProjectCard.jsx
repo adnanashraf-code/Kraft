@@ -1,7 +1,11 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Copy, Trash2, MoreHorizontal, ExternalLink, Archive, Star } from 'lucide-react';
+import useEditorStore from '../../store/useEditorStore';
 
-const ProjectCard = ({ project, onClick, isFavorite, onToggleFavorite, viewMode = 'grid' }) => {
+const ProjectCard = memo(({ project, onClick, isFavorite, onToggleFavorite, viewMode = 'grid' }) => {
+  const { uiTheme } = useEditorStore();
+  const isLight = uiTheme === 'light' || uiTheme === 'gray';
+
   const getPreviewIcon = () => {
     switch (project.previewType) {
       case 'typography': return 'Aa';
@@ -16,10 +20,10 @@ const ProjectCard = ({ project, onClick, isFavorite, onToggleFavorite, viewMode 
     return (
       <div 
         onClick={onClick}
-        className="group flex items-center gap-6 p-4 bg-white border-[3px] border-black neo-border-sm hover:translate-x-1 hover:-translate-y-1 hover:neo-shadow transition-all cursor-pointer"
+        className={`group flex items-center gap-6 p-4 border-[3px] border-black neo-border-sm hover:translate-x-1 hover:-translate-y-1 hover:neo-shadow transition-all cursor-pointer ${isLight ? 'bg-white' : 'bg-[#1a1a1a] text-white'}`}
       >
         {/* Horizontal Preview */}
-        <div className="w-24 h-24 bg-ivory border-2 border-black flex items-center justify-center relative overflow-hidden shrink-0">
+        <div className={`w-24 h-24 border-2 border-black flex items-center justify-center relative overflow-hidden shrink-0 ${isLight ? 'bg-ivory' : 'bg-black'}`}>
           <div className="absolute top-0 right-0 w-8 h-8 blur-xl opacity-20" style={{ backgroundColor: project.thumbnailColor }}></div>
           <span className="text-3xl font-black opacity-20 group-hover:opacity-40 transition-opacity">
             {getPreviewIcon()}
@@ -29,21 +33,21 @@ const ProjectCard = ({ project, onClick, isFavorite, onToggleFavorite, viewMode 
         {/* Metadata Columns */}
         <div className="flex-1 grid grid-cols-4 gap-4 items-center">
           <div className="col-span-1">
-            <h3 className="font-black text-[13px] uppercase tracking-tighter mb-1 truncate">{project.title}</h3>
+            <h3 className={`font-black text-[13px] uppercase tracking-tighter mb-1 truncate ${isLight ? 'text-black' : 'text-white'}`}>{project.title}</h3>
             <div className="flex gap-1.5 flex-wrap">
               {project.tags?.slice(0, 2).map(tag => (
-                <span key={tag} className="text-[7px] font-black uppercase tracking-widest text-black/40 border border-black/10 px-1 py-0.5">
+                <span key={tag} className={`text-[7px] font-black uppercase tracking-widest border px-1 py-0.5 ${isLight ? 'text-black/40 border-black/10' : 'text-white/40 border-white/10'}`}>
                   {tag}
                 </span>
               ))}
             </div>
           </div>
 
-          <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">
+          <div className={`text-[10px] font-bold uppercase tracking-widest text-center ${isLight ? 'text-gray-400' : 'text-white/40'}`}>
             {project.date}
           </div>
 
-          <div className="text-[10px] font-black text-black uppercase tracking-tighter text-center">
+          <div className={`text-[10px] font-black uppercase tracking-tighter text-center ${isLight ? 'text-black' : 'text-white'}`}>
             {project.author}
           </div>
 
@@ -58,11 +62,11 @@ const ProjectCard = ({ project, onClick, isFavorite, onToggleFavorite, viewMode 
         <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all px-2" onClick={(e) => e.stopPropagation()}>
            <button 
             onClick={onToggleFavorite}
-            className={`p-2 border-2 border-black transition-all ${isFavorite ? 'bg-yellow-400' : 'bg-white hover:bg-yellow-200'}`}
+            className={`p-2 border-2 border-black transition-all ${isFavorite ? 'bg-yellow-400 text-black' : (isLight ? 'bg-white hover:bg-yellow-200' : 'bg-black hover:bg-yellow-900 text-white')}`}
           >
             <Star size={12} strokeWidth={3} fill={isFavorite ? "currentColor" : "none"} />
           </button>
-          <button className="p-2 bg-black text-white border-2 border-black hover:bg-cyan-400 hover:text-black transition-all">
+          <button className={`p-2 border-2 border-black transition-all ${isLight ? 'bg-black text-white hover:bg-cyan-400 hover:text-black' : 'bg-white text-black hover:bg-cyan-400'}`}>
             <ExternalLink size={12} strokeWidth={3}/>
           </button>
         </div>
@@ -73,7 +77,7 @@ const ProjectCard = ({ project, onClick, isFavorite, onToggleFavorite, viewMode 
   return (
     <div className="group cursor-pointer">
       <div 
-        className="aspect-[4/3] bg-white border-[3px] border-black rounded-none overflow-hidden relative mb-6 transition-all duration-300 hover:-translate-y-2 hover:-translate-x-1 neo-shadow hover:neo-shadow-lg"
+        className={`aspect-[4/3] border-[3px] border-black rounded-none overflow-hidden relative mb-6 transition-all duration-300 hover:-translate-y-2 hover:-translate-x-1 neo-shadow hover:neo-shadow-lg ${isLight ? 'bg-white' : 'bg-[#1a1a1a]'}`}
       >
         {/* The "Thumbnail" - Pro Design Look */}
         <div 
@@ -91,11 +95,11 @@ const ProjectCard = ({ project, onClick, isFavorite, onToggleFavorite, viewMode 
             <div className="opacity-0 group-hover:opacity-100 transition-all flex gap-3 -translate-y-2 group-hover:translate-y-0" onClick={(e) => e.stopPropagation()}>
               <button 
                 onClick={onToggleFavorite}
-                className={`p-2.5 border-2 border-black shadow-[2px_2px_0px_0px_black] transition-all active:shadow-none active:translate-x-[1px] active:translate-y-[1px] ${isFavorite ? 'bg-yellow-400' : 'bg-white hover:bg-yellow-200'}`}
+                className={`p-2.5 border-2 border-black shadow-[2px_2px_0px_0px_black] transition-all active:shadow-none active:translate-x-[1px] active:translate-y-[1px] ${isFavorite ? 'bg-yellow-400 text-black' : (isLight ? 'bg-white hover:bg-yellow-200' : 'bg-black hover:bg-yellow-900 text-white')}`}
               >
                 <Star size={14} strokeWidth={3} fill={isFavorite ? "currentColor" : "none"} />
               </button>
-              <button className="p-2.5 bg-white border-2 border-black shadow-[2px_2px_0px_0px_black] hover:bg-cyan-400 transition-all active:shadow-none active:translate-x-[1px] active:translate-y-[1px]">
+              <button className={`p-2.5 border-2 border-black shadow-[2px_2px_0px_0px_black] transition-all active:shadow-none active:translate-x-[1px] active:translate-y-[1px] ${isLight ? 'bg-white hover:bg-cyan-400' : 'bg-black hover:bg-cyan-900 text-white'}`}>
                 <Copy size={14} strokeWidth={3}/>
               </button>
             </div>
@@ -109,7 +113,7 @@ const ProjectCard = ({ project, onClick, isFavorite, onToggleFavorite, viewMode 
 
           <div className="flex gap-2 relative z-10 flex-wrap">
              {project.tags?.map(tag => (
-                <span key={tag} className="text-[10px] font-black uppercase tracking-widest text-black bg-white border-2 border-black px-2 py-0.5 shadow-[2px_2px_0px_0px_black]">
+                <span key={tag} className={`text-[10px] font-black uppercase tracking-widest border-2 border-black px-2 py-0.5 shadow-[2px_2px_0px_0px_black] ${isLight ? 'bg-white text-black' : 'bg-black text-white'}`}>
                   {tag}
                 </span>
              ))}
@@ -118,7 +122,7 @@ const ProjectCard = ({ project, onClick, isFavorite, onToggleFavorite, viewMode 
 
         {/* Hover Overlay */}
         <div onClick={onClick} className="absolute inset-0 bg-black/0 group-hover:bg-yellow-400/10 transition-colors duration-300 flex items-center justify-center p-4">
-            <div className="bg-white px-6 py-3 border-[3px] border-black neo-shadow scale-75 opacity-0 group-hover:scale-100 group-hover:opacity-100 transition-all duration-300 font-black uppercase text-[12px] tracking-[0.2em] flex items-center gap-3">
+            <div className={`px-6 py-3 border-[3px] border-black neo-shadow scale-75 opacity-0 group-hover:scale-100 group-hover:opacity-100 transition-all duration-300 font-black uppercase text-[12px] tracking-[0.2em] flex items-center gap-3 ${isLight ? 'bg-white text-black' : 'bg-yellow-400 text-black'}`}>
                Open Project <ExternalLink size={16} strokeWidth={3} />
             </div>
         </div>
@@ -126,21 +130,21 @@ const ProjectCard = ({ project, onClick, isFavorite, onToggleFavorite, viewMode 
 
       <div className="flex justify-between items-start px-1">
         <div onClick={onClick}>
-          <h3 className="font-black text-[15px] text-black leading-none group-hover:text-cyan-600 transition-colors uppercase tracking-tighter mb-1.5">
+          <h3 className={`font-black text-[15px] leading-none transition-colors uppercase tracking-tighter mb-1.5 ${isLight ? 'text-black group-hover:text-cyan-600' : 'text-white group-hover:text-cyan-400'}`}>
             {project.title}
           </h3>
           <div className="flex items-center gap-2.5 font-bold text-gray-500 text-[10px] uppercase tracking-wide">
             <span>{project.date}</span>
-            <div className="w-1 h-1 bg-black rotate-45" />
-            <span className="text-black">{project.author}</span>
+            <div className={`w-1 h-1 rotate-45 ${isLight ? 'bg-black' : 'bg-white'}`} />
+            <span className={isLight ? 'text-black' : 'text-white'}>{project.author}</span>
           </div>
         </div>
-        <button className="text-black hover:bg-black hover:text-white p-0.5 transition-all border-2 border-transparent hover:border-black">
+        <button className={`p-0.5 transition-all border-2 border-transparent hover:border-black ${isLight ? 'text-black hover:bg-black hover:text-white' : 'text-white hover:bg-white hover:text-black'}`}>
           <MoreHorizontal size={18} strokeWidth={3} />
         </button>
       </div>
     </div>
   );
-};
+});
 
 export default ProjectCard;

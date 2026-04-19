@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as Icons from 'lucide-react';
 import * as RemixIcons from '@remixicon/react';
@@ -98,6 +98,63 @@ const BRAND_CATEGORIES = {
   }
 };
 
+// --- MEMOIZED COMPONENTS FOR PERFORMANCE ---
+
+const IconItem = memo(({ icon, isSelected, toggleStageAsset, isLight }) => {
+  const IconComp = icon.comp;
+  return (
+    <div 
+      title={`${icon.name} (${icon.source})`} 
+      className={`aspect-square border-2 border-black flex items-center justify-center hover:bg-black hover:text-white transition-all cursor-crosshair group neo-shadow-xs overflow-hidden relative ${isSelected(icon, 'icon') ? '!bg-black !text-white' : (isLight ? 'bg-white text-black' : 'bg-[#1a1a1a] text-white')}`} 
+      onClick={() => toggleStageAsset({ ...icon, type: 'icon' })}
+    >
+       {icon.source === 'brand' ? (
+         <svg viewBox="0 0 24 24" className="w-5 h-5 group-hover:scale-125 transition-transform" fill="currentColor">
+           <path d={icon.path} />
+         </svg>
+       ) : (
+         <IconComp size={20} strokeWidth={icon.source === 'lucide' ? 2.5 : 2} className="group-hover:scale-125 transition-transform" />
+       )}
+       <div className={`absolute top-0 right-0 w-2 h-2 border-l border-b border-black ${isSelected(icon, 'icon') ? 'bg-yellow-400' : (icon.source === 'remix' ? 'bg-cyan-400' : icon.source === 'brand' ? 'bg-orange-500' : 'bg-gray-200 opacity-0')}`} />
+       {isSelected(icon, 'icon') && <div className="absolute inset-0 bg-yellow-400/20 pointer-events-none" />}
+    </div>
+  );
+});
+
+const LogoItem = memo(({ logo, isSelected, toggleStageAsset, handleImport, isLight }) => {
+  if (!logo.icon) return null;
+  const iconHex = logo.icon.hex ? `#${logo.icon.hex}` : 'black';
+  const selected = isSelected({name: logo.name}, 'logo');
+  
+  return (
+    <div 
+      onClick={() => toggleStageAsset({ name: logo.name, path: logo.icon.path, hex: logo.icon.hex, type: 'logo' })}
+      className={`border-[3px] border-black p-6 flex flex-col items-center justify-center gap-4 hover:-translate-y-1 transition-transform neo-shadow-xs group relative ${selected ? 'ring-4 ring-black ring-inset' : (isLight ? 'bg-white' : 'bg-[#1a1a1a]')}`}
+    >
+      <div className="w-12 h-12 flex items-center justify-center group-hover:scale-110 transition-transform">
+          <svg viewBox="0 0 24 24" className="w-full h-full" fill={iconHex === 'black' && !isLight ? 'white' : iconHex}>
+            <path d={logo.icon.path} />
+          </svg>
+      </div>
+      <p className={`text-[10px] font-black uppercase text-center truncate w-full ${isLight ? 'text-black' : 'text-white'}`}>{logo.name}</p>
+      
+      <div className={`absolute inset-0 bg-black/95 transition-opacity flex flex-col items-center justify-center gap-2 p-2 ${selected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+         <p className="text-white text-[10px] font-black uppercase tracking-tighter">
+            {selected ? 'Selected ✓' : 'Add to Staging'}
+         </p>
+         {!selected && (
+           <button 
+             onClick={(e) => { e.stopPropagation(); handleImport({ name: logo.name, path: logo.icon.path, hex: logo.icon.hex }, 'logo') }}
+             className="text-[8px] text-yellow-400 font-bold border border-yellow-400/30 px-2 py-1 hover:bg-yellow-400 hover:text-black transition-colors"
+           >
+              Quick Import
+           </button>
+         )}
+      </div>
+    </div>
+  );
+});
+
 const CloudHub = ({ globalSearch = '' }) => {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
@@ -116,7 +173,8 @@ const CloudHub = ({ globalSearch = '' }) => {
   const [importStatus, setImportStatus] = useState(null); // { id, type }
 
   // Multi-selection state from store
-  const { stagedAssets, toggleStageAsset, clearStagedAssets } = useEditorStore();
+  const { stagedAssets, toggleStageAsset, clearStagedAssets, uiTheme } = useEditorStore();
+  const isLight = uiTheme === 'light' || uiTheme === 'gray';
 
   const isSelected = (asset, type) => {
     return stagedAssets.some(a => 
@@ -319,7 +377,7 @@ const CloudHub = ({ globalSearch = '' }) => {
              <button
                key={cat.id}
                onClick={() => setActiveCategory(cat.id)}
-               className={`px-8 py-4 border-2 border-black neo-shadow-sm transition-all flex items-center gap-3 uppercase font-black text-[11px] tracking-widest ${activeCategory === cat.id ? 'bg-yellow-400 text-black translate-x-1 translate-y-1 neo-shadow-none' : 'bg-white text-black hover:bg-gray-100'}`}
+               className={`px-8 py-4 border-2 border-black neo-shadow-sm transition-all flex items-center gap-3 uppercase font-black text-[11px] tracking-widest ${activeCategory === cat.id ? 'bg-yellow-400 text-black translate-x-1 translate-y-1 neo-shadow-none' : (isLight ? 'bg-white text-black hover:bg-gray-100' : 'bg-[#1a1a1a] text-white hover:bg-black')}`}
              >
                <cat.icon size={16} strokeWidth={3} />
                {cat.label}
@@ -328,17 +386,17 @@ const CloudHub = ({ globalSearch = '' }) => {
         </div>
       </div>
 
-      <div className="bg-white/50 border-[3px] border-black p-10 neo-shadow min-h-[600px]">
+      <div className={`border-[3px] border-black p-10 neo-shadow min-h-[600px] transition-colors ${isLight ? 'bg-white/50' : 'bg-black/40'}`}>
         {activeCategory === 'images' && (
           <section className="animate-in fade-in slide-in-from-left-4 duration-300">
             <div className="flex items-center justify-between mb-10">
                <h3 className={`text-3xl font-black uppercase tracking-tight underline decoration-8 ${categories[0].color}`}>AI Asset Gallery</h3>
-               <span className="text-xs font-black uppercase text-orange-600 animate-pulse">⚡ Powered by Gemini</span>
+               <span className="text-xs font-black uppercase text-orange-600 animate-pulse">⚡ KFT-CORE: NEURAL ENGINE</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-12">
                <div 
                  onClick={() => fileInputRef.current?.click()}
-                 className="aspect-square bg-white border-[4px] border-black border-dashed flex flex-col items-center justify-center gap-3 hover:bg-ivory cursor-pointer transition-colors group"
+                 className={`aspect-square border-[4px] border-black border-dashed flex flex-col items-center justify-center gap-3 cursor-pointer transition-colors group ${isLight ? 'bg-white hover:bg-ivory' : 'bg-black/40 hover:bg-black'}`}
                >
                   <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileUpload} accept="image/*" />
                   <div className="w-12 h-12 bg-black flex items-center justify-center neo-shadow-xs group-hover:-translate-y-1 transition-transform">
@@ -391,25 +449,25 @@ const CloudHub = ({ globalSearch = '' }) => {
           <section className="animate-in fade-in slide-in-from-left-4 duration-300">
             <div className="flex items-center justify-between mb-10">
                <h3 className={`text-3xl font-black uppercase tracking-tight underline decoration-8 ${categories[1].color}`}>Type Foundry</h3>
-               <div className="flex items-center gap-3 bg-white border-[3px] border-black px-4 py-2 neo-shadow-xs">
+               <div className={`flex items-center gap-3 border-[3px] border-black px-4 py-2 neo-shadow-xs ${isLight ? 'bg-white' : 'bg-[#1a1a1a] text-white'}`}>
                   <Search size={18} strokeWidth={3} />
                   <input 
                     type="text" 
                     placeholder="Search Families..." 
                     value={fontSearch}
                     onChange={(e) => setFontSearch(e.target.value)}
-                    className="text-xs font-black uppercase outline-none w-48" 
+                    className={`text-xs font-black uppercase outline-none w-48 bg-transparent ${isLight ? 'text-black' : 'text-white'}`} 
                   />
                </div>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
                {filteredFonts.map((font, i) => (
                  <div 
-                   key={i} 
-                   onClick={() => toggleStageAsset({ id: font, name: font, type: 'font' })}
-                   className={`bg-white border-2 border-black p-6 hover:bg-yellow-400 transition-all cursor-pointer neo-shadow-xs group relative ${isSelected({name: font}, 'font') ? 'bg-yellow-400 ring-4 ring-black ring-inset' : ''}`}
+                    key={i} 
+                    onClick={() => toggleStageAsset({ id: font, name: font, type: 'font' })}
+                    className={`border-2 border-black p-6 hover:bg-yellow-400 hover:text-black transition-all cursor-pointer neo-shadow-xs group relative ${isSelected({name: font}, 'font') ? 'bg-yellow-400 text-black ring-4 ring-black ring-inset' : (isLight ? 'bg-white text-black' : 'bg-[#1a1a1a] text-white')}`}
                  >
-                    <p className="text-xs font-black opacity-20 mb-3 tracking-widest">TYPE_{String(i+1).padStart(3,'0')}</p>
+                    <p className={`text-xs font-black mb-3 tracking-widest ${isLight ? 'opacity-20' : 'opacity-40'}`}>TYPE_{String(i+1).padStart(3,'0')}</p>
                     <p className="text-xl font-bold truncate leading-none" style={{ fontFamily: font }}>{font}</p>
                     <p className="text-[9px] font-black opacity-0 group-hover:opacity-100 transition-opacity uppercase mt-4">
                        {isSelected({name: font}, 'font') ? 'Deselect Family' : 'Activate Typeface'}
@@ -429,7 +487,7 @@ const CloudHub = ({ globalSearch = '' }) => {
           <section className="animate-in fade-in slide-in-from-left-4 duration-300">
             <div className="flex items-center justify-between mb-10">
                <h3 className={`text-3xl font-black uppercase tracking-tight underline decoration-8 ${categories[2].color}`}>Icon Vault</h3>
-               <div className="flex items-center gap-3 bg-white border-[3px] border-black px-4 py-2 neo-shadow-xs">
+               <div className={`flex items-center gap-3 border-[3px] border-black px-4 py-2 neo-shadow-xs ${isLight ? 'bg-white' : 'bg-[#1a1a1a] text-white'}`}>
                   <Search size={18} strokeWidth={3} />
                   <input 
                     type="text" 
@@ -439,32 +497,20 @@ const CloudHub = ({ globalSearch = '' }) => {
                       setIconSearch(e.target.value);
                       setIconLimit(400);
                     }}
-                    className="text-xs font-black uppercase outline-none w-64" 
+                    className={`text-xs font-black uppercase outline-none w-64 bg-transparent ${isLight ? 'text-black' : 'text-white'}`} 
                   />
                </div>
             </div>
               <div className="grid grid-cols-6 sm:grid-cols-10 md:grid-cols-12 lg:grid-cols-20 gap-3 p-1">
-                {filteredIcons.slice(0, iconLimit).map((icon, i) => {
-                  const IconComp = icon.comp;
-                  return (
-                    <div 
-                      key={i} 
-                      title={`${icon.name} (${icon.source})`} 
-                      className={`aspect-square bg-white border-2 border-black flex items-center justify-center hover:bg-black hover:text-white transition-all cursor-crosshair group neo-shadow-xs overflow-hidden relative ${isSelected(icon, 'icon') ? '!bg-black !text-white' : ''}`} 
-                      onClick={() => toggleStageAsset({ ...icon, type: 'icon' })}
-                    >
-                       {icon.source === 'brand' ? (
-                         <svg viewBox="0 0 24 24" className="w-5 h-5 group-hover:scale-125 transition-transform" fill="currentColor">
-                           <path d={icon.path} />
-                         </svg>
-                       ) : (
-                         <IconComp size={20} strokeWidth={icon.source === 'lucide' ? 2.5 : 2} className="group-hover:scale-125 transition-transform" />
-                       )}
-                       <div className={`absolute top-0 right-0 w-2 h-2 border-l border-b border-black ${isSelected(icon, 'icon') ? 'bg-yellow-400' : (icon.source === 'remix' ? 'bg-cyan-400' : icon.source === 'brand' ? 'bg-orange-500' : 'bg-gray-200 opacity-0')}`} />
-                       {isSelected(icon, 'icon') && <div className="absolute inset-0 bg-yellow-400/20 pointer-events-none" />}
-                    </div>
-                  );
-                })}
+                {filteredIcons.slice(0, iconLimit).map((icon, i) => (
+                  <IconItem 
+                    key={`${icon.name}-${i}`} 
+                    icon={icon} 
+                    isSelected={isSelected} 
+                    toggleStageAsset={toggleStageAsset} 
+                    isLight={isLight} 
+                  />
+                ))}
                {filteredIcons.length > iconLimit && (
                  <div className="col-span-full py-8 flex flex-col items-center gap-4 mt-6">
                     <button onClick={() => setIconLimit(prev => prev + 400)} className="px-10 py-3 bg-black text-white text-[10px] font-black uppercase neo-shadow-sm">Load More</button>
@@ -478,14 +524,14 @@ const CloudHub = ({ globalSearch = '' }) => {
           <section className="animate-in fade-in slide-in-from-left-4 duration-300">
             <div className="flex items-center justify-between mb-10">
                <h3 className={`text-3xl font-black uppercase tracking-tight underline decoration-8 ${categories[3].color}`}>Brand Central</h3>
-               <div className="flex items-center gap-3 bg-white border-[3px] border-black px-4 py-2 neo-shadow-xs">
+               <div className={`flex items-center gap-3 border-[3px] border-black px-4 py-2 neo-shadow-xs ${isLight ? 'bg-white' : 'bg-[#1a1a1a] text-white'}`}>
                   <Search size={18} strokeWidth={3} />
                   <input 
                     type="text" 
                     placeholder="Search 3,000+ Brands..." 
                     value={logoSearch}
                     onChange={(e) => setLogoSearch(e.target.value)}
-                    className="text-xs font-black uppercase outline-none w-48" 
+                    className={`text-xs font-black uppercase outline-none w-48 bg-transparent ${isLight ? 'text-black' : 'text-white'}`} 
                   />
                </div>
             </div>
@@ -497,7 +543,7 @@ const CloudHub = ({ globalSearch = '' }) => {
                     <button
                       key={id}
                       onClick={() => setActiveLogoCategory(id)}
-                      className={`px-4 py-2 border-2 border-black text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all ${activeLogoCategory === id ? 'bg-black text-white neo-shadow-xs -translate-y-0.5' : 'bg-white hover:bg-gray-100'}`}
+                      className={`px-4 py-2 border-2 border-black text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all ${activeLogoCategory === id ? 'bg-black text-white neo-shadow-xs -translate-y-0.5' : (isLight ? 'bg-white text-black hover:bg-gray-100' : 'bg-[#1a1a1a] text-white hover:bg-black')}`}
                     >
                       {cat.label}
                     </button>
@@ -505,38 +551,16 @@ const CloudHub = ({ globalSearch = '' }) => {
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-                  {BRAND_CATEGORIES[activeLogoCategory].logos.map((logo, i) => {
-                    if (!logo.icon) return null;
-                    const iconHex = logo.icon.hex ? `#${logo.icon.hex}` : 'black';
-                    return (
-                      <div 
-                        key={i} 
-                        onClick={() => toggleStageAsset({ name: logo.name, path: logo.icon.path, hex: logo.icon.hex, type: 'logo' })}
-                        className={`bg-white border-[3px] border-black p-6 flex flex-col items-center justify-center gap-4 hover:-translate-y-1 transition-transform neo-shadow-xs group relative ${isSelected({name: logo.name}, 'logo') ? 'ring-4 ring-black ring-inset' : ''}`}
-                      >
-                        <div className="w-12 h-12 flex items-center justify-center group-hover:scale-110 transition-transform">
-                            <svg viewBox="0 0 24 24" className="w-full h-full" fill={iconHex}>
-                              <path d={logo.icon.path} />
-                            </svg>
-                        </div>
-                        <p className="text-[9px] font-black uppercase tracking-tight text-center truncate w-full">{logo.name}</p>
-                        
-                        <div className={`absolute inset-0 bg-black/95 transition-opacity flex flex-col items-center justify-center gap-2 p-2 ${isSelected({name: logo.name}, 'logo') ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
-                           <p className="text-white text-[10px] font-black uppercase tracking-tighter">
-                              {isSelected({name: logo.name}, 'logo') ? 'Selected ✓' : 'Add to Staging'}
-                           </p>
-                           {!isSelected({name: logo.name}, 'logo') && (
-                             <button 
-                               onClick={(e) => { e.stopPropagation(); handleImport({ name: logo.name, path: logo.icon.path, hex: logo.icon.hex }, 'logo') }}
-                               className="text-[8px] text-yellow-400 font-bold border border-yellow-400/30 px-2 py-1 hover:bg-yellow-400 hover:text-black transition-colors"
-                             >
-                               Quick Import
-                             </button>
-                           )}
-                        </div>
-                      </div>
-                    );
-                  })}
+                  {BRAND_CATEGORIES[activeLogoCategory].logos.map((logo, i) => (
+                    <LogoItem 
+                      key={`${logo.name}-${i}`} 
+                      logo={logo} 
+                      isSelected={isSelected} 
+                      toggleStageAsset={toggleStageAsset} 
+                      handleImport={handleImport}
+                      isLight={isLight} 
+                    />
+                  ))}
                 </div>
               </div>
             ) : (
@@ -551,10 +575,10 @@ const CloudHub = ({ globalSearch = '' }) => {
                     <div 
                       key={i} 
                       title={icon.name} 
-                      className={`aspect-square bg-white border-2 border-black flex items-center justify-center hover:bg-black hover:text-white transition-all cursor-crosshair group neo-shadow-xs relative ${isSelected(icon, 'logo') ? 'bg-black text-white' : ''}`} 
+                      className={`aspect-square border-2 border-black flex items-center justify-center hover:bg-black hover:text-white transition-all cursor-crosshair group neo-shadow-xs relative ${isSelected(icon, 'logo') ? 'bg-black text-white' : (isLight ? 'bg-white text-black' : 'bg-[#1a1a1a] text-white')}`} 
                       onClick={() => toggleStageAsset({ ...icon, type: 'logo' })}
                     >
-                      <svg viewBox="0 0 24 24" className="w-6 h-6 group-hover:scale-125 transition-transform" fill={icon.hex ? `#${icon.hex}` : 'currentColor'}>
+                      <svg viewBox="0 0 24 24" className="w-6 h-6 group-hover:scale-125 transition-transform" fill={icon.hex && icon.hex !== '000000' ? `#${icon.hex}` : (isLight ? 'black' : 'white')}>
                         <path d={icon.path} />
                       </svg>
                       {isSelected(icon, 'logo') && (

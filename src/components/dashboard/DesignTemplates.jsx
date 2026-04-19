@@ -1,11 +1,75 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MoreHorizontal, Zap, Monitor, Smartphone, Rocket, Gamepad2, Building2, ShoppingBag, Cpu, Star } from 'lucide-react';
 import useEditorStore from '../../store/useEditorStore';
 
+// ─── MEMOIZED SUB-COMPONENT ──────────────────────────────────────────────────
+const TemplateCard = memo(({ tpl, isLight, importingId, onImport }) => {
+  return (
+    <div className="group flex flex-col">
+      <div
+        onClick={() => onImport(tpl)}
+        className={`relative aspect-square border-[3px] border-black neo-shadow-sm group-hover:neo-shadow group-hover:-translate-y-1 transition-all cursor-pointer overflow-hidden flex items-center justify-center mb-5 select-none ${isLight ? 'bg-white' : 'bg-[#1a1a1a]'}`}
+      >
+        {/* PUBLISHED badge */}
+        <div className="absolute top-0 left-0 bg-black text-white px-4 py-1.5 text-[9px] font-black uppercase tracking-[0.2em] z-10 border-r-2 border-b-2 border-white/10">
+          Published
+        </div>
+
+        {/* Preview illustration */}
+        <div className="w-full h-full flex items-center justify-center p-10 pointer-events-none">
+          {tpl.type === 'saas'      && <Monitor      size={80} className={`${isLight ? 'text-gray-150 group-hover:text-cyan-200' : 'text-white/10 group-hover:text-cyan-400'} transition-colors duration-500`} strokeWidth={0.8} />}
+          {tpl.type === 'editorial' && <span className={`text-[100px] font-black font-editorial leading-none select-none transition-colors duration-500 ${isLight ? 'text-gray-150 group-hover:text-gray-200' : 'text-white/10 group-hover:text-white/30'}`}>Aa</span>}
+          {tpl.type === 'finance'   && <Smartphone   size={80} className={`${isLight ? 'text-gray-150 group-hover:text-blue-200' : 'text-white/10 group-hover:text-blue-400'} transition-colors duration-500`} strokeWidth={0.8} />}
+          {tpl.type === 'portfolio' && <Zap          size={80} className={`${isLight ? 'text-gray-150 group-hover:text-yellow-200' : 'text-white/10 group-hover:text-yellow-400'} transition-colors duration-500`} strokeWidth={0.8} />}
+          {tpl.type === 'social'    && <Rocket       size={80} className={`${isLight ? 'text-gray-150 group-hover:text-green-200' : 'text-white/10 group-hover:text-green-400'} transition-colors duration-500`} strokeWidth={0.8} />}
+          {tpl.type === 'retro'     && <Star         size={80} className={`${isLight ? 'text-gray-150 group-hover:text-purple-200' : 'text-white/10 group-hover:text-purple-400'} transition-colors duration-500`} strokeWidth={0.8} />}
+          {tpl.type === 'gaming'    && <Gamepad2     size={80} className={`${isLight ? 'text-gray-150 group-hover:text-red-200' : 'text-white/10 group-hover:text-red-400'} transition-colors duration-500`} strokeWidth={0.8} />}
+          {tpl.type === 'agency'    && <Building2    size={80} className={`${isLight ? 'text-gray-150 group-hover:text-yellow-200' : 'text-white/10 group-hover:text-yellow-400'} transition-colors duration-500`} strokeWidth={0.8} />}
+          {tpl.type === 'ecom'      && <ShoppingBag  size={80} className={`${isLight ? 'text-gray-150 group-hover:text-pink-200' : 'text-white/10 group-hover:text-pink-400'} transition-colors duration-500`} strokeWidth={0.8} />}
+          {tpl.type === 'minimal'   && <Cpu          size={80} className={`${isLight ? 'text-gray-150 group-hover:text-gray-300' : 'text-white/10 group-hover:text-gray-400'} transition-colors duration-500`} strokeWidth={0.8} />}
+        </div>
+
+        {/* Category tags – bottom left */}
+        <div className="absolute bottom-4 left-4 flex gap-2 z-10">
+          {tpl.tags.map(tag => (
+            <span key={tag} className={`border-[2px] border-black px-2.5 py-0.5 text-[9px] font-black uppercase tracking-tight shadow-[2px_2px_0px_0px_black] ${isLight ? 'bg-white text-black' : 'bg-black text-white'}`}>
+              {tag}
+            </span>
+          ))}
+        </div>
+
+        {/* Loading overlay */}
+        {importingId === tpl.id && (
+          <div className="absolute inset-0 bg-yellow-400/95 z-20 flex flex-col items-center justify-center gap-3 animate-in fade-in duration-150">
+            <div className="w-7 h-7 border-[3px] border-black border-t-transparent rounded-full animate-spin" />
+            <span className="text-[10px] font-black uppercase tracking-widest text-black">Opening Editor...</span>
+          </div>
+        )}
+      </div>
+
+      {/* ── Metadata footer ──────────────────── */}
+      <div className="flex justify-between items-center px-1">
+        <div className="flex-1 min-w-0 pr-3">
+          <h4 className={`text-[12px] font-black uppercase tracking-tight mb-0.5 truncate group-hover:underline transition-all ${isLight ? 'text-black' : 'text-white'}`}>
+            {tpl.title}
+          </h4>
+          <p className={`text-[9px] font-bold uppercase tracking-wider truncate ${isLight ? 'text-gray-400' : 'text-white/30'}`}>
+            {tpl.time} &nbsp;•&nbsp; {tpl.team}
+          </p>
+        </div>
+        <button
+          className={`p-1 rounded transition-colors shrink-0 ${isLight ? 'hover:bg-gray-100 text-gray-400' : 'hover:bg-white/5 text-white/20'}`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <MoreHorizontal size={16} />
+        </button>
+      </div>
+    </div>
+  );
+});
+
 // ─── TEMPLATE DATA ───────────────────────────────────────────────────────────
-// IMPORTANT: Every text element MUST have explicit `h` = Math.ceil(fontSize * 1.6)
-// to prevent text from wrapping inside an undersized container on the canvas.
 const TEMPLATES_DATA = [
   {
     id: 'tpl-001', title: 'SAAS REVOLUTION HERO', team: 'KRAFT TEAM',
@@ -125,9 +189,10 @@ const TEMPLATES_DATA = [
 ];
 
 // ─── COMPONENT ───────────────────────────────────────────────────────────────
-const DesignTemplates = ({ globalSearch = '' }) => {
+const DesignTemplates = memo(({ globalSearch = '' }) => {
   const navigate = useNavigate();
-  const addElements = useEditorStore(state => state.addElements);
+  const { addElements, uiTheme } = useEditorStore();
+  const isLight = uiTheme === 'light' || uiTheme === 'gray';
   const [importingId, setImportingId] = useState(null);
 
   const filteredTemplates = TEMPLATES_DATA.filter(tpl => {
@@ -151,14 +216,14 @@ const DesignTemplates = ({ globalSearch = '' }) => {
       {/* Page Header */}
       <div className="flex justify-between items-end mb-12">
         <div>
-          <h1 className="text-4xl font-editorial font-bold capitalize mb-2 tracking-tighter underline decoration-yellow-400 decoration-4 underline-offset-4">
+          <h1 className={`text-4xl font-editorial font-bold capitalize mb-2 tracking-tighter underline decoration-yellow-400 decoration-4 underline-offset-4 ${isLight ? 'text-black' : 'text-white'}`}>
             Design Templates
           </h1>
-          <p className="text-gray-500 text-base font-bold italic">
+          <p className={`text-base font-bold italic ${isLight ? 'text-gray-500' : 'text-white/40'}`}>
             Official KRAFT curated layouts — click to open in editor.
           </p>
         </div>
-        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-black/30">
+        <span className={`text-[10px] font-black uppercase tracking-[0.3em] ${isLight ? 'text-black/30' : 'text-white/20'}`}>
           {TEMPLATES_DATA.length} TEMPLATES
         </span>
       </div>
@@ -166,80 +231,24 @@ const DesignTemplates = ({ globalSearch = '' }) => {
       {/* Template Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-12">
         {filteredTemplates.length > 0 ? filteredTemplates.map((tpl) => (
-          <div key={tpl.id} className="group flex flex-col">
-
-            {/* ── Card ─────────────────────────────── */}
-            <div
-              onClick={() => handleImport(tpl)}
-              className="relative aspect-square bg-white border-[3px] border-black neo-shadow-sm group-hover:neo-shadow group-hover:-translate-y-1 transition-all cursor-pointer overflow-hidden flex items-center justify-center mb-5 select-none"
-            >
-              {/* PUBLISHED badge */}
-              <div className="absolute top-0 left-0 bg-black text-white px-4 py-1.5 text-[9px] font-black uppercase tracking-[0.2em] z-10">
-                Published
-              </div>
-
-              {/* Preview illustration */}
-              <div className="w-full h-full flex items-center justify-center p-10 pointer-events-none">
-                {tpl.type === 'saas'      && <Monitor      size={80} className="text-gray-150 group-hover:text-cyan-200 transition-colors duration-500" strokeWidth={0.8} />}
-                {tpl.type === 'editorial' && <span className="text-[100px] font-black text-gray-150 group-hover:text-gray-200 transition-colors duration-500 font-editorial leading-none select-none">Aa</span>}
-                {tpl.type === 'finance'   && <Smartphone   size={80} className="text-gray-150 group-hover:text-blue-200 transition-colors duration-500" strokeWidth={0.8} />}
-                {tpl.type === 'portfolio' && <Zap          size={80} className="text-gray-150 group-hover:text-yellow-200 transition-colors duration-500" strokeWidth={0.8} />}
-                {tpl.type === 'social'    && <Rocket       size={80} className="text-gray-150 group-hover:text-green-200 transition-colors duration-500" strokeWidth={0.8} />}
-                {tpl.type === 'retro'     && <Star         size={80} className="text-gray-150 group-hover:text-purple-200 transition-colors duration-500" strokeWidth={0.8} />}
-                {tpl.type === 'gaming'    && <Gamepad2     size={80} className="text-gray-150 group-hover:text-red-200 transition-colors duration-500" strokeWidth={0.8} />}
-                {tpl.type === 'agency'    && <Building2    size={80} className="text-gray-150 group-hover:text-yellow-200 transition-colors duration-500" strokeWidth={0.8} />}
-                {tpl.type === 'ecom'      && <ShoppingBag  size={80} className="text-gray-150 group-hover:text-pink-200 transition-colors duration-500" strokeWidth={0.8} />}
-                {tpl.type === 'minimal'   && <Cpu          size={80} className="text-gray-150 group-hover:text-gray-300 transition-colors duration-500" strokeWidth={0.8} />}
-              </div>
-
-              {/* Category tags – bottom left */}
-              <div className="absolute bottom-4 left-4 flex gap-2 z-10">
-                {tpl.tags.map(tag => (
-                  <span key={tag} className="bg-white border-[2px] border-black px-2.5 py-0.5 text-[9px] font-black uppercase tracking-tight">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-
-              {/* Loading overlay */}
-              {importingId === tpl.id && (
-                <div className="absolute inset-0 bg-yellow-400/95 z-20 flex flex-col items-center justify-center gap-3 animate-in fade-in duration-150">
-                  <div className="w-7 h-7 border-[3px] border-black border-t-transparent rounded-full animate-spin" />
-                  <span className="text-[10px] font-black uppercase tracking-widest">Opening Editor...</span>
-                </div>
-              )}
-            </div>
-
-            {/* ── Metadata footer ──────────────────── */}
-            <div className="flex justify-between items-center">
-              <div className="flex-1 min-w-0 pr-3">
-                <h4 className="text-[12px] font-black uppercase tracking-tight mb-0.5 truncate group-hover:underline transition-all">
-                  {tpl.title}
-                </h4>
-                <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider truncate">
-                  {tpl.time} &nbsp;•&nbsp; {tpl.team}
-                </p>
-              </div>
-              <button
-                className="p-1 rounded hover:bg-gray-100 transition-colors shrink-0"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <MoreHorizontal size={16} className="text-gray-400" />
-              </button>
-            </div>
-
-          </div>
+          <TemplateCard 
+            key={tpl.id} 
+            tpl={tpl} 
+            isLight={isLight} 
+            importingId={importingId} 
+            onImport={handleImport} 
+          />
         )) : (
           <div className="col-span-full py-40 text-center">
-            <div className="w-20 h-20 bg-ivory border-[3px] border-black neo-shadow flex items-center justify-center mx-auto mb-6 text-black/20">
+            <div className={`w-20 h-20 border-[3px] border-black neo-shadow flex items-center justify-center mx-auto mb-6 ${isLight ? 'bg-ivory text-black/20' : 'bg-black text-white/10'}`}>
                <Zap size={40} />
             </div>
-            <p className="text-xl font-black uppercase tracking-widest opacity-30 italic">No templates match your search</p>
+            <p className={`text-xl font-black uppercase tracking-widest italic ${isLight ? 'opacity-30' : 'opacity-10'}`}>No templates match your search</p>
           </div>
         )}
       </div>
     </div>
   );
-};
+});
 
 export default DesignTemplates;
