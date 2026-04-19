@@ -39,7 +39,7 @@ const LayersPanel = () => {
                 w-full text-xs border rounded-xl py-2 pl-9 pr-8 outline-none transition-all
                 ${isLight 
                   ? 'bg-white border-gray-200 text-gray-800 focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500' 
-                  : 'bg-white/5 border-white/5 text-white focus:bg-white/10 focus:ring-4 focus:ring-blue-500/10'}
+                  : 'bg-black/40 border-white/10 text-white focus:bg-black/60 focus:ring-4 focus:ring-blue-500/10'}
               `}
             />
             <button 

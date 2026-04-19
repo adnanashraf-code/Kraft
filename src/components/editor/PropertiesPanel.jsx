@@ -44,7 +44,7 @@ const ArtboardProperties = ({ theme, isLight, activePage }) => {
         type={type} 
         value={value} 
         onChange={onChange}
-        className={`w-full text-[11px] p-1 rounded outline-none font-bold ${isLight ? 'bg-gray-100 text-gray-900 border-transparent focus:border-blue-500' : 'bg-white/5 text-white border-transparent focus:border-blue-500'} border transition-all hover:bg-black/5 dark:hover:bg-white/10`} 
+        className={`w-full text-[11px] p-1.5 rounded outline-none font-bold border transition-all ${isLight ? 'bg-gray-100 text-gray-900 border-transparent focus:border-blue-500' : 'bg-black/40 text-white border-white/10 focus:border-blue-500 hover:bg-black/60'} `} 
       />
     </div>
   );
@@ -146,8 +146,8 @@ const PropertiesPanel = () => {
   };
 
   const InputBox = ({ label, name, value, onChange, type = "number", suffix = "" }) => (
-    <div className={`flex ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/5'} border focus-within:border-blue-500 rounded-xl overflow-hidden group transition-all`}>
-      <span className={`text-[10px] uppercase font-black ${isLight ? 'text-gray-400 bg-gray-50' : 'text-white/30 bg-white/[0.02]'} w-8 flex items-center justify-center select-none border-r ${theme.border}`}>{label}</span>
+    <div className={`flex ${isLight ? 'bg-white border-gray-200' : 'bg-black/40 border-white/10'} border focus-within:border-blue-500 rounded-xl overflow-hidden group transition-all`}>
+      <span className={`text-[10px] uppercase font-black ${isLight ? 'text-gray-400 bg-gray-50' : 'text-white/30 bg-white/[0.03]'} w-8 flex items-center justify-center select-none border-r ${theme.border}`}>{label}</span>
       <input 
         type={type} 
         name={name} 
@@ -408,7 +408,7 @@ const PropertiesPanel = () => {
                   name="content"
                   value={selectedElement.content || ''}
                   onChange={handleChange}
-                  className={`w-full text-[12px] font-medium border rounded-xl p-3 outline-none min-h-[100px] transition-all ${isLight ? 'bg-white border-gray-200 text-gray-900 shadow-sm' : 'bg-white/5 border-white/5 text-white/80 focus:bg-white/10'}`}
+                  className={`w-full text-[12px] font-medium border rounded-xl p-3 outline-none min-h-[100px] transition-all ${isLight ? 'bg-white border-gray-200 text-gray-900 shadow-sm' : 'bg-black/40 border-white/10 text-white/80 focus:bg-black/60'}`}
                   placeholder="Enter text..."
                 />
               </div>

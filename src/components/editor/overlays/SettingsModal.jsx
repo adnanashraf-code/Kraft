@@ -32,9 +32,10 @@ const SettingsModal = () => {
   if (!isSettingsOpen) return null;
 
   const handleShuffleAvatar = () => {
-    const randomSeeds = ['Neon', 'Gravity', 'Cyber', 'Kraft', 'Studio', 'Pulse', 'Adnan', 'Vision'];
+    const randomSeeds = ['Neon', 'Gravity', 'Cyber', 'Kraft', 'Studio', 'Pulse', 'Adnan', 'Vision', 'Spark', 'Flow'];
     const newSeed = randomSeeds[Math.floor(Math.random() * randomSeeds.length)];
-    setUserProfile({ avatarSeed: newSeed + Math.floor(Math.random() * 100) });
+    // Using Date.now() guarantees a unique seed every click, forcing the browser to refresh the image
+    setUserProfile({ avatarSeed: `${newSeed}-${Date.now()}` });
   };
 
   const handleSaveProfile = () => {
@@ -137,15 +138,15 @@ const SettingsModal = () => {
                       </div>
 
                       <div className="flex-1">
-                         {isEditingProfile ? (
-                            <input 
-                               type="text"
-                               value={tempName}
-                               onChange={(e) => setTempName(e.target.value)}
-                               className="bg-white border-2 border-black px-4 py-2 text-xl font-black uppercase tracking-tighter w-full focus:bg-yellow-50 outline-none"
-                               autoFocus
-                            />
-                         ) : (
+                          {isEditingProfile ? (
+                             <input 
+                                type="text"
+                                value={tempName}
+                                onChange={(e) => setTempName(e.target.value)}
+                                className={`border-2 border-black px-4 py-2 text-xl font-black uppercase tracking-tighter w-full outline-none ${isLight ? 'bg-white focus:bg-yellow-50 text-black' : 'bg-black/40 border-white/10 focus:border-yellow-400 text-white'}`}
+                                autoFocus
+                             />
+                          ) : (
                             <h3 className={`text-xl font-black uppercase tracking-tighter ${isLight ? 'text-black' : 'text-white'}`}>{userProfile.name}</h3>
                          )}
                          <p className="text-[10px] font-black uppercase tracking-widest text-cyan-500 flex items-center gap-2 mt-1">
@@ -181,14 +182,14 @@ const SettingsModal = () => {
                        { id: 'gray', label: 'STUDIO GRAY', color: 'bg-gray-100', text: 'text-gray-600' },
                        { id: 'dark', label: 'DARK ONYX', color: 'bg-[#151515]', text: 'text-white' }
                      ].map(t => (
-                       <button 
-                        key={t.id}
-                        onClick={() => setUiTheme(t.id)}
-                        className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-3 ${uiTheme === t.id ? 'border-black bg-yellow-400 ring-2 ring-yellow-400 ring-offset-2' : `border-transparent ${isLight ? 'bg-gray-100' : 'bg-white/5 opacity-50 hover:opacity-100'}`}`}
-                       >
-                          <div className={`w-10 h-10 rounded-xl border border-black/10 ${t.color}`}></div>
-                          <span className={`text-[9px] font-black tracking-widest ${uiTheme === t.id ? 'text-black' : theme.title}`}>{t.label}</span>
-                       </button>
+                        <button 
+                         key={t.id}
+                         onClick={() => setUiTheme(t.id)}
+                         className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-3 ${uiTheme === t.id ? 'border-black bg-yellow-400 shadow-[0_0_20px_rgba(250,204,21,0.3)]' : `border-transparent ${isLight ? 'bg-gray-100 hover:bg-gray-200' : 'bg-white/5 opacity-50 hover:opacity-100'}`}`}
+                        >
+                           <div className={`w-10 h-10 rounded-xl border ${isLight ? 'border-black/10' : 'border-white/10'} ${t.color}`}></div>
+                           <span className={`text-[9px] font-black tracking-widest ${uiTheme === t.id ? 'text-black' : (isLight ? 'text-gray-400' : 'text-white/40')}`}>{t.label}</span>
+                        </button>
                      ))}
                   </div>
                 </div>
