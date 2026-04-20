@@ -73,5 +73,30 @@ export const ASSETS = [
       { name: 'Action Fab', type: 'rectangle', w: 72, h: 72, borderRadius: 36, fill: '#f43f5e', shadowEnabled: true, shadowBlur: 30, clipPath: 'none' },
       { name: 'Tab Selector', type: 'rectangle', w: 120, h: 48, borderRadius: 12, fill: '#f1f5f9', shadowEnabled: true, shadowBlur: 12, clipPath: 'none' },
     ]
-  }
+  },
+  {
+    category: 'Icons',
+    items: [
+      { name: 'Home', type: 'icon', iconName: 'Home', w: 100, h: 100, fill: '#000000' },
+      { name: 'User', type: 'icon', iconName: 'User', w: 100, h: 100, fill: '#000000' },
+      { name: 'Settings', type: 'icon', iconName: 'Settings', w: 100, h: 100, fill: '#000000' },
+      { name: 'Search', type: 'icon', iconName: 'Search', w: 100, h: 100, fill: '#000000' },
+      { name: 'Heart', type: 'icon', iconName: 'Heart', w: 100, h: 100, fill: '#f43f5e' },
+      { name: 'Bell', type: 'icon', iconName: 'Bell', w: 100, h: 100, fill: '#f59e0b' },
+      { name: 'Calendar', type: 'icon', iconName: 'Calendar', w: 100, h: 100, fill: '#3b82f6' },
+      { name: 'Mail', type: 'icon', iconName: 'Mail', w: 100, h: 100, fill: '#10b981' },
+      { name: 'Camera', type: 'icon', iconName: 'Camera', w: 100, h: 100, fill: '#6366f1' },
+      { name: 'MapPin', type: 'icon', iconName: 'MapPin', w: 100, h: 100, fill: '#ec4899' },
+      { name: 'CheckCircle', type: 'icon', iconName: 'CheckCircle', w: 100, h: 100, fill: '#10b981' },
+      { name: 'Info', type: 'icon', iconName: 'Info', w: 100, h: 100, fill: '#3b82f6' },
+      { name: 'AlertTriangle', type: 'icon', iconName: 'AlertTriangle', w: 100, h: 100, fill: '#f59e0b' },
+      { name: 'ShoppingBag', type: 'icon', iconName: 'ShoppingBag', w: 100, h: 100, fill: '#8b5cf6' },
+      { name: 'Zap', type: 'icon', iconName: 'Zap', w: 100, h: 100, fill: '#facc15' },
+      { name: 'Rocket', type: 'icon', iconName: 'Rocket', w: 100, h: 100, fill: '#3b82f6' },
+      { name: 'Navigation', type: 'icon', iconName: 'Navigation', w: 100, h: 100, fill: '#2563eb' },
+      { name: 'Trash2', type: 'icon', iconName: 'Trash2', w: 100, h: 100, fill: '#f43f5e' },
+      { name: 'Twitter', type: 'icon', iconName: 'Twitter', w: 100, h: 100, fill: '#1DA1F2' },
+      { name: 'Github', type: 'icon', iconName: 'Github', w: 100, h: 100, fill: '#000000' },
+    ]
+  },
 ];

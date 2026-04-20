@@ -216,9 +216,9 @@ const Dashboard = () => {
             )}
 
               {activeTab === 'shared' ? (
-                 <CloudHub globalSearch={searchQuery} />
+                 <CloudHub globalSearch={searchQuery} onBack={() => setActiveTab('recent')} />
                ) : activeTab === 'templates' ? (
-                 <DesignTemplates globalSearch={searchQuery} />
+                 <DesignTemplates globalSearch={searchQuery} onBack={() => setActiveTab('recent')} />
                ) : filteredProjects.length > 0 ? (
                 <div className={`grid gap-x-12 gap-y-12 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'}`}>
                   {filteredProjects.map(project => (

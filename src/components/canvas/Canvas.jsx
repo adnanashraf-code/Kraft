@@ -7,18 +7,49 @@ import ZoomControls from './ZoomControls';
 import HistoryControls from './HistoryControls';
 import ArtboardGrid from './ArtboardGrid';
 
-import * as LucideIcons from 'lucide-react';
+import { resolveIcon, UtilityIcons } from '../../utils/iconUtils';
 
-const DynamicIcon = ({ el, icons }) => {
+const DynamicIcon = ({ el, isLight }) => {
   try {
-    const Icon = icons[el.iconName || 'Box'];
-    if (!Icon || typeof Icon !== 'function') {
-      return <LucideIcons.Box size="100%" color={el.fill || '#000000'} className="opacity-20" />;
+    const defaultColor = isLight ? '#000000' : '#ffffff';
+    // If color is too light on a light theme, force it to visible
+    let iconColor = el.fill || defaultColor;
+    
+    const IconObj = resolveIcon(el.iconName || el.name);
+    
+    if (!IconObj) {
+      const AlertIcon = UtilityIcons.AlertCircle;
+      return (
+        <div className="flex flex-col items-center justify-center w-full h-full opacity-40 select-none border border-dashed border-red-500/20 rounded-lg bg-red-500/5">
+          <AlertIcon size="30%" color="#ff4444" />
+          <span className="text-[6px] font-black uppercase text-center w-full px-1 truncate" style={{ color: iconColor }}>
+            {el.iconName || el.name || 'MISSING'}
+          </span>
+        </div>
+      );
     }
-    return <Icon size="100%" color={el.fill || '#000000'} strokeWidth={el.strokeWidth || 2} />;
+
+    // Handle Brand Logos (objects with path)
+    if (IconObj.type === 'brand') {
+      return (
+        <div className="w-full h-full p-[15%]" style={{ color: el.fill || (IconObj.hex ? `#${IconObj.hex}` : defaultColor) }}>
+          <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
+            <path d={IconObj.path} />
+          </svg>
+        </div>
+      );
+    }
+
+    // Standard Component Icons
+    const IconComp = IconObj;
+    return (
+      <div className="w-full h-full p-[10%]" style={{ color: iconColor }}>
+        <IconComp size="100%" color="currentColor" strokeWidth={el.strokeWidth || 2.2} />
+      </div>
+    );
   } catch (err) {
     console.error('Icon Render Error:', err);
-    return <LucideIcons.AlertCircle size="100%" color="#ff0000" />;
+    return <div className="w-2 h-2 bg-red-500 rounded-full" />;
   }
 };
 
@@ -30,8 +61,6 @@ const DraggableElement = React.memo(({ el }) => {
   const { onResizeStart } = useResizable(el.id);
   const library = useEditorStore(state => state.library) || { components: [] };
   const isLight = uiTheme === 'light' || uiTheme === 'gray';
-
-  const icons = LucideIcons;
 
   const handles = [
     { dir: 'nw', cursor: 'nwse-resize', style: { top: -4, left: -4 } },
@@ -46,7 +75,7 @@ const DraggableElement = React.memo(({ el }) => {
 
   return (
     <div
-      className={`absolute border-2 ${isSelected ? 'border-blue-500 z-10' : 'border-transparent'}`}
+      className={`absolute transition-all ${isSelected ? 'z-10' : ''}`}
       style={{
         left: `${el.x}px`,
         top: `${el.y}px`,
@@ -55,7 +84,9 @@ const DraggableElement = React.memo(({ el }) => {
         transform: `rotate(${el.rotation || 0}deg) scale(${el.flipX ? -1 : 1}, ${el.flipY ? -1 : 1})`,
         opacity: el.opacity ?? 1,
         display: el.visible !== false ? 'block' : 'none',
-        cursor: el.locked ? 'not-allowed' : (isSelected ? 'default' : 'move')
+        cursor: el.locked ? 'not-allowed' : (isSelected ? 'default' : 'move'),
+        outline: isSelected ? '2px solid #000' : 'none',
+        boxShadow: isSelected ? '4px 4px 0px 0px #000' : 'none'
       }}
       onMouseDown={el.locked ? undefined : handleMouseDown}
     >
@@ -94,7 +125,15 @@ const DraggableElement = React.memo(({ el }) => {
             <img src={el.src} alt={el.name} className="w-full h-full object-contain pointer-events-none" />
           )}
 
-          {el.type === 'icon' && <DynamicIcon el={el} icons={icons} />}
+          {el.type === 'icon' && <DynamicIcon el={el} isLight={isLight} />}
+          
+          {(el.type === 'logo') && (
+            <div className="w-full h-full flex items-center justify-center p-[10%]">
+              <svg viewBox="0 0 24 24" className="w-full h-full" fill={el.fill || (isLight ? '#000' : '#fff')}>
+                <path d={el.path} />
+              </svg>
+            </div>
+          )}
 
           {el.type === 'instance' && (() => {
             const comp = library.components.find(c => c.id === el.componentId);
@@ -142,8 +181,8 @@ const DraggableElement = React.memo(({ el }) => {
         {isSelected && !el.locked && handles.map((h) => (
           <div
             key={h.dir}
-            className="absolute rounded bg-white border border-blue-500 pointer-events-auto shadow-sm"
-            style={{ width: 8, height: 8, cursor: h.cursor, ...h.style }}
+            className="absolute bg-white border-2 border-black pointer-events-auto shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+            style={{ width: 10, height: 10, cursor: h.cursor, ...h.style }}
             onMouseDown={(e) => onResizeStart(e, h.dir)}
           />
         ))}
@@ -295,7 +334,7 @@ const Canvas = () => {
       {/* Visual Marquee Overlay */}
       {marquee.active && (
         <div 
-          className="absolute z-50 border border-blue-500 bg-blue-500/10 pointer-events-none"
+          className="absolute z-50 border-2 border-dashed border-black bg-yellow-400/10 pointer-events-none"
           style={{
             left: Math.min(marquee.startX, marquee.currentX) - (canvasRef.current?.getBoundingClientRect().left || 0),
             top: Math.min(marquee.startY, marquee.currentY) - (canvasRef.current?.getBoundingClientRect().top || 0),

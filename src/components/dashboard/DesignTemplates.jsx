@@ -189,7 +189,7 @@ const TEMPLATES_DATA = [
 ];
 
 // ─── COMPONENT ───────────────────────────────────────────────────────────────
-const DesignTemplates = memo(({ globalSearch = '' }) => {
+const DesignTemplates = memo(({ globalSearch = '', onBack }) => {
   const navigate = useNavigate();
   const { addElements, uiTheme } = useEditorStore();
   const isLight = uiTheme === 'light' || uiTheme === 'gray';
@@ -215,13 +215,22 @@ const DesignTemplates = memo(({ globalSearch = '' }) => {
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Page Header */}
       <div className="flex justify-between items-end mb-12">
-        <div>
-          <h1 className={`text-4xl font-editorial font-bold capitalize mb-2 tracking-tighter underline decoration-yellow-400 decoration-4 underline-offset-4 ${isLight ? 'text-black' : 'text-white'}`}>
-            Design Templates
-          </h1>
-          <p className={`text-base font-bold italic ${isLight ? 'text-gray-500' : 'text-white/40'}`}>
-            Official KRAFT curated layouts — click to open in editor.
-          </p>
+        <div className="flex items-center gap-6">
+          <button 
+            onClick={onBack}
+            className={`w-12 h-12 border-[3px] border-black neo-shadow-sm hover:-translate-x-1 transition-transform group flex items-center justify-center ${isLight ? 'bg-white text-black' : 'bg-[#1a1a1a] text-white'}`}
+            title="Go Back"
+          >
+            <Rocket size={24} className="group-hover:scale-110 transition-transform -rotate-90" />
+          </button>
+          <div>
+            <h1 className={`text-4xl font-editorial font-bold capitalize mb-2 tracking-tighter underline decoration-yellow-400 decoration-4 underline-offset-4 ${isLight ? 'text-black' : 'text-white'}`}>
+              Design Templates
+            </h1>
+            <p className={`text-base font-bold italic ${isLight ? 'text-gray-500' : 'text-white/40'}`}>
+              Official KRAFT curated layouts — click to open in editor.
+            </p>
+          </div>
         </div>
         <span className={`text-[10px] font-black uppercase tracking-[0.3em] ${isLight ? 'text-black/30' : 'text-white/20'}`}>
           {TEMPLATES_DATA.length} TEMPLATES

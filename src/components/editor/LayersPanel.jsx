@@ -53,12 +53,12 @@ const LayersPanel = () => {
       )}
 
       {/* Group Label */}
-      <div className="flex items-center justify-between mb-6 px-1 mt-2">
+      <div className="flex items-center justify-between mb-6 px-1 mt-6">
         <div className="flex flex-col">
-          <span className={`text-[10px] font-black uppercase tracking-[0.2em] mb-1 leading-none flex items-center ${theme.title}`}>
-            <Layers size={10} className="mr-1.5" /> Layers
+          <span className="text-[12px] font-black uppercase tracking-[0.3em] font-editorial leading-none flex items-center text-black">
+            <Layers size={12} className="mr-2" /> Arena Layers
           </span>
-          <span className="text-[10px] text-gray-500 font-bold">{filteredElements.length} elements {searchQuery && '(Filtered)'}</span>
+          <span className="text-[10px] text-gray-500 font-bold mt-1 uppercase tracking-widest">{filteredElements.length} elements detected</span>
         </div>
       </div>
 
@@ -74,17 +74,17 @@ const LayersPanel = () => {
                 else selectElement(el.id);
               }}
               className={`
-                group flex items-center justify-between p-3 rounded-2xl cursor-pointer transition-all border
+                group flex items-center justify-between p-3 cursor-pointer transition-all border-2 border-black
                 ${isSelected 
-                  ? 'bg-blue-600 border-blue-600 shadow-lg shadow-blue-500/20 translate-x-1' 
-                  : `border-transparent ${isLight ? 'hover:bg-gray-100' : 'hover:bg-white/5'}`}
+                  ? 'bg-yellow-400 text-black neo-shadow-sm -translate-y-0.5' 
+                  : 'bg-white text-black hover:bg-gray-50 hover:-translate-y-0.5 hover:neo-shadow-xs'}
               `}
             >
               <div className="flex items-center min-w-0 flex-1">
-                <span className={`text-xs font-bold truncate ${isSelected ? 'text-white' : (isLight ? 'text-gray-800' : 'text-white/80')}`}>
+                <span className="text-[11px] font-black uppercase truncate tracking-tight">
                   {el.name || el.type}
                 </span>
-                {el.locked && <Lock size={10} className="ml-2 text-white/50" />}
+                {el.locked && <Lock size={12} strokeWidth={3} className="ml-2 text-black/40" />}
               </div>
 
               {/* Power Tools Row on Hover or Selection */}
@@ -95,9 +95,9 @@ const LayersPanel = () => {
                     useEditorStore.getState().saveHistory();
                     updateElement(el.id, { visible: !el.visible }); 
                   }}
-                  className={`p-1.5 rounded-lg transition-colors ${isSelected ? 'hover:bg-white/20 text-white' : (isLight ? 'hover:bg-gray-200 text-gray-500' : 'hover:bg-white/10 text-gray-400')}`}
+                  className={`p-1 box-content transition-colors ${isSelected ? 'hover:bg-black/10' : 'hover:bg-black/5'}`}
                 >
-                  {el.visible ? <Eye size={12} /> : <EyeOff size={12} />}
+                  {el.visible ? <Eye size={14} strokeWidth={3} /> : <EyeOff size={14} strokeWidth={3} />}
                 </button>
                 <button 
                   onClick={(e) => { 
@@ -105,25 +105,16 @@ const LayersPanel = () => {
                     useEditorStore.getState().saveHistory();
                     updateElement(el.id, { locked: !el.locked }); 
                   }}
-                  className={`p-1.5 rounded-lg transition-colors ${isSelected ? 'hover:bg-white/20 text-white' : (isLight ? 'hover:bg-gray-200 text-gray-500' : 'hover:bg-white/10 text-gray-400')}`}
+                  className={`p-1 box-content transition-colors ${isSelected ? 'hover:bg-black/10' : 'hover:bg-black/5'}`}
                 >
-                  {el.locked ? <Lock size={12} /> : <Unlock size={12} />}
+                  {el.locked ? <Lock size={14} strokeWidth={3} /> : <Unlock size={14} strokeWidth={3} />}
                 </button>
                 <button 
                   onClick={(e) => { e.stopPropagation(); deleteElements([el.id]); }}
-                  className={`p-1.5 rounded-lg transition-colors ${isSelected ? 'hover:bg-red-500/30 text-white' : 'hover:bg-red-500/10 text-red-500'}`}
+                  className="p-1 box-content text-red-500 hover:bg-red-500/10 transition-colors"
                 >
-                  <Trash2 size={12} />
+                  <Trash2 size={14} strokeWidth={3} />
                 </button>
-                
-                <div className="flex flex-col ml-1">
-                   <button onClick={(e) => { e.stopPropagation(); reorderElement(el.id, elements[elements.length - 1 - index + 1]?.id); }}>
-                     <ChevronUp size={10} className={isSelected ? 'text-white/60 hover:text-white' : 'text-gray-400 hover:text-gray-600'} />
-                   </button>
-                   <button onClick={(e) => { e.stopPropagation(); reorderElement(el.id, elements[elements.length - 1 - index - 1]?.id); }}>
-                     <ChevronDown size={10} className={isSelected ? 'text-white/60 hover:text-white' : 'text-gray-400 hover:text-gray-600'} />
-                   </button>
-                </div>
               </div>
             </div>
           );

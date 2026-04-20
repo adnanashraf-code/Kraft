@@ -1,9 +1,13 @@
 import React, { useState, useRef, useMemo, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import * as Icons from 'lucide-react';
-import * as RemixIcons from '@remixicon/react';
-import * as SimpleIcons from 'simple-icons';
-import { Cloud, Zap, ShieldCheck, Users, Search, Type, Image as ImageIcon, Box, LayoutGrid } from 'lucide-react';
+import { 
+  resolveIcon, 
+  BRAND_CATEGORIES, 
+  RAW_LUCIDE_NAMES, 
+  RAW_REMIX_NAMES, 
+  RAW_BRAND_DATA 
+} from '../../utils/iconUtils';
+import { Cloud, Zap, ShieldCheck, Users, Search, Type, Image as ImageIcon, Box, LayoutGrid, X, Grid, Cpu, Globe, ArrowLeft, Upload, Check } from 'lucide-react';
 import useEditorStore from '../../store/useEditorStore';
 
 // --- STATIC DATA (OUTSIDE COMPONENT FOR PERFORMANCE) ---
@@ -30,90 +34,26 @@ const SMART_TAGS = {
   code: ['github', 'git', 'terminal', 'code', 'file', 'script', 'json', 'css', 'html'],
 };
 
-const BRAND_CATEGORIES = {
-  tech: {
-    label: 'Tech & AI',
-    logos: [
-      { name: 'Google', icon: SimpleIcons.siGoogle }, { name: 'Apple', icon: SimpleIcons.siApple },
-      { name: 'Meta', icon: SimpleIcons.siMeta }, { name: 'NVIDIA', icon: SimpleIcons.siNvidia },
-      { name: 'Intel', icon: SimpleIcons.siIntel }, { name: 'AMD', icon: SimpleIcons.siAmd },
-      { name: 'Samsung', icon: SimpleIcons.siSamsung }, { name: 'Sony', icon: SimpleIcons.siSony },
-      { name: 'Xiaomi', icon: SimpleIcons.siXiaomi }, { name: 'Huawei', icon: SimpleIcons.siHuawei },
-      { name: 'Alibaba', icon: SimpleIcons.siAlibabacloud }, { name: 'Acer', icon: SimpleIcons.siAcer },
-      { name: 'HP', icon: SimpleIcons.siHp }, { name: 'Dell', icon: SimpleIcons.siDell },
-      { name: 'Asus', icon: SimpleIcons.siAsus }, { name: 'Lenovo', icon: SimpleIcons.siLenovo }
-    ]
-  },
-  social: {
-    label: 'Social & Comms',
-    logos: [
-      { name: 'Facebook', icon: SimpleIcons.siFacebook }, { name: 'Instagram', icon: SimpleIcons.siInstagram },
-      { name: 'X / Twitter', icon: SimpleIcons.siX }, { name: 'YouTube', icon: SimpleIcons.siYoutube },
-      { name: 'TikTok', icon: SimpleIcons.siTiktok }, { name: 'Snapchat', icon: SimpleIcons.siSnapchat },
-      { name: 'Pinterest', icon: SimpleIcons.siPinterest }, { name: 'Reddit', icon: SimpleIcons.siReddit },
-      { name: 'Discord', icon: SimpleIcons.siDiscord }, { name: 'WhatsApp', icon: SimpleIcons.siWhatsapp },
-      { name: 'Telegram', icon: SimpleIcons.siTelegram }, { name: 'Messenger', icon: SimpleIcons.siMessenger },
-      { name: 'Twitch', icon: SimpleIcons.siTwitch }, { name: 'Quora', icon: SimpleIcons.siQuora },
-      { name: 'Medium', icon: SimpleIcons.siMedium }, { name: 'Tumblr', icon: SimpleIcons.siTumblr }
-    ]
-  },
-  dev: {
-    label: 'Dev & Cloud',
-    logos: [
-      { name: 'GitHub', icon: SimpleIcons.siGithub }, { name: 'GitLab', icon: SimpleIcons.siGitlab },
-      { name: 'Bitbucket', icon: SimpleIcons.siBitbucket }, { name: 'Docker', icon: SimpleIcons.siDocker },
-      { name: 'Kubernetes', icon: SimpleIcons.siKubernetes }, { name: 'Vercel', icon: SimpleIcons.siVercel },
-      { name: 'Netlify', icon: SimpleIcons.siNetlify }, { name: 'Supabase', icon: SimpleIcons.siSupabase },
-      { name: 'Firebase', icon: SimpleIcons.siFirebase }, { name: 'Railway', icon: SimpleIcons.siRailway },
-      { name: 'Cloudflare', icon: SimpleIcons.siCloudflare }, { name: 'DigitalOcean', icon: SimpleIcons.siDigitalocean },
-      { name: 'Hasura', icon: SimpleIcons.siHasura }, { name: 'Vite', icon: SimpleIcons.siVite },
-      { name: 'Postman', icon: SimpleIcons.siPostman }, { name: 'Insomnia', icon: SimpleIcons.siInsomnia }
-    ]
-  },
-  automotive: {
-    label: 'Automotive',
-    logos: [
-      { name: 'Tesla', icon: SimpleIcons.siTesla }, { name: 'BMW', icon: SimpleIcons.siBmw },
-      { name: 'Ford', icon: SimpleIcons.siFord }, { name: 'Toyota', icon: SimpleIcons.siToyota },
-      { name: 'Chevrolet', icon: SimpleIcons.siChevrolet }, { name: 'Ferrari', icon: SimpleIcons.siFerrari },
-      { name: 'Lamborghini', icon: SimpleIcons.siLamborghini }, { name: 'Porsche', icon: SimpleIcons.siPorsche },
-      { name: 'Audi', icon: SimpleIcons.siAudi }, { name: 'Honda', icon: SimpleIcons.siHonda },
-      { name: 'Volkswagen', icon: SimpleIcons.siVolkswagen }, { name: 'Nissan', icon: SimpleIcons.siNissan },
-      { name: 'Mitsubishi', icon: SimpleIcons.siMitsubishi }, { name: 'Mazda', icon: SimpleIcons.siMazda },
-      { name: 'Maserati', icon: SimpleIcons.siMaserati }, { name: 'Bentley', icon: SimpleIcons.siBentley }
-    ]
-  },
-  entertainment: {
-    label: 'Entertainment',
-    logos: [
-      { name: 'Netflix', icon: SimpleIcons.siNetflix }, { name: 'Spotify', icon: SimpleIcons.siSpotify },
-      { name: 'HBO', icon: SimpleIcons.siHbo }, { name: 'SoundCloud', icon: SimpleIcons.siSoundcloud },
-      { name: 'Tidal', icon: SimpleIcons.siTidal }, { name: 'Steam', icon: SimpleIcons.siSteam }, 
-      { name: 'Epic Games', icon: SimpleIcons.siEpicgames }, { name: 'Roblox', icon: SimpleIcons.siRoblox }, 
-      { name: 'Unity', icon: SimpleIcons.siUnity }, { name: 'Unreal Engine', icon: SimpleIcons.siUnrealengine }, 
-      { name: 'Blender', icon: SimpleIcons.siBlender }, { name: 'PlayStation', icon: SimpleIcons.siPlaystation }, 
-      { name: 'Ubisoft', icon: SimpleIcons.siUbisoft }, { name: 'Atari', icon: SimpleIcons.siAtari }, 
-      { name: 'Sega', icon: SimpleIcons.siSega }
-    ]
-  }
-};
+// Moved to iconUtils.js to prevent redundant massive imports
 
 // --- MEMOIZED COMPONENTS FOR PERFORMANCE ---
 
 const IconItem = memo(({ icon, isSelected, toggleStageAsset, isLight }) => {
-  const IconComp = icon.comp;
+  const IconComp = resolveIcon(icon.name);
   return (
     <div 
       title={`${icon.name} (${icon.source})`} 
       className={`aspect-square border-2 border-black flex items-center justify-center hover:bg-black hover:text-white transition-all cursor-crosshair group neo-shadow-xs overflow-hidden relative ${isSelected(icon, 'icon') ? '!bg-black !text-white' : (isLight ? 'bg-white text-black' : 'bg-[#1a1a1a] text-white')}`} 
       onClick={() => toggleStageAsset({ ...icon, type: 'icon' })}
     >
-       {icon.source === 'brand' ? (
+       {icon.source === 'brand' || (IconComp && IconComp.type === 'brand') ? (
          <svg viewBox="0 0 24 24" className="w-5 h-5 group-hover:scale-125 transition-transform" fill="currentColor">
-           <path d={icon.path} />
+           <path d={icon.path || (IconComp && IconComp.path)} />
          </svg>
        ) : (
-         <IconComp size={20} strokeWidth={icon.source === 'lucide' ? 2.5 : 2} className="group-hover:scale-125 transition-transform" />
+         IconComp ? (
+           <IconComp size={20} strokeWidth={icon.source === 'lucide' ? 2.5 : 2} className="group-hover:scale-125 transition-transform" />
+         ) : <Box size={16} className="opacity-20" />
        )}
        <div className={`absolute top-0 right-0 w-2 h-2 border-l border-b border-black ${isSelected(icon, 'icon') ? 'bg-yellow-400' : (icon.source === 'remix' ? 'bg-cyan-400' : icon.source === 'brand' ? 'bg-orange-500' : 'bg-gray-200 opacity-0')}`} />
        {isSelected(icon, 'icon') && <div className="absolute inset-0 bg-yellow-400/20 pointer-events-none" />}
@@ -122,17 +62,19 @@ const IconItem = memo(({ icon, isSelected, toggleStageAsset, isLight }) => {
 });
 
 const LogoItem = memo(({ logo, isSelected, toggleStageAsset, handleImport, isLight }) => {
-  if (!logo.icon) return null;
+  // Visibility fix for white logos in light mode
+  const isWhiteLogo = logo.icon && (logo.icon.hex === 'FFFFFF' || logo.icon.hex === '#FFFFFF');
   const iconHex = logo.icon.hex ? `#${logo.icon.hex}` : 'black';
+  const finalFill = (isWhiteLogo && isLight) ? '#000000' : (iconHex === 'black' && !isLight ? 'white' : iconHex);
   const selected = isSelected({name: logo.name}, 'logo');
-  
+
   return (
     <div 
       onClick={() => toggleStageAsset({ name: logo.name, path: logo.icon.path, hex: logo.icon.hex, type: 'logo' })}
       className={`border-[3px] border-black p-6 flex flex-col items-center justify-center gap-4 hover:-translate-y-1 transition-transform neo-shadow-xs group relative ${selected ? 'ring-4 ring-black ring-inset' : (isLight ? 'bg-white' : 'bg-[#1a1a1a]')}`}
     >
       <div className="w-12 h-12 flex items-center justify-center group-hover:scale-110 transition-transform">
-          <svg viewBox="0 0 24 24" className="w-full h-full" fill={iconHex === 'black' && !isLight ? 'white' : iconHex}>
+          <svg viewBox="0 0 24 24" className="w-full h-full" fill={finalFill}>
             <path d={logo.icon.path} />
           </svg>
       </div>
@@ -155,7 +97,7 @@ const LogoItem = memo(({ logo, isSelected, toggleStageAsset, handleImport, isLig
   );
 });
 
-const CloudHub = ({ globalSearch = '' }) => {
+const CloudHub = ({ globalSearch = '', onBack }) => {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
   
@@ -172,9 +114,13 @@ const CloudHub = ({ globalSearch = '' }) => {
   const [activeLogoCategory, setActiveLogoCategory] = useState('tech');
   const [importStatus, setImportStatus] = useState(null); // { id, type }
 
-  // Multi-selection state from store
-  const { stagedAssets, toggleStageAsset, clearStagedAssets, uiTheme } = useEditorStore();
+  const { stagedAssets, toggleStageAsset, clearStagedAssets, uiTheme, library, removeLibraryImage, preferences, updatePreferences, runLibraryMaintenance } = useEditorStore();
   const isLight = uiTheme === 'light' || uiTheme === 'gray';
+
+  // Run maintenance on mount
+  React.useEffect(() => {
+    runLibraryMaintenance();
+  }, [runLibraryMaintenance]);
 
   const isSelected = (asset, type) => {
     return stagedAssets.some(a => 
@@ -206,29 +152,9 @@ const CloudHub = ({ globalSearch = '' }) => {
   ]);
 
   const iconNames = useMemo(() => {
-    const lucide = Object.keys(Icons).filter(key => 
-      /^[A-Z]/.test(key) && (typeof Icons[key] === 'function' || typeof Icons[key] === 'object') &&
-      !['createLucideIcon', 'Icon', 'LucideIcon'].includes(key)
-    ).map(key => ({ name: key, comp: Icons[key], source: 'lucide', keywords: [key.toLowerCase()] }));
-
-    const remix = Object.keys(RemixIcons).filter(key => 
-      /^[A-Z]/.test(key) && (typeof RemixIcons[key] === 'function' || typeof RemixIcons[key] === 'object') &&
-      key !== 'RiContext'
-    ).map(key => ({ name: key, comp: RemixIcons[key], source: 'remix', keywords: [key.toLowerCase().replace(/^ri/, '')] }));
-
-    const simple = Object.keys(SimpleIcons).filter(key => 
-      key.startsWith('si') && typeof SimpleIcons[key] === 'object'
-    ).map(key => {
-      const icon = SimpleIcons[key];
-      return { 
-        name: icon.title, 
-        comp: null, 
-        path: icon.path, 
-        hex: icon.hex, 
-        source: 'brand', 
-        keywords: [icon.title.toLowerCase(), icon.slug.toLowerCase()] 
-      };
-    });
+    const lucide = RAW_LUCIDE_NAMES.map(key => ({ name: key, source: 'lucide' }));
+    const remix = RAW_REMIX_NAMES.map(key => ({ name: key, source: 'remix' }));
+    const simple = RAW_BRAND_DATA.map(item => ({ ...item, source: 'brand' }));
 
     return [...lucide, ...remix, ...simple];
   }, []);
@@ -266,9 +192,11 @@ const CloudHub = ({ globalSearch = '' }) => {
         // Robust encoding for non-ASCII SVG paths
         const encoded = btoa(unescape(encodeURIComponent(svg)));
         elementData.src = `data:image/svg+xml;base64,${encoded}`;
-      } else if (asset.comp) {
-        elementData.type = 'rectangle';
-        elementData.name = `Icon: ${asset.name}`;
+      } else if (asset.comp || asset.type === 'icon') {
+        elementData.type = 'icon';
+        elementData.iconName = asset.name;
+        elementData.w = 120;
+        elementData.h = 120;
       }
     }
 
@@ -300,10 +228,10 @@ const CloudHub = ({ globalSearch = '' }) => {
         } else if (asset.type === 'icon') {
           el.type = 'icon';
           el.iconName = asset.name;
-          el.library = asset.library || 'lucide';
+          el.library = asset.source || 'lucide';
           el.w = 120;
           el.h = 120;
-          el.fill = '#000000';
+          // Removed hardcoded el.fill to allow Canvas.jsx theme-aware defaults
         } else if (asset.type === 'logo') {
           if (asset.path) {
             try {
@@ -360,7 +288,14 @@ const CloudHub = ({ globalSearch = '' }) => {
     <div className="flex flex-col gap-8 pb-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="bg-black text-white p-8 border-[4px] border-black neo-shadow-lg flex flex-col md:flex-row justify-between items-center gap-6">
         <div className="flex items-center gap-6">
-          <div className="w-16 h-16 bg-yellow-400 flex items-center justify-center neo-shadow-sm rotate-3">
+          <button 
+            onClick={onBack}
+            className="w-12 h-12 bg-white text-black flex items-center justify-center neo-shadow-sm hover:-translate-x-1 transition-transform group mr-4"
+            title="Go Back"
+          >
+            <ArrowLeft size={24} strokeWidth={3} className="group-hover:scale-110 transition-transform" />
+          </button>
+          <div className="w-16 h-16 bg-yellow-400 flex items-center justify-center neo-shadow-sm rotate-3 shrink-0">
              <Cloud className="text-black" size={32} strokeWidth={3} />
           </div>
           <div>
@@ -390,8 +325,23 @@ const CloudHub = ({ globalSearch = '' }) => {
         {activeCategory === 'images' && (
           <section className="animate-in fade-in slide-in-from-left-4 duration-300">
             <div className="flex items-center justify-between mb-10">
-               <h3 className={`text-3xl font-black uppercase tracking-tight underline decoration-8 ${categories[0].color}`}>AI Asset Gallery</h3>
-               <span className="text-xs font-black uppercase text-orange-600 animate-pulse">⚡ KFT-CORE: NEURAL ENGINE</span>
+               <div>
+                  <h3 className={`text-3xl font-black uppercase tracking-tight underline decoration-8 ${categories[0].color}`}>AI Asset Gallery</h3>
+                  <span className="text-xs font-black uppercase text-orange-600 animate-pulse">⚡ KFT-CORE: NEURAL ENGINE</span>
+               </div>
+               
+               <div className="flex items-center gap-4">
+                  <div className="flex flex-col items-end">
+                    <span className="text-[9px] font-black uppercase tracking-widest opacity-40">Auto-Maintenance</span>
+                    <span className="text-[8px] font-bold uppercase opacity-30">Purge unused after 12h</span>
+                  </div>
+                  <button 
+                    onClick={() => updatePreferences({ autoCleanUploads: !preferences.autoCleanUploads })}
+                    className={`w-12 h-6 border-2 border-black relative transition-colors ${preferences.autoCleanUploads ? 'bg-green-400' : 'bg-gray-200'}`}
+                  >
+                    <div className={`absolute top-0.5 w-4 h-4 bg-black transition-all ${preferences.autoCleanUploads ? 'left-6.5' : 'left-0.5'}`} />
+                  </button>
+               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-12">
                <div 
@@ -400,44 +350,58 @@ const CloudHub = ({ globalSearch = '' }) => {
                >
                   <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileUpload} accept="image/*" />
                   <div className="w-12 h-12 bg-black flex items-center justify-center neo-shadow-xs group-hover:-translate-y-1 transition-transform">
-                     <Icons.Upload className="text-white" size={24} strokeWidth={3} />
+                     <Upload className="text-white" size={24} strokeWidth={3} />
                   </div>
                   <p className="text-[12px] font-black uppercase tracking-widest text-center">Upload<br/>New Asset</p>
                </div>
 
-               {images.map((img) => (
+               {/* Show both default AI images and user uploads */}
+               {[...images, ...library.images].map((img) => (
                  <div key={img.id} className="group relative">
-                    <div className="aspect-square bg-white border-[4px] border-black neo-shadow overflow-hidden group-hover:rotate-1 transition-transform">
+                    <div className="aspect-square bg-white border-[4px] border-black neo-shadow overflow-hidden group-hover:rotate-1 transition-transform relative">
                        <img src={img.src} alt={img.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                       <div className={`absolute inset-0 bg-black/60 transition-opacity flex flex-col items-center justify-center gap-3 p-4 ${isSelected(img, 'image') ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+                       
+                       <div className={`absolute inset-0 bg-black/60 transition-opacity flex flex-col items-center justify-center gap-2 p-4 ${isSelected(img, 'image') ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
                           <button 
                             onClick={(e) => {
                               e.stopPropagation();
-                              const assetMetadata = {
-                                name: img.name,
-                                type: 'image',
-                                src: img.src
-                              };
-                              toggleStageAsset(assetMetadata);
+                              toggleStageAsset({ id: img.id, name: img.name, type: 'image', src: img.src });
                             }}
-                            className={`border-2 border-black px-4 py-2 text-[10px] font-black uppercase tracking-widest neo-shadow-xs active:translate-y-1 transition-colors w-full ${isSelected(img, 'image') ? 'bg-yellow-400 text-black' : 'bg-white text-black hover:bg-yellow-400'}`}
+                            className={`w-full py-2 text-[8px] font-black uppercase tracking-widest transition-all neo-shadow-xs ${isSelected(img, 'image') ? 'bg-yellow-400 text-black' : 'bg-white text-black hover:bg-yellow-400'}`}
                           >
-                            {isSelected(img, 'image') ? '✓ Selected' : 'Select Asset'}
+                            {isSelected(img, 'image') ? '✓ Staged' : 'Select'}
                           </button>
+                          
                           <button 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleImport(img, 'image');
-                            }}
-                            className="bg-black text-white border-2 border-white/20 px-4 py-2 text-[10px] font-black uppercase tracking-widest hover:bg-gray-900 transition-colors w-full"
+                            onClick={(e) => { e.stopPropagation(); handleImport(img, 'image'); }}
+                            className="w-full py-2 bg-black text-white text-[8px] font-black uppercase tracking-widest border border-white/20 hover:bg-zinc-900 transition-colors"
                           >
-                            Quick Import
+                            Import
                           </button>
                        </div>
+
+                       {/* Delete Button (Only for library images or allow deleting all for consistency) */}
+                       <button 
+                        onClick={(e) => { 
+                          e.stopPropagation(); 
+                          if (img.id.toString().startsWith('img-')) {
+                            removeLibraryImage(img.id); 
+                          } else {
+                            // Also allow deleting "default" ones for this session
+                            setImages(prev => prev.filter(i => i.id !== img.id));
+                          }
+                        }}
+                        className="absolute -top-2 -right-2 w-7 h-7 bg-red-500 text-white border-2 border-black flex items-center justify-center neo-shadow-xs opacity-0 group-hover:opacity-100 transition-all hover:scale-110 z-20"
+                       >
+                         <X size={14} strokeWidth={4} />
+                       </button>
                     </div>
-                    <div className="mt-4 flex justify-between items-center px-1">
-                       <p className="text-[12px] font-black uppercase tracking-tighter">{img.name}</p>
-                       <p className="text-[9px] font-black opacity-30 uppercase">Local_Asset</p>
+                    
+                    <div className="mt-3 flex justify-between items-start">
+                       <p className={`text-[10px] font-black uppercase leading-tight max-w-[70%] ${isLight ? 'text-black' : 'text-white'}`}>{img.name}</p>
+                       <span className="text-[7px] font-bold opacity-30 uppercase tracking-tighter">
+                          {img.id.toString().startsWith('img-') ? 'Uploaded' : 'System'}
+                       </span>
                     </div>
                  </div>
                ))}
@@ -474,7 +438,7 @@ const CloudHub = ({ globalSearch = '' }) => {
                     </p>
                     {isSelected({name: font}, 'font') && (
                       <div className="absolute top-2 right-2 w-6 h-6 bg-black text-yellow-400 flex items-center justify-center neo-shadow-xs">
-                        <Icons.Check size={14} strokeWidth={4} />
+                        <Check size={14} strokeWidth={4} />
                       </div>
                     )}
                  </div>
@@ -623,7 +587,7 @@ const CloudHub = ({ globalSearch = '' }) => {
                       onClick={() => toggleStageAsset(asset)}
                       className="absolute inset-0 bg-red-500/90 text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
                     >
-                      <Icons.X size={14} strokeWidth={3} />
+                      <X size={14} strokeWidth={3} />
                     </button>
                  </div>
                ))}
@@ -677,9 +641,9 @@ const CloudHub = ({ globalSearch = '' }) => {
           {/* Operational Nodes */}
           <div className="flex-1 flex flex-wrap items-center gap-8">
             {[
-              { label: 'Kraft Grid', sub: 'DSX-Node', color: 'bg-yellow-400', pulse: 'animate-pulse', icon: Icons.Grid },
-              { label: 'Kraft Engine', sub: 'Compute_01', color: 'bg-cyan-400', pulse: 'animate-bounce', icon: Icons.Cpu },
-              { label: 'Kraft Nexus', sub: 'Global_Relay', color: 'bg-magenta-500', pulse: 'animate-pulse', icon: Icons.Globe }
+              { label: 'Kraft Grid', sub: 'DSX-Node', color: 'bg-yellow-400', pulse: 'animate-pulse', icon: Grid },
+              { label: 'Kraft Engine', sub: 'Compute_01', color: 'bg-cyan-400', pulse: 'animate-bounce', icon: Cpu },
+              { label: 'Kraft Nexus', sub: 'Global_Relay', color: 'bg-magenta-500', pulse: 'animate-pulse', icon: Globe }
             ].map((node, i) => (
               <div key={i} className="flex items-center gap-4 group/node cursor-help">
                 <div className="relative">

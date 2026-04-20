@@ -14,6 +14,10 @@
     font-family: 'Epilogue', sans-serif;
     @apply tracking-tight;
   }
+
+  .font-editorial {
+    font-family: 'Outfit', sans-serif;
+  }
 }
 
 @layer utilities {
@@ -100,6 +104,38 @@
   .neo-interactive:active {
     transform: translate(2px, 2px);
     box-shadow: 0px 0px 0px 0px #000000;
+  }
+
+  .neo-panel {
+    @apply border-2 border-black neo-shadow-sm transition-all;
+  }
+
+  .neo-dock {
+    @apply rounded-3xl border-2 border-black neo-shadow-lg bg-white p-2 flex items-center gap-2;
+  }
+
+  /* Theme color overrides for Neo-Brutalism */
+  .bg-ivory { background-color: #F8F7F2; }
+  .bg-studio-gray { background-color: #2D2D2D; }
+  .bg-dark-onyx { background-color: #111111; }
+  .text-vibrant-yellow { color: #FFD700; }
+  .bg-vibrant-yellow { background-color: #FFD700; }
+
+  /* High-Fidelity Tactical Tokens */
+  .neo-input-tactical {
+    @apply bg-[#1a1a1a] border-2 border-black text-white font-black uppercase tracking-widest text-[10px] p-2 outline-none focus:bg-[#222222] transition-colors;
+  }
+
+  .neo-progress-track {
+    @apply h-2 bg-white border-2 border-black rounded-none overflow-visible relative flex items-center;
+  }
+
+  .neo-slider-thumb {
+    @apply w-4 h-4 bg-[#FFD700] border-2 border-black cursor-pointer shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 active:translate-y-0 transition-all;
+  }
+
+  .font-studio {
+    font-family: 'Space Grotesk', 'Outfit', sans-serif;
   }
 }
 

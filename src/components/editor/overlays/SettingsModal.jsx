@@ -230,6 +230,22 @@ const SettingsModal = () => {
                       </button>
                     </div>
 
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-6">
+                        <div className={`p-3.5 rounded-2xl neo-shadow-xs ${isLight ? 'bg-black text-white' : 'bg-orange-500 text-black'}`}><Database size={24} /></div>
+                        <div>
+                          <div className={`font-black uppercase text-sm tracking-tight mb-1 ${isLight ? 'text-gray-900' : 'text-white/90'}`}>Auto-Purge Library (12h)</div>
+                          <div className={`text-[11px] font-bold ${theme.title}`}>Automatically delete unused uploaded assets after 12 hours of inactivity.</div>
+                        </div>
+                      </div>
+                      <button 
+                        onClick={() => updatePreferences({ autoCleanUploads: !preferences.autoCleanUploads })}
+                        className={`w-14 h-8 rounded-full border-2 border-black relative transition-colors ${preferences.autoCleanUploads ? 'bg-orange-400' : (isLight ? 'bg-gray-200' : 'bg-white/10')}`}
+                      >
+                        <div className={`absolute top-1 w-5 h-5 bg-white border-2 border-black rounded-full transition-all ${preferences.autoCleanUploads ? 'right-1' : 'left-1'}`} />
+                      </button>
+                    </div>
+
                   </div>
                 </div>
               </div>

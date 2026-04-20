@@ -16,10 +16,11 @@ const useEditorStore = create(
     gridSnap: 20, // 20px snapping
     isRulersVisible: false,
   },
-  preferences: {
-    snapEnabled: true,
-    highFidelity: true,
-  },
+    preferences: {
+      snapEnabled: true,
+      highFidelity: true,
+      autoCleanUploads: false, // 12h auto-purge policy
+    },
   smartGuides: [], // Array of { axis: 'x'|'y', pos: number }
   
   library: {
@@ -198,9 +199,47 @@ const useEditorStore = create(
     set((state) => ({
       library: {
         ...state.library,
-        images: [...state.library.images, { id: 'img-' + Date.now(), name, src: dataUrl, w, h }]
+        images: [
+          ...state.library.images, 
+          { id: 'img-' + Date.now(), name, src: dataUrl, w, h, timestamp: Date.now() }
+        ]
       }
     }));
+  },
+
+  removeLibraryImage: (id) => {
+    set((state) => ({
+      library: {
+        ...state.library,
+        images: state.library.images.filter(img => img.id !== id)
+      }
+    }));
+  },
+
+  runLibraryMaintenance: () => {
+    const { preferences, library, pages } = get();
+    if (!preferences.autoCleanUploads) return;
+
+    const twelveHoursAgo = Date.now() - (12 * 60 * 60 * 1000);
+    
+    // Safety check: Don't delete images that are actually on the canvas
+    const usedSrcs = new Set();
+    pages.forEach(p => p.elements.forEach(el => {
+      if (el.type === 'image' && el.src) usedSrcs.add(el.src);
+    }));
+
+    const cleanedImages = library.images.filter(img => {
+       const isOld = (img.timestamp || 0) < twelveHoursAgo;
+       const isUsed = usedSrcs.has(img.src);
+       return !isOld || isUsed;
+    });
+
+    if (cleanedImages.length !== library.images.length) {
+      set({
+        library: { ...library, images: cleanedImages }
+      });
+      console.log('KRAFT_MAINTENANCE: Purged expired assets from library.');
+    }
   },
 
   createComponent: (name) => {
@@ -318,7 +357,7 @@ const useEditorStore = create(
         x: 0, y: 0, 
         w: defaultW, h: defaultH,
         rotation: 0,
-        fill: element.type === 'text' ? 'transparent' : '#D1E8E2',
+        fill: (element.type === 'text' || element.type === 'icon') ? undefined : '#D1E8E2',
         opacity: 1,
         visible: true,
         locked: false,
@@ -404,7 +443,7 @@ const useEditorStore = create(
         const built = {
           // Safe defaults (will be overridden by ...element if element has them)
           rotation: 0,
-          fill: isText ? 'transparent' : '#E0E0E0',
+          fill: isText || element.type === 'icon' ? undefined : '#E0E0E0',
           strokeColor: '#000000',
           strokeWidth: 0,
           opacity: 1,
