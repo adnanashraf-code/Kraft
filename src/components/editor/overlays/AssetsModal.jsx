@@ -69,7 +69,7 @@ const DynamicAssetPreview = ({ asset, isLight }) => {
 const AssetsModal = () => {
   const { 
     isAssetsOpen, setAssetsOpen, uiTheme, addElement, 
-    pages, activePageId, library, uploadImage, removeLibraryImage 
+    pages, activePageId, library, uploadImage, removeLibraryImage, preferences 
   } = useEditorStore();
   
   const activePage = pages.find(p => p.id === activePageId) || pages[0];
@@ -261,29 +261,25 @@ const AssetsModal = () => {
                  {library.images.length === 0 && (
                    <div className="col-span-full py-20 text-center opacity-30 font-bold uppercase tracking-widest text-sm">No images uploaded yet</div>
                  )}
-                  {library.images.map(img => (
-                    <div 
-                     key={img.id}
-                     className={`group relative flex flex-col items-center p-4 rounded-2xl border cursor-pointer hover:shadow-xl transition-all hover:-translate-y-1 ${isLight ? 'bg-white border-gray-200' : 'bg-[#1a1a1a] border-white/5 hover:border-white/20'}`}
-                     onClick={() => handleAddUpload(img)}
-                    >
-                      <img src={img.src} alt={img.name} className="w-full aspect-square object-contain mb-4 rounded-lg bg-black/10" />
-                      
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (window.confirm(`Delete "${img.name}" permanently?`)) {
-                            removeLibraryImage(img.id);
-                          }
-                        }}
-                        className="absolute -top-2 -right-2 w-7 h-7 bg-red-500 text-white border-2 border-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:scale-110 shadow-lg z-10"
-                      >
-                         <X size={14} strokeWidth={3} />
-                      </button>
-
-                      <span className={`text-[10px] font-bold uppercase tracking-wider truncate w-full text-center ${theme.text}`}>{img.name}</span>
-                    </div>
-                  ))}
+                 {library.images.map(img => (
+                   <div 
+                    key={img.id}
+                    className={`group relative flex flex-col items-center p-4 rounded-2xl border cursor-pointer hover:shadow-xl transition-all hover:-translate-y-1 ${isLight ? 'bg-white border-gray-200' : 'bg-[#1a1a1a] border-white/5 hover:border-white/20'}`}
+                   >
+                     <div onClick={() => handleAddUpload(img)} className="w-full flex flex-col items-center">
+                        <img src={img.src} alt={img.name} className="w-full aspect-square object-contain mb-4 rounded-lg bg-black/10" />
+                        <span className={`text-[10px] font-bold uppercase tracking-wider truncate w-full text-center ${theme.text}`}>{img.name}</span>
+                     </div>
+                     
+                     <button 
+                      onClick={(e) => { e.stopPropagation(); removeLibraryImage(img.id); }}
+                      className="absolute -top-2 -right-2 w-7 h-7 bg-red-500 text-white rounded-full border-2 border-black flex items-center justify-center neo-shadow-xs opacity-0 group-hover:opacity-100 transition-all hover:scale-110 z-10"
+                      title="Delete permanently"
+                     >
+                       <X size={14} strokeWidth={4} />
+                     </button>
+                   </div>
+                 ))}
                </div>
              )}
 

@@ -26,17 +26,17 @@ const PagesPanel = () => {
   };
 
   return (
-    <div id="pages-panel" className={`border-b-2 border-black mb-4 pb-4`}>
-      <div className="flex items-center justify-between px-4 py-4">
-        <span className="text-[12px] font-black uppercase tracking-[0.3em] font-editorial flex items-center text-black">
-          <FileText size={12} className="mr-2" /> Design Pages
+    <div id="pages-panel" className={`border-b ${theme.border} mb-2`}>
+      <div className="flex items-center justify-between px-4 py-3">
+        <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${theme.title} flex items-center`}>
+          <FileText size={10} className="mr-1.5" /> Pages
         </span>
         <button 
           onClick={() => addPage()}
-          className="p-1.5 rounded-none border-2 border-black bg-white hover:bg-yellow-400 transition-colors neo-shadow-xs"
+          className={`p-1 rounded-lg transition-colors ${isLight ? 'hover:bg-gray-100 text-gray-400 hover:text-blue-600' : 'hover:bg-white/5 text-gray-500 hover:text-white'}`}
           title="Add Page"
         >
-          <Plus size={14} strokeWidth={3} />
+          <Plus size={14} />
         </button>
       </div>
 
@@ -50,26 +50,26 @@ const PagesPanel = () => {
               <div 
                 onClick={() => !isEditing && switchPage(page.id)}
                 className={`
-                  flex items-center justify-between px-4 py-2.5 cursor-pointer transition-all border-2 border-black
+                  flex items-center justify-between px-3 py-2 rounded-xl cursor-pointer transition-all group/item
                   ${isActive 
-                    ? 'bg-yellow-400 text-black neo-shadow-sm -translate-y-0.5' 
-                    : 'bg-white text-black hover:bg-gray-50 hover:-translate-y-0.5 hover:neo-shadow-xs'}
+                    ? (isLight ? 'bg-blue-50 text-blue-600 border border-blue-100' : 'bg-blue-600/10 text-blue-400 border border-blue-500/20') 
+                    : `border border-transparent ${isLight ? 'hover:bg-gray-50 text-gray-600' : 'hover:bg-white/5 text-gray-400'}`}
                 `}
               >
                 <div className="flex items-center flex-1 min-w-0">
-                  <ChevronRight size={12} strokeWidth={3} className={`mr-2 transition-transform ${isActive ? 'rotate-90 opacity-100' : 'opacity-20'}`} />
+                  <ChevronRight size={10} className={`mr-1.5 transition-transform ${isActive ? 'rotate-90 opacity-100' : 'opacity-20 translate-x-[-4px] group-hover/item:translate-x-0 group-hover/item:opacity-50'}`} />
                   
                   {isEditing ? (
                     <input 
                       autoFocus
-                      className="bg-transparent outline-none w-full text-[11px] font-black uppercase"
+                      className="bg-transparent outline-none w-full text-xs font-bold"
                       value={editValue}
                       onChange={(e) => setEditValue(e.target.value)}
                       onBlur={() => handleRename(page.id)}
                       onKeyDown={(e) => e.key === 'Enter' && handleRename(page.id)}
                     />
                   ) : (
-                    <span className="text-[11px] font-black uppercase truncate tracking-tight">{page.name}</span>
+                    <span className="text-xs font-bold truncate">{page.name}</span>
                   )}
                 </div>
 
@@ -79,9 +79,9 @@ const PagesPanel = () => {
                       e.stopPropagation();
                       setActiveMenu(activeMenu === page.id ? null : page.id);
                     }}
-                    className="p-1 hover:bg-black/10 transition-colors"
+                    className={`p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-all ${isLight ? 'hover:bg-blue-100' : 'hover:bg-white/10'}`}
                   >
-                    <MoreHorizontal size={14} strokeWidth={3} />
+                    <MoreHorizontal size={12} />
                   </button>
                 )}
               </div>

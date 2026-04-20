@@ -229,13 +229,13 @@ const SettingsModal = () => {
                         <div className={`absolute top-1 w-5 h-5 bg-white border-2 border-black rounded-full transition-all ${preferences.highFidelity ? 'right-1' : 'left-1'}`} />
                       </button>
                     </div>
-
+                    
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-6">
                         <div className={`p-3.5 rounded-2xl neo-shadow-xs ${isLight ? 'bg-black text-white' : 'bg-orange-500 text-black'}`}><Database size={24} /></div>
                         <div>
-                          <div className={`font-black uppercase text-sm tracking-tight mb-1 ${isLight ? 'text-gray-900' : 'text-white/90'}`}>Auto-Purge Library (12h)</div>
-                          <div className={`text-[11px] font-bold ${theme.title}`}>Automatically delete unused uploaded assets after 12 hours of inactivity.</div>
+                          <div className={`font-black uppercase text-sm tracking-tight mb-1 ${isLight ? 'text-gray-900' : 'text-white/90'}`}>Auto-Purge Unused Assets</div>
+                          <div className={`text-[11px] font-bold ${theme.title}`}>Permanently delete unused uploads after 12 hours of inactivity.</div>
                         </div>
                       </div>
                       <button 

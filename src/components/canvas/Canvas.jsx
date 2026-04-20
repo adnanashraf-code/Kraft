@@ -75,7 +75,7 @@ const DraggableElement = React.memo(({ el }) => {
 
   return (
     <div
-      className={`absolute transition-all ${isSelected ? 'z-10' : ''}`}
+      className={`absolute border-2 ${isSelected ? 'border-blue-500 z-10' : 'border-transparent'}`}
       style={{
         left: `${el.x}px`,
         top: `${el.y}px`,
@@ -84,9 +84,7 @@ const DraggableElement = React.memo(({ el }) => {
         transform: `rotate(${el.rotation || 0}deg) scale(${el.flipX ? -1 : 1}, ${el.flipY ? -1 : 1})`,
         opacity: el.opacity ?? 1,
         display: el.visible !== false ? 'block' : 'none',
-        cursor: el.locked ? 'not-allowed' : (isSelected ? 'default' : 'move'),
-        outline: isSelected ? '2px solid #000' : 'none',
-        boxShadow: isSelected ? '4px 4px 0px 0px #000' : 'none'
+        cursor: el.locked ? 'not-allowed' : (isSelected ? 'default' : 'move')
       }}
       onMouseDown={el.locked ? undefined : handleMouseDown}
     >
@@ -181,8 +179,8 @@ const DraggableElement = React.memo(({ el }) => {
         {isSelected && !el.locked && handles.map((h) => (
           <div
             key={h.dir}
-            className="absolute bg-white border-2 border-black pointer-events-auto shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
-            style={{ width: 10, height: 10, cursor: h.cursor, ...h.style }}
+            className="absolute rounded bg-white border border-blue-500 pointer-events-auto shadow-sm"
+            style={{ width: 8, height: 8, cursor: h.cursor, ...h.style }}
             onMouseDown={(e) => onResizeStart(e, h.dir)}
           />
         ))}
@@ -334,7 +332,7 @@ const Canvas = () => {
       {/* Visual Marquee Overlay */}
       {marquee.active && (
         <div 
-          className="absolute z-50 border-2 border-dashed border-black bg-yellow-400/10 pointer-events-none"
+          className="absolute z-50 border border-blue-500 bg-blue-500/10 pointer-events-none"
           style={{
             left: Math.min(marquee.startX, marquee.currentX) - (canvasRef.current?.getBoundingClientRect().left || 0),
             top: Math.min(marquee.startY, marquee.currentY) - (canvasRef.current?.getBoundingClientRect().top || 0),
