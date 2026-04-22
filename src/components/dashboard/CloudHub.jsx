@@ -337,9 +337,9 @@ const CloudHub = ({ globalSearch = '', onBack }) => {
                   </div>
                   <button 
                     onClick={() => updatePreferences({ autoCleanUploads: !preferences.autoCleanUploads })}
-                    className={`w-12 h-6 border-2 border-black relative transition-colors ${preferences.autoCleanUploads ? 'bg-green-400' : 'bg-gray-200'}`}
+                    className={`w-12 h-6 border-2 border-black relative transition-all duration-300 ${preferences.autoCleanUploads ? 'bg-green-400' : 'bg-gray-200'}`}
                   >
-                    <div className={`absolute top-0.5 w-4 h-4 bg-black transition-all ${preferences.autoCleanUploads ? 'left-6.5' : 'left-0.5'}`} />
+                    <div className={`absolute top-0.5 w-4 h-4 bg-black transition-all duration-300 ${preferences.autoCleanUploads ? 'left-[26px]' : 'left-0.5'}`} />
                   </button>
                </div>
             </div>

@@ -34,56 +34,57 @@ const Footer = () => {
           </div>
 
           {/* Links Grid */}
-          <div className="lg:col-span-8 grid grid-cols-2 md:grid-cols-3 gap-8">
-            <div className="flex flex-col gap-4">
-              <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-orange mb-2">Navigation</h4>
+          <div className="lg:col-span-8 grid grid-cols-2 md:grid-cols-3 gap-12 lg:pl-12">
+            <div className="flex flex-col gap-5">
+              <h4 className="text-[11px] font-black uppercase tracking-[0.4em] text-orange mb-2">Navigation</h4>
               {['Features', 'Cloud Hub', 'Manifesto'].map(item => (
                 <a 
                   key={item} 
                   href={`#${item.toLowerCase().replace(' ', '')}`} 
-                  className="font-black uppercase text-sm hover:text-orange transition-colors w-fit"
+                  className="text-black font-black uppercase text-sm hover:text-orange transition-colors w-fit border-b-2 border-transparent hover:border-orange"
                 >
                   {item}
                 </a>
               ))}
             </div>
 
-            <div className="flex flex-col gap-4">
-              <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-teal mb-2">Ecosystem</h4>
+            <div className="flex flex-col gap-5">
+              <h4 className="text-[11px] font-black uppercase tracking-[0.4em] text-teal mb-2">Ecosystem</h4>
               <button 
                 onClick={() => navigate('/docs')} 
-                className="font-black uppercase text-sm hover:text-teal transition-colors text-left w-fit flex items-center gap-2 group"
+                className="text-black font-black uppercase text-sm hover:text-teal transition-colors text-left w-fit border-b-2 border-transparent hover:border-teal"
               >
-                Documentation <ArrowRight size={14} className="opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all" />
+                Documentation
               </button>
               <button 
                 onClick={() => navigate('/privacy')} 
-                className="font-black uppercase text-sm hover:text-teal transition-colors text-left w-fit flex items-center gap-2 group"
+                className="text-black font-black uppercase text-sm hover:text-teal transition-colors text-left w-fit border-b-2 border-transparent hover:border-teal"
               >
-                Privacy Policy <ArrowRight size={14} className="opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all" />
+                Privacy Policy
               </button>
             </div>
 
-            <div className="flex flex-col gap-4 col-span-2 md:col-span-1">
-              <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-mustard mb-2">Protocol</h4>
-              <div className="flex items-center gap-2 text-xs font-black">
-                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+            <div className="flex flex-col gap-5">
+              <h4 className="text-[11px] font-black uppercase tracking-[0.4em] text-mustard mb-2">Protocol</h4>
+              <div className="flex items-center gap-3 text-xs font-black text-black">
+                 <div className="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
                  CORE_ONLINE_V2.0
               </div>
-              <div className="text-[9px] font-bold text-gray-400 mt-2">
+              <div className="text-[10px] font-bold text-gray-500 mt-2 leading-relaxed">
                 LATENCY: 0.02ms <br />
-                ENCRYPTION: 256-BIT AES
+                ENCRYPTION: 256-BIT AES <br />
+                NODES: 24_ACTIVE
               </div>
             </div>
           </div>
         </div>
 
         <div className="pt-12 border-t-2 border-black/5 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex flex-wrap gap-4">
+          <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest flex flex-wrap gap-4">
             <span>© 2026 KRAFT DESIGN PLATFORM // ALL RIGHTS RESERVED.</span>
             <div className="flex gap-4 border-l border-black/10 pl-4">
-              <button onClick={() => navigate('/docs')} className="hover:text-black transition-colors">Documentation</button>
-              <button onClick={() => navigate('/privacy')} className="hover:text-black transition-colors">Privacy Policy</button>
+              <button onClick={() => navigate('/docs')} className="text-black hover:text-orange transition-colors">Documentation</button>
+              <button onClick={() => navigate('/privacy')} className="text-black hover:text-orange transition-colors">Privacy Policy</button>
             </div>
           </div>
           <div className="flex items-center gap-8">

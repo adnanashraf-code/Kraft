@@ -106,7 +106,7 @@ const CloudHubSection = () => {
           </div>
 
           {/* Visual Right (The "Cyber Cluster") */}
-          <div className="relative h-[600px] flex items-center justify-center">
+          <div className="relative h-[400px] md:h-[600px] flex items-center justify-center scale-75 md:scale-100 transition-transform">
             {/* Main Core */}
             <div className="w-48 h-48 bg-black border-4 border-orange relative z-20 flex items-center justify-center solid-shadow-lg rotate-3 hover:rotate-0 transition-transform duration-500 group">
               <Database

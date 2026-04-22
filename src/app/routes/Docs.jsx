@@ -2,7 +2,6 @@ import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, BookOpen, Zap, Target, MousePointer2, Code } from "lucide-react";
 import Button from "../../components/common/Button";
-import Footer from "../../components/layout/Footer";
 
 const Docs = () => {
   const navigate = useNavigate();
@@ -19,22 +18,28 @@ const Docs = () => {
       content: "KRAFT is a high-performance, browser-based visual editor designed for creators who refuse to compromise on structural integrity. Unlike traditional drag-and-drop tools that produce bloated code, KRAFT is built on a clean state-driven architecture that treats design as live logic."
     },
     {
-      title: "The Philosophy",
-      icon: Target,
+      title: "The Architecture",
+      icon: Code,
       color: "text-teal",
-      content: "We believe that structure is power. KRAFT is different because it gives you absolute control over every node and path without the overhead of templates. Our philosophy is rooted in Digital Brutalism—prioritizing raw performance, bold aesthetics, and pixel-perfect precision over decorative fluff."
+      content: "Built on a custom React/Zustand core, KRAFT utilizes a Virtual Layering System. This allows for zero-lag interactions even with thousands of nodes. Every change you make is mapped to a state tree, ensuring that what you see is mathematically identical to the exported production code."
     },
     {
-      title: "Why KRAFT?",
+      title: "The Asset Vault",
       icon: Zap,
       color: "text-mustard",
-      content: "Most design tools are 'drawing' tools. KRAFT is an 'engineering' tool for designers. It offers sub-pixel rendering, a predictive grid architecture, and a direct design-to-code pipeline that eliminates the translation gap between mockup and production."
+      content: "Our Cloud Hub isn't just storage—it's a synchronized fuel cell. It houses 10k+ vector icons, 120+ variable font families, and 3k+ brand logos. All assets are served via a global edge network with <0.2ms retrieval latency."
     },
     {
-      title: "How to Use",
-      icon: MousePointer2,
+      title: "Pro Shortcuts",
+      icon: Target,
       color: "text-coral",
-      content: "1. Initialize: Launch the studio and set your canvas dimensions. 2. Compose: Use the vector-first toolbar to build your layout. 3. Sync: Connect to the Cloud Hub for instant asset deployment. 4. Export: One-click absolute CSS/HTML export for any framework."
+      content: "Speed is a core value. Use [CTRL + G] for snapping toggle, [SHIFT + R] for instant responsive preview, and [CMD + E] for direct code export. KRAFT is designed for keyboard-first efficiency to keep you in the creative flow."
+    },
+    {
+      title: "Design To Code",
+      icon: MousePointer2,
+      color: "text-orange",
+      content: "We've eliminated the handoff. KRAFT's compiler translates your visual layers into optimized HTML/CSS or React components. The export is clean, semantic, and production-ready. No manual translation required."
     }
   ];
 
@@ -97,8 +102,6 @@ const Docs = () => {
           <Code className="absolute top-[-20%] right-[-10%] text-white/5 rotate-12" size={300} />
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 };

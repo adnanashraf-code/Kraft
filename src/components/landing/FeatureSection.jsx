@@ -44,7 +44,7 @@ const FeatureSection = () => {
         </div>
 
         {/* Bento Grid */}
-        <div className="grid lg:grid-cols-12 lg:grid-rows-6 gap-4 h-full min-h-[800px] lg:h-[900px]">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 lg:grid-rows-6 gap-4 h-full min-h-screen lg:h-[900px]">
           
           {/* 1. Main Core Engine (Large) */}
           <div className="lg:col-span-6 lg:row-span-4 bg-black text-white p-12 flex flex-col justify-center relative overflow-hidden group border-4 border-black solid-shadow-lg animate-slide-up">

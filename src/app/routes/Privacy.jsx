@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, ShieldCheck, Lock, Trash2, EyeOff } from "lucide-react";
-import Footer from "../../components/layout/Footer";
 
 const Privacy = () => {
   const navigate = useNavigate();
@@ -66,19 +65,19 @@ const Privacy = () => {
           </p>
         </div>
 
-        <div className="grid gap-6">
+        <div className="grid gap-8">
           {policies.map((policy, idx) => (
             <div 
               key={policy.title} 
-              className="group border-2 border-white/10 p-10 bg-white/5 backdrop-blur-sm hover:border-teal/50 transition-all animate-slide-up"
+              className="group border-2 border-white/20 p-10 bg-[#111] backdrop-blur-sm hover:border-teal/60 hover:solid-shadow-teal transition-all animate-slide-up"
               style={{ animationDelay: `${idx * 100}ms` }}
             >
               <div className="flex items-start gap-8">
-                <div className="p-4 bg-teal text-black neo-shadow-sm shrink-0 group-hover:scale-110 transition-transform">
+                <div className="p-4 bg-teal text-black neo-shadow-sm shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform shadow-[0_0_15px_rgba(45,212,191,0.3)]">
                   <policy.icon size={32} />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-black uppercase tracking-tighter mb-4 text-white">{policy.title}</h2>
+                  <h2 className="text-2xl font-black uppercase tracking-tighter mb-4 text-white group-hover:text-teal transition-colors">{policy.title}</h2>
                   <p className="text-lg font-bold leading-relaxed text-gray-400">
                     {policy.content}
                   </p>
@@ -94,8 +93,6 @@ const Privacy = () => {
           </p>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 };

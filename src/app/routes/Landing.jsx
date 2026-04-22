@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Layers, Code, Type, Zap, Command, MousePointer2, Settings2, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Settings2, Menu, X as CloseIcon, Zap, Command, MousePointer2 } from 'lucide-react';
 import Button from '../../components/common/Button';
 import IdentityModal from '../../components/common/IdentityModal';
-import mockup from '../../assets/mockup.png';
+import SystemSettings from '../../components/common/SystemSettings';
 import FeatureSection from '../../components/landing/FeatureSection';
 import CloudHubSection from '../../components/landing/CloudHubSection';
 import Footer from '../../components/layout/Footer';
@@ -32,12 +32,15 @@ const InteractiveDots = () => {
     parent.addEventListener('mousemove', handleMouseMove);
     handleResize();
 
-    const dots = Array.from({ length: 100 }, () => ({
+    const isMobile = window.innerWidth < 768;
+    const dotCount = isMobile ? 40 : 100;
+
+    const dots = Array.from({ length: dotCount }, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
       vx: (Math.random() - 0.5) * 1.2,
       vy: (Math.random() - 0.5) * 1.2,
-      size: Math.random() * 3 + 2, // Smaller, subtle dots
+      size: Math.random() * 3 + 2,
     }));
 
     // Lifecycle Logic: Spawn every 1s, Delete every 2s
@@ -48,7 +51,7 @@ const InteractiveDots = () => {
           y: Math.random() * canvas.height,
           vx: (Math.random() - 0.5) * 1.2,
           vy: (Math.random() - 0.5) * 1.2,
-          size: Math.random() * 2 + 1,
+          size: Math.random() * 3 + 2,
         });
       }
     }, 1000);
@@ -156,10 +159,12 @@ const AbstractArtwork = ({ className }) => (
 const Landing = () => {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [wordIndex, setWordIndex] = useState(0);
   const words = ['Without', 'Beyond', 'Above', 'Absolute'];
 
   const [scrolled, setScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -228,8 +233,8 @@ const Landing = () => {
             </div>
           </div>
 
-          {/* Center: Navigation */}
-          <div className="hidden md:flex items-center gap-10">
+          {/* Center: Navigation (Desktop) */}
+          <div className="hidden lg:flex items-center gap-10">
             {['Features', 'Cloud Hub', 'Manifesto'].map((item) => (
               <a 
                 key={item}
@@ -242,33 +247,65 @@ const Landing = () => {
             ))}
           </div>
 
-          {/* Right: Actions */}
           <div className="flex items-center gap-3">
             <div className="hidden sm:flex items-center gap-2 mr-2">
               <button 
                 className="p-2.5 border-2 border-black hover:bg-orange transition-all neo-shadow-xs active:translate-x-[1px] active:translate-y-[1px] active:shadow-none bg-white"
                 title="Open Settings"
+                onClick={() => setIsSettingsOpen(true)}
               >
                 <Settings2 size={18} />
               </button>
             </div>
-            <Button 
-              variant="editorial" 
-              className={`py-3 px-6 text-xs transition-all duration-500 ${scrolled ? 'scale-95' : 'scale-100'}`} 
-              onClick={handleOpenEditor}
+            
+            <div className="hidden md:block">
+              <Button 
+                variant="editorial" 
+                className={`py-3 px-6 text-xs transition-all duration-500 ${scrolled ? 'scale-95' : 'scale-100'}`} 
+                onClick={handleOpenEditor}
+              >
+                Open Studio
+              </Button>
+            </div>
+
+            <button 
+              className="lg:hidden p-2.5 border-2 border-black bg-white neo-shadow-xs"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
-              Open Studio
-            </Button>
+              {isMobileMenuOpen ? <CloseIcon size={20} /> : <Menu size={20} />}
+            </button>
           </div>
+        </div>
+
+        <div className={`lg:hidden fixed inset-0 z-40 bg-white transition-all duration-500 ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}`}>
+           <div className="flex flex-col items-center justify-center h-full gap-10 px-6">
+              {['Features', 'Cloud Hub', 'Manifesto'].map((item) => (
+                <a 
+                  key={item}
+                  href={`#${item.toLowerCase().replace(' ', '')}`} 
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="font-black uppercase text-3xl tracking-tighter hover:text-orange transition-colors"
+                >
+                  {item}
+                </a>
+              ))}
+              <div className="flex flex-col w-full gap-4 mt-8">
+                 <Button variant="editorial" className="w-full py-5 text-lg" onClick={() => { setIsMobileMenuOpen(false); handleOpenEditor(); }}>Open Studio</Button>
+                 <button 
+                   onClick={() => { setIsMobileMenuOpen(false); setIsSettingsOpen(true); }}
+                   className="w-full py-5 border-4 border-black font-black uppercase text-lg neo-shadow"
+                 >
+                   System Settings
+                 </button>
+              </div>
+           </div>
         </div>
       </nav>
 
-      {/* Hero Section */}
       <main className="max-w-[1440px] mx-auto px-6 pt-32 w-full">
         <div className="grid lg:grid-cols-2 gap-24 items-center">
           <div className="max-w-2xl relative z-10">
-
-            <h1 className="font-editorial text-5xl md:text-8xl font-extrabold leading-[0.9] text-black mb-8">
+            <h1 className="font-editorial text-5xl md:text-7xl lg:text-8xl font-extrabold leading-[0.9] text-black mb-8">
               Design <br/>
               <span className="relative h-[1.1em] overflow-hidden block">
                 <span 
@@ -280,16 +317,21 @@ const Landing = () => {
               </span>
               Compromise.
             </h1>
-            <p className="text-xl text-gray-600 mb-6 max-w-md leading-relaxed">
+            <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-md leading-relaxed">
               A premium, browser-based visual editor built for creative teams who demand bold aesthetics and absolute structural control.
             </p>
             <div className="flex flex-wrap gap-4">
               <Button variant="editorial" onClick={handleOpenEditor} icon={ArrowRight}>Start Creating</Button>
-              <Button variant="secondary" onClick={() => navigate('/dashboard')}>View Workspace</Button>
+              <Button 
+                variant="secondary" 
+                onClick={() => navigate('/dashboard')}
+              >
+                View Workspace
+              </Button>
             </div>
           </div>
 
-          <div className="relative z-10 w-full aspect-square md:aspect-auto md:h-[600px] flex items-center justify-center p-10 -mt-6">
+          <div className="relative z-10 w-full aspect-square md:aspect-auto md:h-[600px] flex items-center justify-center p-10 -mt-6 scale-75 md:scale-100 transition-transform">
             <div className="relative w-full max-w-md h-full transition-transform duration-700 hover:scale-105">
               <div className="absolute inset-0 bg-mustard border-4 border-black translate-x-4 translate-y-4" />
               <div className="absolute inset-0 bg-white border-4 border-black p-4 overflow-hidden flex flex-col">
@@ -310,15 +352,10 @@ const Landing = () => {
           </div>
         </div>
 
-        {/* Features Detail Section (Phase 5) */}
         <FeatureSection />
-
-        {/* Cloud Hub Vault (Phase 7 Replacement) */}
         <CloudHubSection />
 
-        {/* KRAFT Manifesto Section (Replacing Templates) */}
         <div id="manifesto" className="relative py-24 border-b-4 border-black bg-ivory overflow-hidden">
-          {/* Background Marquee */}
           <div className="absolute top-1/2 -translate-y-1/2 left-0 w-full opacity-[0.03] pointer-events-none select-none">
             <div className="flex whitespace-nowrap animate-marquee">
               <span className="text-[20rem] font-black uppercase tracking-tighter mx-4">KRAFT KRAFT KRAFT KRAFT KRAFT KRAFT</span>
@@ -341,7 +378,7 @@ const Landing = () => {
               </div>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-0 border-4 border-black neo-shadow-lg">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border-4 border-black neo-shadow-lg">
               {[
                 { 
                   id: '01', 
@@ -433,6 +470,11 @@ const Landing = () => {
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
         onComplete={handleModalComplete} 
+      />
+
+      <SystemSettings 
+        isOpen={isSettingsOpen} 
+        onClose={() => setIsSettingsOpen(false)} 
       />
     </div>
   );
