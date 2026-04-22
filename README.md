@@ -1,6 +1,6 @@
 # KRAFT 🪐 | Absolute Interaction Engine v2.0
 
-![KRAFT Banner](https://raw.githubusercontent.com/lucide-react/lucide/main/icons/zap.svg)
+![KRAFT Banner](file:///C:/Users/Adnan/.gemini/antigravity/brain/b4723657-04b8-4612-89cc-19d971ab2147/kraft_hero_banner_1776893849874.png)
 
 **KRAFT** is a high-fidelity, state-driven visual interaction engine built for creative teams who demand absolute structural control. Unlike traditional tools, KRAFT treats design as a live logic tree, eliminating the translation gap between visual mockups and production-ready code.
 
@@ -51,7 +51,7 @@ KRAFT/
 │   ├── utils/
 │   │   └── iconUtils.js     # Logic for resolving 10k+ brand assets
 │   └── App.jsx              # Main Router & Theme Provider
-├── si_keys.txt              # Global Brand Lookup Metadata
+├── .env                     # Environment Configuration (GitIgnored)
 ├── tailwind.config.js       # Neo-Brutalist Design Tokens
 └── package.json
 ```
@@ -60,11 +60,11 @@ KRAFT/
 
 ## 🔑 Key Files Explained
 
-### `si_keys.txt`
-This file is the **Global Brand Metadata** for KRAFT's "Brand Central" engine. It contains 3,000+ mapping keys for world-class logos. When you search for a brand in the Cloud Hub, the engine uses this lookup table to resolve the correct vector path from our edge-cached library. It is essential for the High-Fidelity Asset Pipeline.
-
 ### `useEditorStore.js`
 The central nervous system. It manages everything from element positions to theme states and user preferences. It ensures that your workspace persists across sessions using local storage hydration.
+
+### `iconUtils.js`
+The high-fidelity asset pipeline. It maps search terms to vector paths for 10,000+ icons and brand logos, ensuring the "Brand Central" engine works instantly via the integrated `simple-icons` system.
 
 ---
 
@@ -83,7 +83,7 @@ The central nervous system. It manages everything from element positions to them
 
 ### 🌐 Future (Phase 4)
 - [ ] **Real-time Collaboration**: Multi-user editing via WebSocket sync.
-- [ ] **Asset Marketplace**: community-contributed design fuel.
+- [ ] **Asset Marketplace**: Community-contributed design fuel.
 
 ---
 
