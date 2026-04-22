@@ -18,7 +18,7 @@ const Dashboard = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [viewMode, setViewMode] = useState('grid');
-  const { setSettingsOpen, uiTheme } = useEditorStore();
+  const { setSettingsOpen, uiTheme, userProfile } = useEditorStore();
   const isLight = uiTheme === 'light' || uiTheme === 'gray';
   
   const [notifications, setNotifications] = useState([
@@ -104,7 +104,17 @@ const Dashboard = () => {
            </div>
         </div>
 
-        {/* User section removed as requested */}
+         <div className="mt-auto p-5 border-t-[3px] border-black">
+            <div className={`flex items-center gap-3 p-3 border-2 border-black neo-shadow-sm ${isLight ? 'bg-orange/10' : 'bg-orange/20'}`}>
+              <div className="w-10 h-10 bg-orange border-2 border-black flex items-center justify-center shrink-0">
+                <span className="font-black text-lg">{userProfile.name?.charAt(0) || 'U'}</span>
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-black truncate">{userProfile.name || 'User'}</p>
+                <p className="text-[10px] font-bold opacity-40 truncate">ID: {userProfile.id || 'guest'}</p>
+              </div>
+            </div>
+         </div>
       </aside>
 
       {/* MAIN CONTENT AREA */}

@@ -51,11 +51,12 @@ const useEditorStore = create(
   projectName: 'KRAFT',
   isSaving: false,
   stagedAssets: [], // Array of { id, name, type, src, etc. }
-  userProfile: {
-    name: 'Adnan Ashraf',
-    avatarSeed: 'Adnan',
-    role: 'PRO DESIGNER_KW'
-  },
+    userProfile: {
+      name: localStorage.getItem('kraft_user_name') || 'Adnan Ashraf',
+      id: localStorage.getItem('kraft_user_id') || 'adnan-01',
+      avatarSeed: localStorage.getItem('kraft_user_name') || 'Adnan',
+      role: 'PRO DESIGNER_KW'
+    },
   notifications: [], // Array of { id, message, type: 'success' | 'error' | 'info' }
   projectFonts: [], // Array of string font names
 
@@ -141,9 +142,13 @@ const useEditorStore = create(
     activeFlyout: state.activeFlyout === type ? 'none' : type 
   })),
 
-  setUserProfile: (profile) => set((state) => ({
-    userProfile: { ...state.userProfile, ...profile }
-  })),
+  setUserProfile: (profile) => set((state) => {
+    if (profile.name) localStorage.setItem('kraft_user_name', profile.name);
+    if (profile.id) localStorage.setItem('kraft_user_id', profile.id);
+    return {
+      userProfile: { ...state.userProfile, ...profile }
+    };
+  }),
 
   addNotification: (message, type = 'success') => {
     const id = Date.now().toString();

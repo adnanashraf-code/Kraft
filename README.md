@@ -1,5 +1,6 @@
 ## 📝 Documentation
-*Project documentation and roadmap are managed internally.*
+*   [**Workflow Guide**](./WORKFLOW.md): Detailed architecture and diagrams.
+*   [**Implementation Plan**](./IMPLEMENTATION_PLAN.md): Project roadmap and task status.
 
 ## 🚀 Getting Started
 1. `npm install`
