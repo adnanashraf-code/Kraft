@@ -1,5 +1,6 @@
 import React from 'react';
 import { Database, ShieldCheck, Zap, Type, Layout, Hexagon, Circle, Square, Star, Smile } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import Button from '../common/Button';
 
 const AssetBadge = ({ icon: Icon, label }) => (
@@ -10,6 +11,7 @@ const AssetBadge = ({ icon: Icon, label }) => (
 );
 
 const CloudHubSection = () => {
+  const navigate = useNavigate();
   return (
     <section id="cloudhub" className="py-40 px-6 bg-[#0a0a0a] text-white overflow-hidden relative">
       {/* Background Glows */}
@@ -52,8 +54,12 @@ const CloudHubSection = () => {
               </div>
             </div>
 
-            <Button variant="editorial" className="bg-white text-black py-6 px-12 text-xl hover:bg-orange transition-colors">
-              Explore the Vault
+            <Button 
+              variant="editorial" 
+              onClick={() => navigate('/dashboard', { state: { activeTab: 'shared' } })}
+              className="bg-orange text-black py-6 px-12 text-xl hover:bg-white hover:text-black transition-all"
+            >
+              EXPLORE THE VAULT
             </Button>
           </div>
 

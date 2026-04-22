@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   Search, Plus, LayoutGrid, List, Clock, 
   FileEdit, Archive, Star, Hash, Settings, Bell, ChevronDown
@@ -14,7 +14,8 @@ import { PREMIUM_TEMPLATES } from '../../utils/workspaceData';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('recent');
+  const location = useLocation();
+  const [activeTab, setActiveTab] = useState(location.state?.activeTab || 'recent');
   const [searchQuery, setSearchQuery] = useState('');
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [viewMode, setViewMode] = useState('grid');

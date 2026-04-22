@@ -189,10 +189,11 @@ const TEMPLATES_DATA = [
 ];
 
 // ─── COMPONENT ───────────────────────────────────────────────────────────────
-const DesignTemplates = memo(({ globalSearch = '', onBack }) => {
+const DesignTemplates = memo(({ globalSearch = '', onBack, isLight: forcedIsLight }) => {
   const navigate = useNavigate();
   const { addElements, uiTheme } = useEditorStore();
-  const isLight = uiTheme === 'light' || uiTheme === 'gray';
+  const storeIsLight = uiTheme === 'light' || uiTheme === 'gray';
+  const isLight = forcedIsLight !== undefined ? forcedIsLight : storeIsLight;
   const [importingId, setImportingId] = useState(null);
 
   const filteredTemplates = TEMPLATES_DATA.filter(tpl => {
