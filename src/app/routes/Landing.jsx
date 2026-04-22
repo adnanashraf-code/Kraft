@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Layers, Code, Type, Zap, Command, MousePointer2 } from 'lucide-react';
+import { ArrowRight, Layers, Code, Type, Zap, Command, MousePointer2, Settings2, ShieldCheck } from 'lucide-react';
 import Button from '../../components/common/Button';
 import IdentityModal from '../../components/common/IdentityModal';
 import mockup from '../../assets/mockup.png';
 import FeatureSection from '../../components/landing/FeatureSection';
 import CloudHubSection from '../../components/landing/CloudHubSection';
-import DesignTemplates from '../../components/dashboard/DesignTemplates';
+import Footer from '../../components/layout/Footer';
 
 const InteractiveDots = () => {
   const canvasRef = React.useRef(null);
@@ -159,11 +159,21 @@ const Landing = () => {
   const [wordIndex, setWordIndex] = useState(0);
   const words = ['Without', 'Beyond', 'Above', 'Absolute'];
 
+  const [scrolled, setScrolled] = useState(false);
+
   useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
+    };
+    window.addEventListener('scroll', handleScroll);
+    
     const interval = setInterval(() => {
       setWordIndex((prev) => (prev + 1) % words.length);
     }, 2700);
-    return () => clearInterval(interval);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      clearInterval(interval);
+    };
   }, []);
 
   const handleOpenEditor = () => {
@@ -182,33 +192,79 @@ const Landing = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col relative bg-ivory text-black">
-      {/* Decorative Background Elements */}
-      <div className="absolute top-[-10%] right-[-5%] w-96 h-96 bg-mustard rounded-full opacity-20 blur-3xl pointer-events-none" />
-      <div className="absolute bottom-[-10%] left-[-5%] w-96 h-96 bg-teal rounded-full opacity-20 blur-3xl pointer-events-none" />
+    <div className="flex flex-col relative bg-ivory text-black overflow-hidden">
+      {/* Decorative Background Elements Removed to fix scroll issue */}
 
-      {/* Navbar */}
-      <nav className="w-full border-b-2 border-black bg-white/90 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-[1440px] mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-            <div className="w-8 h-8 bg-orange border-2 border-black flex items-center justify-center">
+      {/* Navbar - Command Center Style */}
+      <nav 
+        className={`w-full fixed top-0 left-0 z-50 transition-all duration-500 flex justify-center px-6 ${
+          scrolled ? 'pt-4' : 'pt-0'
+        }`}
+      >
+        <div 
+          className={`flex items-center justify-between transition-all duration-500 border-black ${
+            scrolled 
+            ? 'w-full max-w-[1100px] bg-white/90 backdrop-blur-md px-6 py-3 rounded-2xl border-4 solid-shadow-sm' 
+            : 'w-full max-w-full bg-white px-8 py-5 rounded-none border-b-4'
+          }`}
+        >
+          {/* Left: Logo & Status */}
+          <div 
+            className="flex items-center gap-4 cursor-pointer group" 
+            onClick={() => {
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+              navigate('/');
+            }}
+          >
+            <div className="w-10 h-10 bg-orange border-2 border-black flex items-center justify-center neo-shadow-sm group-hover:rotate-12 transition-transform">
               <div className="w-3 h-3 bg-white rounded-full" />
             </div>
-            <span className="font-editorial font-bold text-2xl tracking-tighter">KRAFT</span>
+              <div className="flex flex-col -gap-1">
+              <span className="font-editorial font-black text-2xl tracking-tighter leading-none">KRAFT.</span>
+              <div className="flex items-center gap-1.5 mt-1">
+                <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_#22c55e]" />
+                <span className="text-[8px] font-black uppercase tracking-widest text-gray-400">Engine_v2.0</span>
+              </div>
+            </div>
           </div>
-          <div className="hidden md:flex items-center gap-8 font-medium">
-            <a href="#features" className="hover:text-orange transition-colors">Features</a>
-            <a href="#templates" className="hover:text-orange transition-colors">Templates</a>
-            <a href="#cloudhub" className="hover:text-orange transition-colors">Cloud Hub</a>
+
+          {/* Center: Navigation */}
+          <div className="hidden md:flex items-center gap-10">
+            {['Features', 'Cloud Hub', 'Manifesto'].map((item) => (
+              <a 
+                key={item}
+                href={`#${item.toLowerCase().replace(' ', '')}`} 
+                className="font-black uppercase text-[11px] tracking-[0.2em] hover:text-orange transition-colors relative group"
+              >
+                {item}
+                <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-orange transition-all group-hover:w-full" />
+              </a>
+            ))}
           </div>
-          <div className="flex items-center gap-4">
-            <Button variant="editorial" className="py-2 px-5 text-sm" onClick={handleOpenEditor}>Open Editor</Button>
+
+          {/* Right: Actions */}
+          <div className="flex items-center gap-3">
+            <div className="hidden sm:flex items-center gap-2 mr-2">
+              <button 
+                className="p-2.5 border-2 border-black hover:bg-orange transition-all neo-shadow-xs active:translate-x-[1px] active:translate-y-[1px] active:shadow-none bg-white"
+                title="Open Settings"
+              >
+                <Settings2 size={18} />
+              </button>
+            </div>
+            <Button 
+              variant="editorial" 
+              className={`py-3 px-6 text-xs transition-all duration-500 ${scrolled ? 'scale-95' : 'scale-100'}`} 
+              onClick={handleOpenEditor}
+            >
+              Open Studio
+            </Button>
           </div>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <main className="flex-1 flex flex-col justify-center max-w-[1440px] mx-auto px-6 pt-12 pb-24 w-full">
+      <main className="max-w-[1440px] mx-auto px-6 pt-32 w-full">
         <div className="grid lg:grid-cols-2 gap-24 items-center">
           <div className="max-w-2xl relative z-10">
 
@@ -257,32 +313,99 @@ const Landing = () => {
         {/* Features Detail Section (Phase 5) */}
         <FeatureSection />
 
-        {/* Templates Section (Phase 6) */}
-        <div id="templates" className="py-32 px-6 border-y-4 border-black">
-          <div className="max-w-[1440px] mx-auto">
-            <DesignTemplates onBack={() => {}} isLight={true} />
-          </div>
-        </div>
-
         {/* Cloud Hub Vault (Phase 7 Replacement) */}
         <CloudHubSection />
 
+        {/* KRAFT Manifesto Section (Replacing Templates) */}
+        <div id="manifesto" className="relative py-24 border-b-4 border-black bg-ivory overflow-hidden">
+          {/* Background Marquee */}
+          <div className="absolute top-1/2 -translate-y-1/2 left-0 w-full opacity-[0.03] pointer-events-none select-none">
+            <div className="flex whitespace-nowrap animate-marquee">
+              <span className="text-[20rem] font-black uppercase tracking-tighter mx-4">KRAFT KRAFT KRAFT KRAFT KRAFT KRAFT</span>
+              <span className="text-[20rem] font-black uppercase tracking-tighter mx-4">KRAFT KRAFT KRAFT KRAFT KRAFT KRAFT</span>
+            </div>
+          </div>
+
+          <div className="max-w-[1440px] mx-auto px-6 relative z-10">
+            <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
+              <div className="max-w-2xl">
+                <span className="inline-block bg-orange text-black px-3 py-1 text-xs font-bold uppercase tracking-widest mb-4 neo-shadow-sm">The Manifesto</span>
+                <h2 className="font-editorial text-5xl md:text-8xl font-black tracking-tighter leading-[0.8] reveal-text">
+                  KILL THE <br />
+                  <span className="text-orange italic">BORING.</span>
+                </h2>
+              </div>
+              <div className="text-right">
+                <p className="text-xl font-bold uppercase tracking-widest text-black/40">Established 2026</p>
+                <p className="text-sm font-medium">Vol. 01 / First Edition</p>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-0 border-4 border-black neo-shadow-lg">
+              {[
+                { 
+                  id: '01', 
+                  title: 'Beyond Templates', 
+                  desc: 'We don\'t do generic. Every canvas is a rebellion against the ordinary. Break the grid, or build a better one.',
+                  color: 'hover:bg-coral'
+                },
+                { 
+                  id: '02', 
+                  title: 'Absolute Control', 
+                  desc: 'Structure is power. Every node, every path, every pixel belongs to you. No safety nets, just pure precision.',
+                  color: 'hover:bg-mustard'
+                },
+                { 
+                  id: '03', 
+                  title: 'Raw Aesthetics', 
+                  desc: 'Boldness over beauty. Brutalism over blandness. KRAFT is for those who demand absolute visual authority.',
+                  color: 'hover:bg-teal'
+                }
+              ].map((law, idx) => (
+                <div 
+                  key={law.id} 
+                  className={`p-10 border-black ${idx !== 2 ? 'md:border-r-4 border-b-4 md:border-b-0' : ''} transition-all duration-300 group ${law.color} hover:text-white cursor-crosshair glitch-hover`}
+                >
+                  <div className="flex justify-between items-start mb-12">
+                    <span className="text-4xl font-black font-editorial">.{law.id}</span>
+                    <Zap className="opacity-0 group-hover:opacity-100 transition-opacity" size={24} />
+                  </div>
+                  <h3 className="text-3xl font-black uppercase tracking-tighter mb-4">{law.title}</h3>
+                  <p className="font-bold leading-tight text-black/70 group-hover:text-white/90">
+                    {law.desc}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-16 flex justify-center">
+               <div className="flex items-center gap-6 text-sm font-black uppercase tracking-widest animate-pulse">
+                 <span>No compromise</span>
+                 <div className="w-2 h-2 bg-orange rounded-full" />
+                 <span>Absolute freedom</span>
+                 <div className="w-2 h-2 bg-orange rounded-full" />
+                 <span>Raw power</span>
+               </div>
+            </div>
+          </div>
+        </div>
+
         {/* Big CTA */}
-        <div className="relative mt-20 mb-20 py-24 border-y-4 border-black overflow-hidden bg-ivory min-h-[80vh] flex items-center">
+        <div className="relative py-16 border-b-4 border-black overflow-hidden bg-ivory min-h-[60vh] flex items-center">
             <InteractiveDots />
-            <div className="relative z-10 text-center px-6 w-full">
-                <div className="inline-flex items-center gap-2 bg-black text-white px-4 py-1 text-[10px] font-black uppercase tracking-[0.4em] mb-8">
-                  <Command size={12} /> Final_Protocol
+            <div className="relative z-10 px-6 w-full flex flex-col items-center">
+                <div className="w-full flex justify-start mb-8">
+                  <div className="inline-flex items-center gap-2 bg-black text-white px-4 py-1 text-[10px] font-black uppercase tracking-[0.4em]">
+                    <Command size={12} /> Final_Protocol
+                  </div>
                 </div>
                 
-                <div className="relative inline-block mb-12">
-                  <h2 className="font-editorial text-6xl md:text-[8rem] font-black tracking-tighter leading-tight relative z-10">
-                    Ready to <br />
-                    <span className="text-orange italic block mt-4">Kraft?</span>
+                <div className="relative inline-block mb-12 text-center">
+                  <h2 className="font-editorial text-5xl md:text-[7rem] font-black tracking-tighter leading-none relative z-10">
+                    Ready to <span className="text-orange italic">Kraft?</span>
                   </h2>
-                  <div className="absolute -inset-1 text-black opacity-10 font-editorial text-6xl md:text-[8rem] font-black tracking-tighter leading-tight select-none translate-x-2 translate-y-2 pointer-events-none">
-                    Ready to <br />
-                    <span className="italic block mt-4">Kraft?</span>
+                  <div className="absolute -inset-1 text-black opacity-10 font-editorial text-5xl md:text-[7rem] font-black tracking-tighter leading-none select-none translate-x-2 translate-y-2 pointer-events-none">
+                    Ready to <span className="italic">Kraft?</span>
                   </div>
                 </div>
 
@@ -304,19 +427,8 @@ const Landing = () => {
         </div>
       </main>
 
-      <footer className="border-t-2 border-black bg-white py-12">
-        <div className="max-w-[1440px] mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-3">
-            <div className="w-6 h-6 bg-black flex items-center justify-center">
-              <div className="w-2 h-2 bg-white rounded-full" />
-            </div>
-            <span className="font-editorial font-bold text-xl tracking-tighter">KRAFT.STUDIO</span>
-          </div>
-          <div className="text-sm font-medium text-gray-500">
-            © 2026 Kraft Design Platform. No generic templates allowed.
-          </div>
-        </div>
-      </footer>
+      <Footer />
+      
       <IdentityModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
