@@ -44,43 +44,71 @@ An integrated design philosophy section that defines the KRAFT ethos: "Kill the 
 
 ## 📂 Project Architecture
 
-### Data Flow & Workflow
-KRAFT operates on a **Single Source of Truth** architecture. The visual canvas is a direct projection of the global Zustand state.
+### System Flow & Engine Logic
+KRAFT is built on a **Modular State Engine** architecture. Every user interaction is normalized into a state update, which then drives the synchronized rendering of the canvas and the asset pipeline.
 
 ```mermaid
-graph TD
-    A[User Interaction] --> B{Zustand Store}
-    B -->|State Update| C[Virtual Canvas Engine]
-    B -->|Asset Fetch| D[Cloud Hub / Vault]
-    B -->|Config Sync| E[System BIOS]
+graph LR
+    subgraph "Input Layer"
+        UI[User Interaction]
+        BIOS[System BIOS Config]
+    end
+
+    subgraph "The Brain (Central Store)"
+        Store{{"Zustand Global State"}}
+        History[Undo/Redo Stack]
+        Persist[(Local Storage)]
+    end
+
+    subgraph "Asset Pipeline"
+        Vault[Cloud Vault]
+        Icons[10k+ Icon Resolver]
+        Fonts[Font Streamer]
+    end
+
+    subgraph "Rendering Engine"
+        Canvas[Virtual Canvas]
+        DOM[Optimized DOM]
+    end
+
+    UI --> Store
+    BIOS --> Store
+    Store <--> History
+    Store <--> Persist
     
-    C --> F[Optimized DOM Projection]
-    D -->|SVG/Font Stream| C
-    
-    F --> G[Production Code Export]
-    G -->|Clean CSS/HTML| H[Deployment]
+    Vault --> Store
+    Icons --> Store
+    Fonts --> Store
+
+    Store --> Canvas
+    Canvas --> DOM
+    DOM --> Export[Production Code Export]
 ```
 
-### Directory Structure
+### Directory Breakdown
 ```bash
 KRAFT/
+├── public/              # Static hardware assets & manifest
 ├── src/
 │   ├── app/
-│   │   └── routes/          # Landing, Editor, Docs, Privacy, Dashboard
+│   │   └── routes/      # Main entry points (Landing, Studio, Docs, Dashboard)
+│   ├── assets/          # Raw images, SVG shapes, and brand logos
 │   ├── components/
-│   │   ├── canvas/          # Viewport logic & element rendering
-│   │   ├── common/          # Modals, Buttons, BIOS, Identity System
-│   │   ├── dashboard/       # Cloud Hub & Asset Management
-│   │   ├── editor/          # Sidebars, Properties, Toolbars
-│   │   ├── landing/         # Marketing Sections (Manifesto, Features)
-│   │   └── layout/          # Global Navigation & Footer
-│   ├── store/
-│   │   └── useEditorStore.js # Central "Brain" (Zustand)
-│   ├── utils/
-│   │   └── iconUtils.js     # 10k+ Asset Resolution Pipeline
-│   └── index.css            # Design System (Tailwind + Custom Tokens)
-├── tailwind.config.js       # Neo-Brutalist Theme Configuration
-└── vite.config.js           # Engine Build Pipeline
+│   │   ├── canvas/      # The Viewport: Rulers, Grids, and Element rendering
+│   │   ├── common/      # System UI: BIOS Modals, Identity system, Buttons
+│   │   ├── dashboard/   # The Hub: Cloud Vault, Project cards, Templates
+│   │   ├── editor/      # Workspace: Property panels, Toolbars, Sidebars
+│   │   ├── landing/     # Marketing: Manifesto, Feature sections, CTA
+│   │   └── layout/      # Framework: Global Nav, Footer, Command Center
+│   ├── data/            # Static configuration & system constants
+│   ├── hooks/           # Performance-tuned React hooks (Events, Sizing)
+│   ├── store/           # Zustand Engine: Global state & history logic
+│   ├── theme/           # Neo-Brutalist design tokens & color palettes
+│   ├── utils/           # Helper logic: Icon resolvers, Math, Export logic
+│   ├── App.jsx          # Root Router & Global Providers
+│   └── index.css        # The Design System: Tailwind + Custom Keyframes
+├── tailwind.config.js   # Master Theme Configuration
+└── vite.config.js       # High-performance Build Pipeline
 ```
 
 ---
