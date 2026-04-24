@@ -2,13 +2,50 @@
 
 ![KRAFT Banner](file:///C:/Users/Adnan/.gemini/antigravity/brain/b4723657-04b8-4612-89cc-19d971ab2147/kraft_hero_banner_1776893849874.png)
 
-**KRAFT** is a high-fidelity, state-driven visual interaction engine built for creative teams who demand absolute structural control. Unlike traditional tools, KRAFT treats design as a live logic tree, eliminating the translation gap between visual mockups and production-ready code.
+**KRAFT** is a high-fidelity, state-driven visual interaction engine designed for creative teams who demand bold aesthetics and absolute structural control. Built on a Neo-Brutalist design philosophy, KRAFT bridges the gap between raw creative intent and pixel-perfect production reality.
 
 ---
 
-## 🛠️ System Architecture & Workflow
+## ⚡ Core Philosophy: Design Beyond Compromise
 
-KRAFT operates on a "Single Source of Truth" architecture, where the visual canvas is a direct projection of the global state.
+KRAFT isn't just a tool; it's a rebellion against the "boring" web. We prioritize:
+- **Neo-Brutalist Aesthetics**: High-contrast HSL palettes, solid shadows, and bold typography (Outfit, Inter, Editorial).
+- **Absolute Interaction**: Every element is a live node in a state-driven logic tree.
+- **State-Driven Integrity**: Powered by a high-performance Zustand engine for zero-latency workspace hydration.
+- **Cyber-Vault Infrastructure**: Instant access to 10k+ assets, fonts, and brand logos.
+
+---
+
+## 🛠️ System Modules
+
+### 1. The Design Studio
+The heartbeat of KRAFT. A high-fidelity canvas featuring:
+- **Dynamic Layering**: Non-destructive hierarchy management.
+- **Magnetic Guides**: Real-time alignment for geometric precision.
+- **Universal Toolbar**: Quick-access shapes, text engines, and asset injectors.
+
+### 2. Cloud Hub (Cyber-Vault)
+A premium dashboard serving as a centralized asset repository:
+- **10,000+ Icons**: Integrated `lucide-react` and `simple-icons` lookup.
+- **100+ Curated Fonts**: Professional typography selection.
+- **AI-Generated Fuel**: 20+ specialized assets for rapid prototyping.
+- **Auto-Purge Logic**: Optimized 12-hour asset lifecycle management with toggleable controls.
+
+### 3. System BIOS & Control Center
+A deep-level configuration modal for hardware-level control:
+- **Animation Speed**: Global control over UI transitions.
+- **GPU Acceleration**: Toggleable performance modes.
+- **Workspace Prefs**: Custom grid sizes and snapping sensitivity.
+
+### 4. The Manifesto
+An integrated design philosophy section that defines the KRAFT ethos: "Kill the Boring." It features interactive Neo-Brutalist cards and high-impact typography.
+
+---
+
+## 📂 Project Architecture
+
+### Data Flow & Workflow
+KRAFT operates on a **Single Source of Truth** architecture. The visual canvas is a direct projection of the global Zustand state.
 
 ```mermaid
 graph TD
@@ -24,83 +61,73 @@ graph TD
     G -->|Clean CSS/HTML| H[Deployment]
 ```
 
-### Core Pipeline:
-1.  **State-Driven Interaction**: Every drag, resize, and style change is processed through a high-performance Zustand store.
-2.  **Virtual Layering**: Objects are managed in a non-destructive hierarchy, allowing for instant reordering and grouping.
-3.  **Cloud Vault Engine**: A massive repository of 10k+ assets is served via a lookup system for zero-lag retrieval.
-4.  **Absolute Export**: Our compiler translates the state tree into pixel-perfect, framework-agnostic CSS/HTML.
-
----
-
-## 📂 Project Structure
-
+### Directory Structure
 ```bash
 KRAFT/
 ├── src/
 │   ├── app/
-│   │   └── routes/          # High-level page components (Landing, Docs, Privacy)
+│   │   └── routes/          # Landing, Editor, Docs, Privacy, Dashboard
 │   ├── components/
-│   │   ├── canvas/          # Core editing engine & viewport logic
-│   │   ├── common/          # Reusable UI (Modals, Buttons, System Settings)
-│   │   ├── dashboard/       # Cloud Hub & Project Management
-│   │   ├── editor/          # Sidebars, Toolbars, and Property Panels
-│   │   ├── landing/         # Interactive marketing sections
-│   │   └── layout/          # Global navigation & footer
+│   │   ├── canvas/          # Viewport logic & element rendering
+│   │   ├── common/          # Modals, Buttons, BIOS, Identity System
+│   │   ├── dashboard/       # Cloud Hub & Asset Management
+│   │   ├── editor/          # Sidebars, Properties, Toolbars
+│   │   ├── landing/         # Marketing Sections (Manifesto, Features)
+│   │   └── layout/          # Global Navigation & Footer
 │   ├── store/
-│   │   └── useEditorStore.js # Global State (The "Brain")
+│   │   └── useEditorStore.js # Central "Brain" (Zustand)
 │   ├── utils/
-│   │   └── iconUtils.js     # Logic for resolving 10k+ brand assets
-│   └── App.jsx              # Main Router & Theme Provider
-├── .env                     # Environment Configuration (GitIgnored)
-├── tailwind.config.js       # Neo-Brutalist Design Tokens
-└── package.json
+│   │   └── iconUtils.js     # 10k+ Asset Resolution Pipeline
+│   └── index.css            # Design System (Tailwind + Custom Tokens)
+├── tailwind.config.js       # Neo-Brutalist Theme Configuration
+└── vite.config.js           # Engine Build Pipeline
 ```
 
 ---
 
-## 🔑 Key Files Explained
+## 🚀 Tech Stack
 
-### `useEditorStore.js`
-The central nervous system. It manages everything from element positions to theme states and user preferences. It ensures that your workspace persists across sessions using local storage hydration.
-
-### `iconUtils.js`
-The high-fidelity asset pipeline. It maps search terms to vector paths for 10,000+ icons and brand logos, ensuring the "Brand Central" engine works instantly via the integrated `simple-icons` system.
-
----
-
-## 🗺️ Project Roadmap
-
-### 🚀 Completed
-- [x] **Neo-Brutalist Design System**: Solid shadows, high-contrast HSL palettes.
-- [x] **Cloud Vault v2.0**: Integrated 10k icons and brand logos with instant sync.
-- [x] **System BIOS Modal**: Interactive hardware acceleration and animation controls.
-- [x] **Full Responsiveness**: Optimized for Mobile, Tablet, and Ultra-wide monitors.
-
-### 🛠️ In Progress (Phase 3)
-- [ ] **Advanced Layering**: Multi-select, grouping, and layer-locking logic.
-- [ ] **Smart Alignment**: Real-time magnetic guides for pixel-perfect placement.
-- [ ] **PDF/PNG Export**: High-resolution bitmap and vector document exports.
-
-### 🌐 Future (Phase 4)
-- [ ] **Real-time Collaboration**: Multi-user editing via WebSocket sync.
-- [ ] **Asset Marketplace**: Community-contributed design fuel.
+- **Core**: React 18 + Vite
+- **State**: Zustand (with Persist Middleware)
+- **Styling**: Tailwind CSS + `tailwindcss-animate`
+- **Icons**: Lucide React + Simple Icons
+- **Fonts**: Google Fonts (Outfit, Inter) + Custom Editorial
+- **Animations**: Optimized CSS Keyframes & Tailwind Transitions
 
 ---
 
-## 🚀 Getting Started
+## 🏁 Getting Started
 
-1. **Install Dependencies**:
+1. **Clone & Install**:
    ```bash
    npm install
    ```
 
-2. **Run Development Server**:
+2. **Launch Dev Engine**:
    ```bash
    npm run dev
    ```
 
 3. **Open Studio**:
-   Navigate to `localhost:5173` and click "Launch Studio" to engage the engine.
+   Navigate to `localhost:5173` and click **Launch Studio**.
 
 ---
+
+## 🗺️ Development Roadmap
+
+### ✅ Completed
+- [x] **Neo-Brutalist Design System**: Solid shadows, high-contrast HSL.
+- [x] **Cloud Vault v2.0**: 10k+ assets with instant search.
+- [x] **System BIOS**: Interactive hardware acceleration controls.
+- [x] **Manifesto Section**: High-impact marketing integration.
+- [x] **Full Responsiveness**: Optimized for all device classes.
+
+### 🚧 In Progress
+- [ ] **Advanced Layering**: Multi-select and grouping logic.
+- [ ] **Magnetic Guides**: Real-time alignment assistance.
+- [ ] **Asset Marketplace**: Community contribution engine.
+
+---
+
 *Built with Absolute Precision by the KRAFT Team*
+
