@@ -222,7 +222,7 @@ const DesignTemplates = memo(({ globalSearch = '', onBack, isLight: forcedIsLigh
             className={`w-10 h-10 md:w-12 md:h-12 border-[3px] border-black neo-shadow-sm hover:-translate-x-1 transition-transform group flex items-center justify-center shrink-0 ${isLight ? 'bg-white text-black' : 'bg-[#1a1a1a] text-white'}`}
             title="Go Back"
           >
-            <Rocket size={20} md:size={24} className="group-hover:scale-110 transition-transform -rotate-90" />
+            <Rocket strokeWidth={3} className="w-5 h-5 md:w-6 md:h-6 group-hover:scale-110 transition-transform -rotate-90" />
           </button>
           <div>
             <h1 className={`text-2xl md:text-4xl font-editorial font-bold capitalize mb-1 md:mb-2 tracking-tighter underline decoration-yellow-400 decoration-4 underline-offset-4 ${isLight ? 'text-black' : 'text-white'}`}>
@@ -251,7 +251,7 @@ const DesignTemplates = memo(({ globalSearch = '', onBack, isLight: forcedIsLigh
         )) : (
           <div className="col-span-full py-20 md:py-40 text-center">
             <div className={`w-16 h-16 md:w-20 md:h-20 border-[3px] border-black neo-shadow flex items-center justify-center mx-auto mb-6 ${isLight ? 'bg-ivory text-black/20' : 'bg-black text-white/10'}`}>
-               <Zap size={32} md:size={40} />
+               <Zap className="w-8 h-8 md:w-10 md:h-10" />
             </div>
             <p className={`text-sm md:text-xl font-black uppercase tracking-widest italic ${isLight ? 'opacity-30' : 'opacity-10'}`}>No templates match search</p>
           </div>

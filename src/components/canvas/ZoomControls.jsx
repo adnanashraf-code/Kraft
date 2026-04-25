@@ -16,7 +16,7 @@ const ZoomControls = () => {
   };
 
   return (
-    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center space-x-2">
+    <div className="absolute bottom-24 md:bottom-6 right-4 md:left-1/2 md:-translate-x-1/2 z-50 flex items-center space-x-2">
       <div className={`
         flex items-center px-2 py-1.5 rounded-2xl backdrop-blur-xl border shadow-2xl transition-all
         ${isLight ? 'bg-white/80 border-gray-200 shadow-gray-200/50' : 'bg-black/60 border-white/10 shadow-black'}

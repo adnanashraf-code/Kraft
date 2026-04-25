@@ -16,7 +16,7 @@ const HistoryControls = () => {
   if (elements.length === 0) return null;
 
   return (
-    <div className="absolute top-6 left-1/2 -translate-x-1/2 z-50 flex items-center animate-in fade-in slide-in-from-top-4 duration-500">
+    <div className="absolute top-20 md:top-6 left-1/2 -translate-x-1/2 z-50 flex items-center animate-in fade-in slide-in-from-top-4 duration-500">
       <div className={`
         flex items-center p-1.5 rounded-2xl backdrop-blur-xl border shadow-2xl transition-all
         ${isLight ? 'bg-white/80 border-gray-200 shadow-gray-200/40' : 'bg-black/60 border-white/10 shadow-black/40'}

@@ -181,7 +181,7 @@ const AssetsModal = () => {
   const currentAssets = currentCategory?.items || [];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-8">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-8">
       {/* Backdrop */}
       <div 
         className="absolute inset-0 bg-black/60 backdrop-blur-md"
@@ -189,21 +189,21 @@ const AssetsModal = () => {
       />
 
       {/* Modal */}
-      <div className={`relative w-full max-w-5xl h-full max-h-[80vh] flex flex-col rounded-3xl overflow-hidden shadow-2xl border ${isLight ? 'bg-white border-gray-200' : 'bg-[#151515] border-white/10'}`}>
+      <div className={`relative w-full max-w-5xl h-full md:h-full md:max-h-[85vh] flex flex-col rounded-none md:rounded-3xl overflow-hidden shadow-2xl border ${isLight ? 'bg-white border-gray-200' : 'bg-[#151515] border-white/10'}`}>
         
         {/* Header */}
-        <div className={`flex items-center justify-between px-8 py-5 border-b ${theme.border}`}>
+        <div className={`flex flex-col md:flex-row md:items-center justify-between px-6 md:px-8 py-4 md:py-5 border-b ${theme.border} gap-4`}>
           <div>
-            <h2 className={`font-black uppercase tracking-widest text-lg ${isLight ? 'text-gray-900' : 'text-white'}`}>Asset Vault</h2>
-            <p className={`text-xs mt-1 ${theme.title}`}>Insert premium shapes, elements, and icons.</p>
+            <h2 className={`font-black uppercase tracking-widest text-base md:text-lg ${isLight ? 'text-gray-900' : 'text-white'}`}>Asset Vault</h2>
+            <p className={`text-[10px] md:text-xs mt-0.5 md:mt-1 ${theme.title} hidden xs:block`}>Insert premium shapes, elements, and icons.</p>
           </div>
           
-          <div className="flex-1 max-w-md mx-8">
-            <div className={`flex items-center gap-3 px-4 py-2 rounded-2xl border transition-all ${isLight ? 'bg-gray-100 border-gray-200 focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-500/20' : 'bg-white/5 border-white/10 focus-within:bg-white/10'}`}>
-               <Search size={16} className="opacity-50" />
+          <div className="flex-1 max-w-md w-full">
+            <div className={`flex items-center gap-3 px-4 py-2 rounded-xl md:rounded-2xl border transition-all ${isLight ? 'bg-gray-100 border-gray-200 focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-500/20' : 'bg-white/5 border-white/10 focus-within:bg-white/10'}`}>
+               <Search size={14} className="opacity-50 shrink-0" />
                <input 
                 type="text" 
-                placeholder="Search assets & icons..." 
+                placeholder="Search assets..." 
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
@@ -214,16 +214,16 @@ const AssetsModal = () => {
             </div>
           </div>
 
-          <button onClick={() => setAssetsOpen(false)} className={`p-2 rounded-xl transition-colors hover:${isLight ? 'bg-gray-100 text-gray-900' : 'bg-white/10 text-white'} ${theme.title}`}>
+          <button onClick={() => setAssetsOpen(false)} className={`absolute top-4 right-4 md:relative md:top-0 md:right-0 p-2 rounded-xl transition-colors hover:${isLight ? 'bg-gray-100 text-gray-900' : 'bg-white/10 text-white'} ${theme.title}`}>
             <X size={20} />
           </button>
         </div>
 
         {/* Content with Sidebar */}
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
           
-          {/* Categories Sidebar */}
-          <div className={`w-64 border-r ${theme.border} p-4 space-y-2 overflow-y-auto custom-scrollbar`}>
+          {/* Categories Sidebar / Mobile Top Nav */}
+          <div className={`w-full md:w-64 border-b md:border-b-0 md:border-r ${theme.border} p-3 md:p-4 flex flex-row md:flex-col gap-2 overflow-x-auto md:overflow-y-auto scrollbar-hide no-scrollbar`}>
             <input 
               type="file" 
               ref={fileInputRef} 
@@ -234,49 +234,49 @@ const AssetsModal = () => {
             
             <button
               onClick={() => fileInputRef.current.click()}
-              className={`w-full flex items-center px-4 py-3 rounded-xl mb-4 border-2 border-dashed transition-all hover:bg-blue-500/5 ${isLight ? 'border-blue-200 text-blue-600' : 'border-blue-500/30 text-blue-400'}`}
+              className={`flex items-center px-4 py-2.5 md:py-3 rounded-lg md:rounded-xl md:mb-4 border-2 border-dashed transition-all hover:bg-blue-500/5 shrink-0 ${isLight ? 'border-blue-200 text-blue-600' : 'border-blue-500/30 text-blue-400'}`}
             >
-              <Upload size={16} className="mr-3" />
-              <span className="text-xs font-black uppercase tracking-wider">Device Upload</span>
+              <Upload size={14} className="md:mr-3" />
+              <span className="hidden md:inline text-[10px] md:text-xs font-black uppercase tracking-wider">Device Upload</span>
             </button>
 
             {ALL_CATEGORIES.map(cat => (
               <button
                 key={cat.category}
                 onClick={() => setActiveCategory(cat.category)}
-                className={`w-full flex items-center px-4 py-3 rounded-xl transition-all ${activeCategory === cat.category ? 'bg-blue-600 text-white shadow-md' : `hover:${isLight ? 'bg-gray-100' : 'bg-white/5'} ${theme.text}`}`}
+                className={`flex items-center px-4 py-2.5 md:py-3 rounded-lg md:rounded-xl transition-all shrink-0 whitespace-nowrap ${activeCategory === cat.category ? 'bg-blue-600 text-white shadow-md' : `hover:${isLight ? 'bg-gray-100' : 'bg-white/5'} ${theme.text}`}`}
               >
-                {cat.category === 'UPLOADS' && <ImageIcon size={16} className="mr-3 opacity-70" />}
-                {cat.category === 'COMPONENTS' && <Box size={16} className="mr-3 opacity-70" />}
-                {cat.category !== 'UPLOADS' && cat.category !== 'COMPONENTS' && <Layers size={16} className="mr-3 opacity-70" />}
-                <span className="text-xs font-bold tracking-wide">{cat.category}</span>
+                {cat.category === 'UPLOADS' && <ImageIcon size={14} className="md:mr-3 opacity-70" />}
+                {cat.category === 'COMPONENTS' && <Box size={14} className="md:mr-3 opacity-70" />}
+                {cat.category !== 'UPLOADS' && cat.category !== 'COMPONENTS' && <Layers size={14} className="md:mr-3 opacity-70" />}
+                <span className="text-[10px] md:text-xs font-bold tracking-wide">{cat.category}</span>
               </button>
             ))}
           </div>
 
           {/* Grid */}
-          <div className={`flex-1 p-8 overflow-y-auto custom-scrollbar ${theme.canvas}`}>
+          <div className={`flex-1 p-4 md:p-8 overflow-y-auto custom-scrollbar ${theme.canvas}`}>
              {activeCategory === 'UPLOADS' && (
-               <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
                  {library.images.length === 0 && (
-                   <div className="col-span-full py-20 text-center opacity-30 font-bold uppercase tracking-widest text-sm">No images uploaded yet</div>
+                   <div className="col-span-full py-20 text-center opacity-30 font-bold uppercase tracking-widest text-[10px] md:text-sm">No images uploaded yet</div>
                  )}
                  {library.images.map(img => (
                    <div 
                     key={img.id}
-                    className={`group relative flex flex-col items-center p-4 rounded-2xl border cursor-pointer hover:shadow-xl transition-all hover:-translate-y-1 ${isLight ? 'bg-white border-gray-200' : 'bg-[#1a1a1a] border-white/5 hover:border-white/20'}`}
+                    className={`group relative flex flex-col items-center p-3 md:p-4 rounded-2xl border cursor-pointer hover:shadow-xl transition-all hover:-translate-y-1 ${isLight ? 'bg-white border-gray-200' : 'bg-[#1a1a1a] border-white/5 hover:border-white/20'}`}
                    >
                      <div onClick={() => handleAddUpload(img)} className="w-full flex flex-col items-center">
-                        <img src={img.src} alt={img.name} className="w-full aspect-square object-contain mb-4 rounded-lg bg-black/10" />
-                        <span className={`text-[10px] font-bold uppercase tracking-wider truncate w-full text-center ${theme.text}`}>{img.name}</span>
+                        <img src={img.src} alt={img.name} className="w-full aspect-square object-contain mb-3 md:mb-4 rounded-lg bg-black/10" />
+                        <span className={`text-[9px] md:text-[10px] font-bold uppercase tracking-wider truncate w-full text-center ${theme.text}`}>{img.name}</span>
                      </div>
                      
                      <button 
                       onClick={(e) => { e.stopPropagation(); removeLibraryImage(img.id); }}
-                      className="absolute -top-2 -right-2 w-7 h-7 bg-red-500 text-white rounded-full border-2 border-black flex items-center justify-center neo-shadow-xs opacity-0 group-hover:opacity-100 transition-all hover:scale-110 z-10"
+                      className="absolute -top-2 -right-2 w-6 h-6 md:w-7 md:h-7 bg-red-500 text-white rounded-full border-2 border-black flex items-center justify-center neo-shadow-xs opacity-0 group-hover:opacity-100 transition-all hover:scale-110 z-10"
                       title="Delete permanently"
                      >
-                       <X size={14} strokeWidth={4} />
+                       <X size={12} strokeWidth={4} />
                      </button>
                    </div>
                  ))}
@@ -284,59 +284,59 @@ const AssetsModal = () => {
              )}
 
              {activeCategory === 'COMPONENTS' && (
-               <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
                  {library.components.length === 0 && (
-                   <div className="col-span-full py-20 text-center opacity-30 font-bold uppercase tracking-widest text-sm">No components created yet</div>
+                   <div className="col-span-full py-20 text-center opacity-30 font-bold uppercase tracking-widest text-[10px] md:text-sm">No components created yet</div>
                  )}
                  {library.components.map(comp => (
                     <div 
                       key={comp.id}
-                      className={`group flex flex-col items-center p-6 rounded-2xl border cursor-pointer hover:shadow-xl transition-all hover:-translate-y-1 ${isLight ? 'bg-white border-gray-200' : 'bg-[#1a1a1a] border-white/5 hover:border-white/20'}`}
+                      className={`group flex flex-col items-center p-4 md:p-6 rounded-2xl border cursor-pointer hover:shadow-xl transition-all hover:-translate-y-1 ${isLight ? 'bg-white border-gray-200' : 'bg-[#1a1a1a] border-white/5 hover:border-white/20'}`}
                       onClick={() => handleAddInstance(comp)}
                     >
-                      <div className="w-16 h-16 rounded-xl bg-indigo-500/20 flex items-center justify-center mb-4">
-                        <Box size={32} className="text-indigo-500" />
+                      <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl bg-indigo-500/20 flex items-center justify-center mb-3 md:mb-4">
+                        <Box size={24} className="md:w-8 md:h-8 text-indigo-500" />
                       </div>
-                      <span className={`text-[10px] font-bold uppercase tracking-wider truncate w-full text-center ${theme.text}`}>{comp.name}</span>
+                      <span className={`text-[9px] md:text-[10px] font-bold uppercase tracking-wider truncate w-full text-center ${theme.text}`}>{comp.name}</span>
                     </div>
                  ))}
                </div>
              )}
 
           {activeCategory === 'Icons' && (
-             <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-10 gap-4">
+             <div className="grid grid-cols-3 xs:grid-cols-4 sm:grid-cols-6 lg:grid-cols-10 gap-2 md:gap-4">
                 {filteredIcons.map((asset, idx) => (
                   <div 
                     key={idx}
-                    className={`group flex flex-col items-center p-4 rounded-2xl border cursor-pointer hover:shadow-xl transition-all hover:-translate-y-1 ${isLight ? 'bg-white border-gray-200' : 'bg-[#1a1a1a] border-white/5 hover:border-white/20'}`}
+                    className={`group flex flex-col items-center p-3 md:p-4 rounded-xl md:rounded-2xl border cursor-pointer hover:shadow-xl transition-all hover:-translate-y-1 ${isLight ? 'bg-white border-gray-200' : 'bg-[#1a1a1a] border-white/5 hover:border-white/20'}`}
                     onClick={() => handleAddAsset({ 
                       ...asset, 
                       iconName: asset.name,
                       path: asset.path,
                       hex: asset.hex,
-                      fill: undefined // Force dynamic theme color for new icons
+                      fill: undefined 
                     })}
                   >
                     <DynamicAssetPreview asset={asset} isLight={isLight} />
-                    <span className={`text-[8px] font-black uppercase tracking-wider mt-2 truncate w-full text-center ${theme.text}`}>{asset.name}</span>
+                    <span className={`text-[7px] md:text-[8px] font-black uppercase tracking-wider mt-2 truncate w-full text-center ${theme.text}`}>{asset.name}</span>
                   </div>
                 ))}
                 {filteredIcons.length === 0 && (
-                   <div className="col-span-full py-20 text-center opacity-30 font-bold uppercase tracking-widest text-sm">No icons found matching "{searchQuery}"</div>
+                   <div className="col-span-full py-20 text-center opacity-30 font-bold uppercase tracking-widest text-[10px] md:text-sm">No icons matching "{searchQuery}"</div>
                 )}
              </div>
           )}
 
           {activeCategory !== 'UPLOADS' && activeCategory !== 'COMPONENTS' && activeCategory !== 'Icons' && (
-               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
                   {currentAssets.map((asset, idx) => (
                     <div 
                       key={idx}
-                      className={`group flex flex-col items-center p-6 rounded-2xl border cursor-pointer hover:shadow-xl transition-all hover:-translate-y-1 ${isLight ? 'bg-white border-gray-200' : 'bg-[#1a1a1a] border-white/5 hover:border-white/20'}`}
+                      className={`group flex flex-col items-center p-4 md:p-6 rounded-2xl border cursor-pointer hover:shadow-xl transition-all hover:-translate-y-1 ${isLight ? 'bg-white border-gray-200' : 'bg-[#1a1a1a] border-white/5 hover:border-white/20'}`}
                       onClick={() => handleAddAsset(asset)}
                     >
                       <DynamicAssetPreview asset={asset} isLight={isLight} />
-                      <span className={`text-xs font-bold uppercase tracking-wider ${isLight ? 'text-gray-900' : 'text-white'}`}>{asset.name}</span>
+                      <span className={`text-[10px] md:text-xs font-bold uppercase tracking-wider ${isLight ? 'text-gray-900' : 'text-white'}`}>{asset.name}</span>
                     </div>
                   ))}
                </div>

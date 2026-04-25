@@ -22,7 +22,7 @@ const LayersPanel = () => {
   );
 
   return (
-    <div className={`w-[300px] ${theme.sidebar} flex flex-col h-full shrink-0 border-r ${theme.border} relative z-10 p-4 transition-colors duration-500`}>
+    <div className={`w-full ${theme.sidebar} flex flex-col h-full shrink-0 border-r ${theme.border} relative z-10 p-4 transition-colors duration-500`}>
       
       {/* Dynamic Search Area */}
       {isSearchOpen && (

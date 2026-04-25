@@ -50,7 +50,7 @@ const ArtboardProperties = ({ theme, isLight, activePage }) => {
   );
 
   return (
-    <div className={`w-[320px] ${theme.sidebar} border-l ${theme.border} flex flex-col h-full shrink-0 relative z-10 transition-colors duration-500`}>
+    <div className={`w-full ${theme.sidebar} border-l ${theme.border} flex flex-col h-full shrink-0 relative z-10 transition-colors duration-500`}>
       <div className={`h-14 border-b ${theme.border} flex items-center px-4 justify-between shrink-0`}>
         <div className="flex items-center">
             <LayoutGrid size={15} className="mr-2 text-indigo-500" strokeWidth={3} />
@@ -170,7 +170,7 @@ const PropertiesPanel = () => {
   );
 
   return (
-    <div className={`w-[320px] ${theme.sidebar} border-l ${theme.border} flex flex-col h-full shrink-0 relative z-10 transition-colors duration-500`}>
+    <div className={`w-full ${theme.sidebar} border-l ${theme.border} flex flex-col h-full shrink-0 relative z-10 transition-colors duration-500`}>
       <div className={`h-14 border-b ${theme.border} flex items-center px-4 justify-between ${isLight ? 'bg-gray-50' : 'bg-black/20'} shrink-0`}>
         <div className="flex items-center">
             <Hash size={15} className="mr-2 text-blue-500" strokeWidth={3} />

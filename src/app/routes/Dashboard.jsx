@@ -228,8 +228,8 @@ const Dashboard = () => {
                 onClick={() => navigate('/editor')}
                 className="bg-black text-white px-4 md:px-6 py-2.5 neo-shadow hover:bg-cyan-500 hover:text-black transition-all group text-[10px] md:text-xs"
               >
-                <span className="hidden xs:inline">New Design</span>
-                <span className="xs:hidden">New</span>
+                <span className="hidden sm:inline">New Design</span>
+                <span className="sm:hidden">New</span>
               </Button>
            </div>
         </header>
@@ -248,13 +248,13 @@ const Dashboard = () => {
                       onClick={() => setViewMode('grid')}
                       className={`p-2 transition-all ${viewMode === 'grid' ? (isLight ? 'bg-black text-white' : 'bg-yellow-400 text-black') : (isLight ? 'text-black hover:bg-gray-100' : 'text-white hover:bg-white/10')}`}
                     >
-                      <LayoutGrid size={18} md:size={20}/>
+                      <LayoutGrid className="w-[18px] h-[18px] md:w-5 md:h-5"/>
                     </button>
                     <button 
                       onClick={() => setViewMode('list')}
                       className={`p-2 transition-all ${viewMode === 'list' ? (isLight ? 'bg-black text-white' : 'bg-yellow-400 text-black') : (isLight ? 'text-black hover:bg-gray-100' : 'text-white hover:bg-white/10')}`}
                     >
-                      <List size={18} md:size={20}/>
+                      <List className="w-[18px] h-[18px] md:w-5 md:h-5"/>
                     </button>
                  </div>
               </div>
@@ -280,7 +280,7 @@ const Dashboard = () => {
               ) : (
                 <div className="flex flex-col items-center justify-center py-20 md:py-40 text-center">
                    <div className="w-16 h-16 md:w-24 md:h-24 bg-white border-[3px] border-black neo-shadow flex items-center justify-center text-black mb-6 md:mb-8">
-                      <Search size={32} md:size={48} strokeWidth={3} />
+                      <Search className="w-8 h-8 md:w-12 md:h-12" strokeWidth={3} />
                    </div>
                    <h3 className="text-xl md:text-3xl font-black uppercase tracking-tight mb-2">
                      {activeTab === 'drafts' ? 'No Work in Progress' : activeTab === 'archived' ? 'History is Empty' : 'Ghost Town...'}

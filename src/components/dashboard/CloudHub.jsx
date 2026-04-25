@@ -293,10 +293,10 @@ const CloudHub = ({ globalSearch = '', onBack }) => {
             className="w-10 h-10 md:w-12 md:h-12 bg-white text-black flex items-center justify-center neo-shadow-sm hover:-translate-x-1 transition-transform group shrink-0"
             title="Go Back"
           >
-            <ArrowLeft size={20} md:size={24} strokeWidth={3} className="group-hover:scale-110 transition-transform" />
+            <ArrowLeft strokeWidth={3} className="w-5 h-5 md:w-6 md:h-6 group-hover:scale-110 transition-transform" />
           </button>
           <div className="w-12 h-12 md:w-16 md:h-16 bg-yellow-400 flex items-center justify-center neo-shadow-sm rotate-3 shrink-0">
-             <Cloud className="text-black" size={24} md:size={32} strokeWidth={3} />
+             <Cloud className="text-black w-6 h-6 md:w-8 md:h-8" strokeWidth={3} />
           </div>
           <div className="min-w-0">
             <h2 className="text-xl md:text-3xl font-black uppercase tracking-tighter leading-none mb-1 truncate">Vault_Cloud_01</h2>
@@ -314,7 +314,7 @@ const CloudHub = ({ globalSearch = '', onBack }) => {
                onClick={() => setActiveCategory(cat.id)}
                className={`px-4 md:px-8 py-3 md:py-4 border-2 border-black neo-shadow-sm transition-all flex items-center gap-2 md:gap-3 uppercase font-black text-[9px] md:text-[11px] tracking-widest whitespace-nowrap ${activeCategory === cat.id ? 'bg-yellow-400 text-black translate-x-1 translate-y-1 neo-shadow-none' : (isLight ? 'bg-white text-black hover:bg-gray-100' : 'bg-[#1a1a1a] text-white hover:bg-black')}`}
              >
-               <cat.icon size={14} md:size={16} strokeWidth={3} />
+               <cat.icon className="w-3.5 h-3.5 md:w-4 md:h-4" strokeWidth={3} />
                <span className="md:inline">{cat.label}</span>
              </button>
            ))}
@@ -350,7 +350,7 @@ const CloudHub = ({ globalSearch = '', onBack }) => {
                >
                   <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileUpload} accept="image/*" />
                   <div className="w-10 h-10 md:w-12 md:h-12 bg-black flex items-center justify-center neo-shadow-xs group-hover:-translate-y-1 transition-transform">
-                     <Upload className="text-white" size={20} md:size={24} strokeWidth={3} />
+                     <Upload className="text-white w-5 h-5 md:w-6 md:h-6" strokeWidth={3} />
                   </div>
                   <p className="text-[10px] md:text-[12px] font-black uppercase tracking-widest text-center">Upload<br/>New Asset</p>
                </div>
@@ -435,7 +435,7 @@ const CloudHub = ({ globalSearch = '', onBack }) => {
                     </p>
                     {isSelected({name: font}, 'font') && (
                       <div className="absolute top-2 right-2 w-5 h-5 md:w-6 md:h-6 bg-black text-yellow-400 flex items-center justify-center neo-shadow-xs">
-                        <Check size={12} md:size={14} strokeWidth={4} />
+                        <Check className="w-3 h-3 md:w-3.5 md:h-3.5" strokeWidth={4} />
                       </div>
                     )}
                  </div>
@@ -582,15 +582,15 @@ const CloudHub = ({ globalSearch = '', onBack }) => {
                {stagedAssets.map((asset, i) => (
                  <div key={i} className="h-8 w-8 md:h-10 md:w-10 shrink-0 bg-white/5 border border-white/20 flex items-center justify-center group relative overflow-hidden transition-all hover:border-yellow-400">
                     {asset.type === 'image' && <img src={asset.src} className="w-full h-full object-cover" />}
-                    {asset.type === 'font' && <Type size={12} md:size={14} className="text-white/60" />}
-                    {asset.type === 'icon' && <Box size={12} md:size={14} className="text-cyan-400" />}
-                    {asset.type === 'logo' && <LayoutGrid size={12} md:size={14} className="text-magenta-400" />}
+                    {asset.type === 'font' && <Type className="text-white/60 w-3 h-3 md:w-3.5 md:h-3.5" />}
+                    {asset.type === 'icon' && <Box className="text-cyan-400 w-3 h-3 md:w-3.5 md:h-3.5" />}
+                    {asset.type === 'logo' && <LayoutGrid className="text-magenta-400 w-3 h-3 md:w-3.5 md:h-3.5" />}
                     
                     <button 
                       onClick={() => toggleStageAsset(asset)}
                       className="absolute inset-0 bg-red-500/90 text-white md:opacity-0 md:group-hover:opacity-100 transition-opacity flex items-center justify-center"
                     >
-                      <X size={12} md:size={14} strokeWidth={3} />
+                      <X className="w-3 h-3 md:w-3.5 md:h-3.5" strokeWidth={3} />
                     </button>
                  </div>
                ))}
@@ -607,7 +607,7 @@ const CloudHub = ({ globalSearch = '', onBack }) => {
                  onClick={handleBatchImport}
                  className="flex-1 md:flex-none px-4 md:px-6 py-2.5 bg-yellow-400 text-black neo-shadow-sm hover:-translate-y-0.5 transition-all font-black uppercase text-[9px] md:text-[10px] tracking-widest flex items-center justify-center gap-2"
                >
-                 <Zap size={12} md:size={14} strokeWidth={3} />
+                 <Zap className="w-3 h-3 md:w-3.5 md:h-3.5" strokeWidth={3} />
                  <span>Construct Layout</span>
                </button>
             </div>
@@ -646,7 +646,7 @@ const CloudHub = ({ globalSearch = '', onBack }) => {
               <div key={i} className="flex items-center gap-3 md:gap-4 group/node cursor-help min-w-[120px]">
                 <div className="relative">
                   <div className={`w-2.5 h-2.5 md:w-3 md:h-3 ${node.color} rotate-45 relative z-10 flex items-center justify-center`}>
-                     <node.icon size={6} md:size={8} className="text-black" strokeWidth={4} />
+                     <node.icon className="text-black w-1.5 h-1.5 md:w-2 md:h-2" strokeWidth={4} />
                   </div>
                   <div className={`absolute inset-0 ${node.color} opacity-40 rotate-45 scale-150 blur-sm ${node.pulse}`} />
                 </div>

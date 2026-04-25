@@ -30,7 +30,9 @@ const Editor = () => {
     bringToFront, sendToBack, moveForward, moveBackward
   } = useEditorStore();
   const theme = THEMES[uiTheme];
-  const isFirstLoad = useRef(true);
+  
+  const [isLeftSidebarOpen, setIsLeftSidebarOpen] = React.useState(false);
+  const [isRightSidebarOpen, setIsRightSidebarOpen] = React.useState(false);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -117,19 +119,26 @@ const Editor = () => {
     }
   }, [id, loadProject]);
 
-  // Redundant manual save logic removed. Zustand 'persist' handles this now.
-
   // Safety check for theme
   if (!theme) return <div className="p-10 text-red-500 font-bold">Error: Theme '{uiTheme}' not found.</div>;
 
   return (
-    <div className={`flex h-screen w-screen ${theme.canvas} overflow-hidden font-sans relative transition-colors duration-500 select-none`}>
+    <div className={`flex flex-col md:flex-row h-screen w-screen ${theme.canvas} overflow-hidden font-sans relative transition-colors duration-500 select-none`}>
       {/* Sidebar Navigation & Tools */}
-      <Toolbar />
+      <Toolbar onToggleLeft={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)} onToggleRight={() => setIsRightSidebarOpen(!isRightSidebarOpen)} />
 
       <div className="flex flex-1 overflow-hidden relative">
+        {/* Left Sidebar Overlay (Mobile) */}
+        {isLeftSidebarOpen && (
+          <div className="fixed inset-0 bg-black/60 z-30 md:hidden backdrop-blur-sm" onClick={() => setIsLeftSidebarOpen(false)} />
+        )}
+
         {/* Left Sidebar: Pages + Layers */}
-        <div className={`w-[300px] flex flex-col h-full border-r ${theme.sidebar} ${theme.border}`}>
+        <div className={`
+          fixed md:relative inset-y-0 left-0 z-40 w-[280px] md:w-[300px] flex flex-col h-full border-r transition-transform duration-300 ease-in-out
+          ${theme.sidebar} ${theme.border}
+          ${isLeftSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+        `}>
             <PagesPanel />
             <LayersPanel />
         </div>
@@ -146,8 +155,18 @@ const Editor = () => {
           </div>
         </div>
 
+        {/* Right Sidebar Overlay (Mobile) */}
+        {isRightSidebarOpen && (
+          <div className="fixed inset-0 bg-black/60 z-30 md:hidden backdrop-blur-sm" onClick={() => setIsRightSidebarOpen(false)} />
+        )}
+
         {/* Property Controls */}
-        <PropertiesPanel />
+        <div className={`
+          fixed md:relative inset-y-0 right-0 z-40 w-[280px] md:w-[320px] transition-transform duration-300 ease-in-out
+          ${isRightSidebarOpen ? 'translate-x-0' : 'translate-x-full md:translate-x-0'}
+        `}>
+          <PropertiesPanel />
+        </div>
       </div>
 
       <ContextMenu />

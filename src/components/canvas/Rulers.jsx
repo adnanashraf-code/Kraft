@@ -83,21 +83,24 @@ const Ruler = ({ type, zoom, pan, isLight, theme }) => {
 export const HorizontalRuler = () => {
   const { canvas, uiTheme } = useEditorStore();
   const isLight = uiTheme === 'light' || uiTheme === 'gray';
-  if (!canvas.isRulersVisible) return null;
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  if (!canvas.isRulersVisible || isMobile) return null;
   return <Ruler type="horizontal" zoom={canvas.zoom} pan={canvas.panX} isLight={isLight} />;
 };
 
 export const VerticalRuler = () => {
   const { canvas, uiTheme } = useEditorStore();
   const isLight = uiTheme === 'light' || uiTheme === 'gray';
-  if (!canvas.isRulersVisible) return null;
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  if (!canvas.isRulersVisible || isMobile) return null;
   return <Ruler type="vertical" zoom={canvas.zoom} pan={canvas.panY} isLight={isLight} />;
 };
 
 export const RulerCorner = () => {
     const { canvas, uiTheme } = useEditorStore();
     const isLight = uiTheme === 'light' || uiTheme === 'gray';
-    if (!canvas.isRulersVisible) return null;
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    if (!canvas.isRulersVisible || isMobile) return null;
     return (
         <div className={`absolute left-0 top-0 w-6 h-6 z-[50] border-r border-b ${isLight ? 'bg-white border-gray-100' : 'bg-[#0f0f0f] border-white/5'}`} />
     );
