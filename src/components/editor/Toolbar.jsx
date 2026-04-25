@@ -170,6 +170,12 @@ const Toolbar = ({ onToggleLeft, onToggleRight }) => {
       {/* Top Right Controls (Mobile) */}
       <div className="flex items-center space-x-1 md:hidden">
         <ToolButton
+          id="tool-settings-mobile"
+          icon={Settings}
+          title="Settings"
+          onClick={() => setSettingsOpen(true)}
+        />
+        <ToolButton
           id="tool-upload-mobile"
           icon={Upload}
           title="Upload Image"
@@ -250,7 +256,6 @@ const Toolbar = ({ onToggleLeft, onToggleRight }) => {
         icon={Search}
         title="Search"
         onClick={() => setSearchOpen(true)}
-        className="hidden sm:flex"
       />
     </>
   );
@@ -309,10 +314,10 @@ const Toolbar = ({ onToggleLeft, onToggleRight }) => {
       </div>
 
       {/* Bottom Toolbar (Mobile Only) */}
-      <div className={`md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center justify-center p-2 rounded-2xl border shadow-2xl ${theme.sidebar} ${theme.border} backdrop-blur-xl bg-opacity-80`}>
-        <div className="flex items-center space-x-2">
+      <div className={`md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center justify-center w-[90vw] max-w-sm px-2 py-2 rounded-2xl border shadow-2xl ${theme.sidebar} ${theme.border} backdrop-blur-xl bg-opacity-80`}>
+        <div className="flex items-center space-x-1 overflow-x-auto no-scrollbar scroll-smooth px-1">
           <ToolsContent />
-          <div className={`w-px h-6 ${theme.border} border-l mx-1`} />
+          <div className={`w-px h-6 ${theme.border} border-l mx-1 shrink-0`} />
           <ToolButton
             icon={Settings}
             title="Settings"

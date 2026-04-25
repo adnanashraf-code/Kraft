@@ -199,6 +199,7 @@ const Canvas = () => {
   const canvasRef = useRef(null);
   const theme = THEMES[uiTheme];
   const isLight = uiTheme === 'light' || uiTheme === 'gray';
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
   const [marquee, setMarquee] = React.useState({ active: false, startX: 0, startY: 0, currentX: 0, currentY: 0 });
 
@@ -303,9 +304,44 @@ const Canvas = () => {
       setZoom(canvas.zoom + delta);
     };
 
+    // Touch Handling for Pinch-to-Zoom
+    let initialDist = 0;
+    let initialZoom = canvas.zoom;
+
+    const handleTouchStart = (e) => {
+      if (e.touches.length === 2) {
+        const dist = Math.hypot(
+          e.touches[0].pageX - e.touches[1].pageX,
+          e.touches[0].pageY - e.touches[1].pageY
+        );
+        initialDist = dist;
+        initialZoom = canvas.zoom;
+      }
+    };
+
+    const handleTouchMove = (e) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        const dist = Math.hypot(
+          e.touches[0].pageX - e.touches[1].pageX,
+          e.touches[0].pageY - e.touches[1].pageY
+        );
+        const scale = dist / initialDist;
+        const newZoom = initialZoom * scale;
+        // Clamp and update zoom
+        setZoom(Math.max(10, Math.min(500, newZoom)));
+      }
+    };
+
     // Use non-passive listener to allow preventDefault()
     canvasEl.addEventListener('wheel', handleWheelRaw, { passive: false });
-    return () => canvasEl.removeEventListener('wheel', handleWheelRaw);
+    canvasEl.addEventListener('touchstart', handleTouchStart, { passive: true });
+    canvasEl.addEventListener('touchmove', handleTouchMove, { passive: false });
+    return () => {
+      canvasEl.removeEventListener('wheel', handleWheelRaw);
+      canvasEl.removeEventListener('touchstart', handleTouchStart);
+      canvasEl.removeEventListener('touchmove', handleTouchMove);
+    };
   }, [canvas.zoom, setZoom]);
 
   const handleCanvasMouseDown = (e) => {
@@ -381,7 +417,7 @@ const Canvas = () => {
         ))}
       </div>
       
-      <ZoomControls />
+      {isMobile ? null : <ZoomControls />}
       <HistoryControls />
     </div>
   );
