@@ -14,10 +14,23 @@ const ShapePicker = () => {
   const basicShapes = ASSETS.find(cat => cat.category === 'Basic Shapes')?.items || [];
 
   const handleSelectShape = (shape) => {
+    const { canvas } = useEditorStore.getState();
+    const zoomScale = (canvas.zoom || 100) / 100;
+    
+    // Use the actual canvas container size if possible, otherwise viewport
+    const container = document.getElementById('canvas-container');
+    const width = container ? container.clientWidth : window.innerWidth;
+    const height = container ? container.clientHeight : window.innerHeight;
+    
+    const centerX = (-canvas.panX + (width / 2)) / zoomScale;
+    const centerY = (-canvas.panY + (height / 2)) / zoomScale;
+
+    console.log('Adding shape at:', { centerX, centerY, panX: canvas.panX, zoom: canvas.zoom });
+
     addElement({
       ...shape,
-      x: 400,
-      y: 200,
+      x: centerX - (shape.w || 100) / 2,
+      y: centerY - (shape.h || 100) / 2,
       fill: isLight ? '#3b82f6' : '#60a5fa'
     });
     setShapePickerOpen(false);
@@ -25,7 +38,10 @@ const ShapePicker = () => {
 
   return (
     <div className={`
-      absolute left-20 top-32 w-64 ${theme.sidebar} border ${theme.border} 
+      fixed md:absolute 
+      inset-x-4 top-1/2 -translate-y-1/2 md:translate-y-0
+      md:left-20 md:top-32 md:inset-x-auto
+      w-auto md:w-64 ${theme.sidebar} border ${theme.border} 
       rounded-2xl shadow-2xl z-50 overflow-hidden flex flex-col 
       animate-in fade-in zoom-in-95 duration-200
     `}>

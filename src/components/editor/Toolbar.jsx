@@ -86,10 +86,23 @@ const Toolbar = ({ onToggleLeft, onToggleRight }) => {
   const isLight = uiTheme === "light" || uiTheme === "gray";
 
   const handleAddText = () => {
+    const { canvas, addNotification } = useEditorStore.getState();
+    const zoomScale = (canvas.zoom || 100) / 100;
+    
+    // Use the actual canvas container size if possible, otherwise viewport
+    const container = document.getElementById('canvas-container');
+    const width = container ? container.clientWidth : window.innerWidth;
+    const height = container ? container.clientHeight : window.innerHeight;
+    
+    const centerX = (-canvas.panX + (width / 2)) / zoomScale;
+    const centerY = (-canvas.panY + (height / 2)) / zoomScale;
+
+    console.log('Adding text at:', { centerX, centerY, panX: canvas.panX, zoom: canvas.zoom });
+
     addElement({
       type: "text",
-      x: 300,
-      y: 150,
+      x: centerX - 100,
+      y: centerY - 20,
       w: 200,
       h: 40,
       content: "Heading Text",

@@ -93,9 +93,17 @@ const Editor = () => {
           });
         }
       } else if (e.key.toLowerCase() === 't' && !isCtrl) {
-        addElement({ type: 'text', content: 'New Text', x: 100, y: 100 });
+        const { canvas } = useEditorStore.getState();
+        const zoomScale = canvas.zoom / 100;
+        const centerX = (-canvas.panX + (window.innerWidth / 2)) / zoomScale;
+        const centerY = (-canvas.panY + (window.innerHeight / 2)) / zoomScale;
+        addElement({ type: 'text', content: 'New Text', x: centerX - 100, y: centerY - 20 });
       } else if (e.key.toLowerCase() === 'r' && !isCtrl) {
-        addElement({ type: 'rectangle', x: 100, y: 100 });
+        const { canvas } = useEditorStore.getState();
+        const zoomScale = canvas.zoom / 100;
+        const centerX = (-canvas.panX + (window.innerWidth / 2)) / zoomScale;
+        const centerY = (-canvas.panY + (window.innerHeight / 2)) / zoomScale;
+        addElement({ type: 'rectangle', x: centerX - 50, y: centerY - 50 });
       } else if (e.key === 'Delete' || e.key === 'Backspace') {
         deleteElements(selectedElementIds);
       }

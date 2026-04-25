@@ -413,7 +413,7 @@ const useEditorStore = create(
         })
       };
 
-      return {
+      const addedElement = {
         pages: state.pages.map(page => 
           page.id === state.activePageId 
             ? { ...page, elements: [...page.elements, newElement] }
@@ -421,6 +421,13 @@ const useEditorStore = create(
         ),
         selectedElementIds: [newId] 
       };
+
+      // Add notification for better UX
+      setTimeout(() => {
+        get().addNotification(`${newElement.name} added to canvas`, 'success');
+      }, 0);
+
+      return addedElement;
     });
   },
 
