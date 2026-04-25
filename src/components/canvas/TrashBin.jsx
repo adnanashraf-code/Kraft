@@ -14,35 +14,49 @@ const TrashBin = () => {
   // However, since we're using custom global mouse events in useDraggable, 
   // we can just use a simple mouse move listener here or trust the coordinates.
   
+  const binRef = React.useRef(null);
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
   useEffect(() => {
     if (!isDraggingGlobal) {
       setIsHovered(false);
       return;
     }
 
-    const handleGlobalMove = (e) => {
-      const centerX = window.innerWidth - 372; // Adjusted for right-[340px] and w-16
-      const centerY = window.innerHeight - 72; // Adjusted for bottom-10 and h-16
+    const handleMove = (clientX, clientY) => {
+      if (!binRef.current) return;
+      const rect = binRef.current.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
       
-      const distance = Math.hypot(e.clientX - centerX, e.clientY - centerY);
+      const distance = Math.hypot(clientX - centerX, clientY - centerY);
+      setIsHovered(distance < 90);
+    };
 
-      if (distance < 90) {
-        setIsHovered(true);
-      } else {
-        setIsHovered(false);
+    const handleGlobalMouseMove = (e) => handleMove(e.clientX, e.clientY);
+    const handleGlobalTouchMove = (e) => {
+      if (e.touches.length > 0) {
+        handleMove(e.touches[0].clientX, e.touches[0].clientY);
       }
     };
 
-    window.addEventListener('mousemove', handleGlobalMove);
-    return () => window.removeEventListener('mousemove', handleGlobalMove);
+    window.addEventListener('mousemove', handleGlobalMouseMove);
+    window.addEventListener('touchmove', handleGlobalTouchMove, { passive: true });
+    return () => {
+      window.removeEventListener('mousemove', handleGlobalMouseMove);
+      window.removeEventListener('touchmove', handleGlobalTouchMove);
+    };
   }, [isDraggingGlobal]);
 
   if (!isDraggingGlobal && !isHovered) return null;
 
   return (
     <div 
+      ref={binRef}
+      id="trash-bin-zone"
       className={`
-        fixed bottom-10 right-[340px] z-[100]
+        fixed bottom-10 z-[100]
+        ${isMobile ? 'left-1/2 -translate-x-1/2' : 'right-[340px]'}
         flex flex-col items-center justify-center
         transition-all duration-500 ease-out
         ${isDraggingGlobal ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-20 opacity-0 scale-90'}

@@ -189,11 +189,18 @@ export const useDraggable = (id) => {
     setDraggingGlobal(false);
     
     // DELETE ZONE DETECTION
-    const trashCenterX = window.innerWidth - 372;
-    const trashCenterY = window.innerHeight - 72;
-    const distToTrash = Math.hypot(e.clientX - trashCenterX, e.clientY - trashCenterY);
+    const trashBin = document.getElementById('trash-bin-zone');
+    let isDroppedInTrash = false;
 
-    if (distToTrash < 90) {
+    if (trashBin) {
+      const rect = trashBin.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const distToTrash = Math.hypot(e.clientX - centerX, e.clientY - centerY);
+      if (distToTrash < 90) isDroppedInTrash = true;
+    }
+
+    if (isDroppedInTrash) {
       const { selectedElementIds } = useEditorStore.getState();
       deleteElements(selectedElementIds.includes(id) ? selectedElementIds : [id]);
     }
