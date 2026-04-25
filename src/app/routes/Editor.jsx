@@ -2,21 +2,26 @@ import React, { useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import useEditorStore from '../../store/useEditorStore';
 import Toolbar from '../../components/editor/Toolbar';
-import LayersPanel from '../../components/editor/LayersPanel';
-import PagesPanel from '../../components/editor/PagesPanel';
-import PropertiesPanel from '../../components/editor/PropertiesPanel';
 import Canvas from '../../components/canvas/Canvas';
 import { HorizontalRuler, VerticalRuler, RulerCorner } from '../../components/canvas/Rulers';
-import ContextMenu from '../../components/common/ContextMenu';
-import SettingsModal from '../../components/editor/overlays/SettingsModal';
-import TemplatesModal from '../../components/editor/overlays/TemplatesModal';
-import AssetsModal from '../../components/editor/overlays/AssetsModal';
-import ShapePicker from '../../components/editor/overlays/ShapePicker';
-import HelpModal from '../../components/editor/overlays/HelpModal';
-import OnboardingTour from '../../components/editor/overlays/OnboardingTour';
+
+// Lazy load sidebars and panels for faster initial boot
+const LayersPanel = React.lazy(() => import('../../components/editor/LayersPanel'));
+const PagesPanel = React.lazy(() => import('../../components/editor/PagesPanel'));
+const PropertiesPanel = React.lazy(() => import('../../components/editor/PropertiesPanel'));
+const ContextMenu = React.lazy(() => import('../../components/common/ContextMenu'));
+
+// Lazy load overlays for performance
+const SettingsModal = React.lazy(() => import('../../components/editor/overlays/SettingsModal'));
+const TemplatesModal = React.lazy(() => import('../../components/editor/overlays/TemplatesModal'));
+const AssetsModal = React.lazy(() => import('../../components/editor/overlays/AssetsModal'));
+const ShapePicker = React.lazy(() => import('../../components/editor/overlays/ShapePicker'));
+const HelpModal = React.lazy(() => import('../../components/editor/overlays/HelpModal'));
+const OnboardingTour = React.lazy(() => import('../../components/editor/overlays/OnboardingTour'));
 import TrashBin from '../../components/canvas/TrashBin';
 import FontLoader from '../../components/common/FontLoader';
 import ToastContainer from '../../components/common/ToastContainer';
+import Delayed from '../../components/common/Delayed';
 import { THEMES } from '../../utils/themes';
 import { TEMPLATE_SEEDS } from '../../utils/templateSeeds';
 
@@ -147,8 +152,10 @@ const Editor = () => {
           ${theme.sidebar} ${theme.border}
           ${isLeftSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
         `}>
-            <PagesPanel />
-            <LayersPanel />
+            <React.Suspense fallback={<Delayed delay={1000}><div className="flex-1 bg-black/5 animate-pulse" /></Delayed>}>
+              <PagesPanel />
+              <LayersPanel />
+            </React.Suspense>
         </div>
         
         {/* Main Canvas Area */}
@@ -173,19 +180,25 @@ const Editor = () => {
           fixed md:relative inset-y-0 right-0 z-40 w-[280px] md:w-[320px] transition-transform duration-300 ease-in-out
           ${isRightSidebarOpen ? 'translate-x-0' : 'translate-x-full md:translate-x-0'}
         `}>
-          <PropertiesPanel />
+          <React.Suspense fallback={<Delayed delay={1000}><div className="w-full h-full bg-black/5 animate-pulse" /></Delayed>}>
+            <PropertiesPanel />
+          </React.Suspense>
         </div>
       </div>
 
-      <ContextMenu />
+      <React.Suspense fallback={null}>
+        <ContextMenu />
+      </React.Suspense>
 
       {/* Overlays / Modals */}
-      <SettingsModal />
-      <TemplatesModal />
-      <AssetsModal />
-      <ShapePicker />
-      <HelpModal />
-      <OnboardingTour />
+      <React.Suspense fallback={null}>
+        <SettingsModal />
+        <TemplatesModal />
+        <AssetsModal />
+        <ShapePicker />
+        <HelpModal />
+        <OnboardingTour />
+      </React.Suspense>
       <TrashBin />
       <FontLoader />
       <ToastContainer />
