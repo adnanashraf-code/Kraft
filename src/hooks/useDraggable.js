@@ -55,6 +55,54 @@ export const useDraggable = (id) => {
     document.addEventListener('mouseup', handleMouseUp);
   };
 
+  const handleTouchStart = (e) => {
+    if (e.touches.length !== 1) return;
+    
+    e.stopPropagation();
+    const touch = e.touches[0];
+    
+    const state = useEditorStore.getState();
+    const curActivePage = state.pages.find(p => p.id === state.activePageId) || state.pages[0];
+    const curElements = curActivePage.elements;
+
+    if (!state.selectedElementIds.includes(id)) {
+      selectElement(id);
+    }
+
+    const { selectedElementIds } = useEditorStore.getState();
+    const el = curElements.find(e => e.id === id);
+    if (!el || el.locked) return;
+
+    isDragging.current = true;
+    setDraggingGlobal(true);
+    startPos.current = { x: touch.clientX, y: touch.clientY };
+    originalPos.current = { x: el.x, y: el.y };
+    
+    const initialPositions = {};
+    selectedElementIds.forEach(selId => {
+      const selectedEl = curElements.find(e => e.id === selId);
+      if (selectedEl) {
+        initialPositions[selId] = { x: selectedEl.x, y: selectedEl.y };
+      }
+    });
+    groupOriginalPos.current = initialPositions;
+
+    const onTouchMove = (e) => {
+      const touchMove = e.touches[0];
+      handleMouseMove({ clientX: touchMove.clientX, clientY: touchMove.clientY, shiftKey: false });
+    };
+
+    const onTouchEnd = (e) => {
+      const touchEnd = e.changedTouches[0];
+      handleMouseUp({ clientX: touchEnd.clientX, clientY: touchEnd.clientY });
+      document.removeEventListener('touchmove', onTouchMove);
+      document.removeEventListener('touchend', onTouchEnd);
+    };
+
+    document.addEventListener('touchmove', onTouchMove, { passive: false });
+    document.addEventListener('touchend', onTouchEnd);
+  };
+
   const handleMouseMove = (e) => {
     if (!isDragging.current) return;
     
@@ -165,6 +213,7 @@ export const useDraggable = (id) => {
 
   return {
     handleMouseDown,
+    handleTouchStart,
     isDragging: isDragging.current
   };
 };

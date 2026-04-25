@@ -135,6 +135,14 @@ const Toolbar = ({ onToggleLeft, onToggleRight }) => {
 
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
+  const handleResetView = () => {
+    const { setZoom, setPanX, setPanY, addNotification } = useEditorStore.getState();
+    setZoom(100);
+    setPanX(0);
+    setPanY(0);
+    addNotification('View reset to default', 'info');
+  };
+
   const NavContent = () => (
     <>
       {/* Mobile Toggle Left */}
@@ -182,6 +190,12 @@ const Toolbar = ({ onToggleLeft, onToggleRight }) => {
 
       {/* Top Right Controls (Mobile) */}
       <div className="flex items-center space-x-1 md:hidden">
+        <ToolButton
+          id="tool-reset-mobile"
+          icon={Monitor}
+          title="Reset View"
+          onClick={handleResetView}
+        />
         <ToolButton
           id="tool-settings-mobile"
           icon={Settings}

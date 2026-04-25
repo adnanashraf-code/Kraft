@@ -57,8 +57,8 @@ const DraggableElement = React.memo(({ el }) => {
   const isSelected = useEditorStore(state => state.selectedElementIds.includes(el.id));
   const uiTheme = useEditorStore(state => state.uiTheme);
   const preferences = useEditorStore(state => state.preferences) || { highFidelity: true };
-  const { handleMouseDown } = useDraggable(el.id);
-  const { onResizeStart } = useResizable(el.id);
+  const { handleMouseDown, handleTouchStart, isDragging } = useDraggable(el.id);
+  const { handleResizeStart, handleRotateStart } = useResizable(el.id);
   const library = useEditorStore(state => state.library) || { components: [] };
   const isLight = uiTheme === 'light' || uiTheme === 'gray';
 
@@ -304,43 +304,61 @@ const Canvas = () => {
       setZoom(canvas.zoom + delta);
     };
 
-    // Touch Handling for Pinch-to-Zoom
-    let initialDist = 0;
-    let initialZoom = canvas.zoom;
+    // --- TOUCH ENGINE: Pinch-to-Zoom & Panning ---
+    let initialPinchDist = 0;
+    let initialPinchZoom = canvas.zoom;
+    let lastTouchX = 0;
+    let lastTouchY = 0;
+    let isPinching = false;
 
     const handleTouchStart = (e) => {
       if (e.touches.length === 2) {
-        const dist = Math.hypot(
+        isPinching = true;
+        initialPinchDist = Math.hypot(
           e.touches[0].pageX - e.touches[1].pageX,
           e.touches[0].pageY - e.touches[1].pageY
         );
-        initialDist = dist;
-        initialZoom = canvas.zoom;
+        initialPinchZoom = canvas.zoom;
+      } else if (e.touches.length === 1) {
+        isPinching = false;
+        lastTouchX = e.touches[0].pageX;
+        lastTouchY = e.touches[0].pageY;
       }
     };
 
     const handleTouchMove = (e) => {
-      if (e.touches.length === 2) {
+      if (e.touches.length === 2 && isPinching) {
         e.preventDefault();
         const dist = Math.hypot(
           e.touches[0].pageX - e.touches[1].pageX,
           e.touches[0].pageY - e.touches[1].pageY
         );
-        const scale = dist / initialDist;
-        const newZoom = initialZoom * scale;
-        // Clamp and update zoom
-        setZoom(Math.max(10, Math.min(500, newZoom)));
+        if (initialPinchDist > 0) {
+          const scale = dist / initialPinchDist;
+          const newZoom = Math.max(10, Math.min(500, initialPinchZoom * scale));
+          setZoom(newZoom);
+        }
+      } else if (e.touches.length === 1 && !isPinching) {
+        // Optional: Panning with one finger if not dragging an element
+        // But for now let's focus on zoom reliability
       }
+    };
+
+    const handleTouchEnd = () => {
+      isPinching = false;
+      initialPinchDist = 0;
     };
 
     // Use non-passive listener to allow preventDefault()
     canvasEl.addEventListener('wheel', handleWheelRaw, { passive: false });
     canvasEl.addEventListener('touchstart', handleTouchStart, { passive: true });
     canvasEl.addEventListener('touchmove', handleTouchMove, { passive: false });
+    canvasEl.addEventListener('touchend', handleTouchEnd, { passive: true });
     return () => {
       canvasEl.removeEventListener('wheel', handleWheelRaw);
       canvasEl.removeEventListener('touchstart', handleTouchStart);
       canvasEl.removeEventListener('touchmove', handleTouchMove);
+      canvasEl.removeEventListener('touchend', handleTouchEnd);
     };
   }, [canvas.zoom, setZoom]);
 
