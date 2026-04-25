@@ -87,6 +87,7 @@ const DraggableElement = React.memo(({ el }) => {
         cursor: el.locked ? 'not-allowed' : (isSelected ? 'default' : 'move')
       }}
       onMouseDown={el.locked ? undefined : handleMouseDown}
+      onTouchStart={el.locked ? undefined : handleTouchStart}
     >
         <div 
           className="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden"
@@ -181,7 +182,8 @@ const DraggableElement = React.memo(({ el }) => {
             key={h.dir}
             className="absolute rounded bg-white border border-blue-500 pointer-events-auto shadow-sm"
             style={{ width: 8, height: 8, cursor: h.cursor, ...h.style }}
-            onMouseDown={(e) => onResizeStart(e, h.dir)}
+            onMouseDown={(e) => handleResizeStart(e, h.dir)}
+            onTouchStart={(e) => handleResizeStart(e, h.dir)}
           />
         ))}
     </div>
@@ -335,12 +337,24 @@ const Canvas = () => {
         );
         if (initialPinchDist > 0) {
           const scale = dist / initialPinchDist;
+          // Faster zoom: use a power or multiplier if needed, but scale should be fine
           const newZoom = Math.max(10, Math.min(500, initialPinchZoom * scale));
           setZoom(newZoom);
         }
       } else if (e.touches.length === 1 && !isPinching) {
-        // Optional: Panning with one finger if not dragging an element
-        // But for now let's focus on zoom reliability
+        // One-finger Panning
+        if (e.target === canvasEl || canvasEl.contains(e.target)) {
+           // Only pan if we're not dragging an element
+           // The element dragging is handled separately by useDraggable's onTouchMove
+           // But here we can handle background panning
+           if (e.target === canvasEl) {
+             const dx = e.touches[0].pageX - lastTouchX;
+             const dy = e.touches[0].pageY - lastTouchY;
+             setPan(canvas.panX + dx, canvas.panY + dy);
+             lastTouchX = e.touches[0].pageX;
+             lastTouchY = e.touches[0].pageY;
+           }
+        }
       }
     };
 
