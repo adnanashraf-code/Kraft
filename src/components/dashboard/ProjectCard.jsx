@@ -31,11 +31,11 @@ const ProjectCard = memo(({ project, onClick, isFavorite, onToggleFavorite, view
         </div>
 
         {/* Metadata Columns */}
-        <div className="flex-1 grid grid-cols-4 gap-4 items-center">
+        <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 items-center">
           <div className="col-span-1">
-            <h3 className={`font-black text-[13px] uppercase tracking-tighter mb-1 truncate ${isLight ? 'text-black' : 'text-white'}`}>{project.title}</h3>
+            <h3 className={`font-black text-[11px] md:text-[13px] uppercase tracking-tighter mb-1 truncate ${isLight ? 'text-black' : 'text-white'}`}>{project.title}</h3>
             <div className="flex gap-1.5 flex-wrap">
-              {project.tags?.slice(0, 2).map(tag => (
+              {project.tags?.slice(0, 1).map(tag => (
                 <span key={tag} className={`text-[7px] font-black uppercase tracking-widest border px-1 py-0.5 ${isLight ? 'text-black/40 border-black/10' : 'text-white/40 border-white/10'}`}>
                   {tag}
                 </span>
@@ -43,16 +43,16 @@ const ProjectCard = memo(({ project, onClick, isFavorite, onToggleFavorite, view
             </div>
           </div>
 
-          <div className={`text-[10px] font-bold uppercase tracking-widest text-center ${isLight ? 'text-gray-400' : 'text-white/40'}`}>
+          <div className={`hidden md:block text-[10px] font-bold uppercase tracking-widest text-center ${isLight ? 'text-gray-400' : 'text-white/40'}`}>
             {project.date}
           </div>
 
-          <div className={`text-[10px] font-black uppercase tracking-tighter text-center ${isLight ? 'text-black' : 'text-white'}`}>
+          <div className={`hidden md:block text-[10px] font-black uppercase tracking-tighter text-center ${isLight ? 'text-black' : 'text-white'}`}>
             {project.author}
           </div>
 
-          <div className="flex justify-center">
-            <span className={`text-[8px] px-2 py-1 font-black uppercase border-2 border-black tracking-widest ${project.status === 'draft' ? 'bg-yellow-400' : 'bg-black text-white'}`}>
+          <div className="flex justify-end md:justify-center">
+            <span className={`text-[7px] md:text-[8px] px-1.5 md:px-2 py-0.5 md:py-1 font-black uppercase border-2 border-black tracking-widest ${project.status === 'draft' ? 'bg-yellow-400' : 'bg-black text-white'}`}>
               {project.status}
             </span>
           </div>

@@ -215,31 +215,31 @@ const DesignTemplates = memo(({ globalSearch = '', onBack, isLight: forcedIsLigh
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Page Header */}
-      <div className="flex justify-between items-end mb-12">
-        <div className="flex items-center gap-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 md:mb-12 gap-4">
+        <div className="flex items-center gap-4 md:gap-6">
           <button 
             onClick={onBack}
-            className={`w-12 h-12 border-[3px] border-black neo-shadow-sm hover:-translate-x-1 transition-transform group flex items-center justify-center ${isLight ? 'bg-white text-black' : 'bg-[#1a1a1a] text-white'}`}
+            className={`w-10 h-10 md:w-12 md:h-12 border-[3px] border-black neo-shadow-sm hover:-translate-x-1 transition-transform group flex items-center justify-center shrink-0 ${isLight ? 'bg-white text-black' : 'bg-[#1a1a1a] text-white'}`}
             title="Go Back"
           >
-            <Rocket size={24} className="group-hover:scale-110 transition-transform -rotate-90" />
+            <Rocket size={20} md:size={24} className="group-hover:scale-110 transition-transform -rotate-90" />
           </button>
           <div>
-            <h1 className={`text-4xl font-editorial font-bold capitalize mb-2 tracking-tighter underline decoration-yellow-400 decoration-4 underline-offset-4 ${isLight ? 'text-black' : 'text-white'}`}>
+            <h1 className={`text-2xl md:text-4xl font-editorial font-bold capitalize mb-1 md:mb-2 tracking-tighter underline decoration-yellow-400 decoration-4 underline-offset-4 ${isLight ? 'text-black' : 'text-white'}`}>
               Design Templates
             </h1>
-            <p className={`text-base font-bold italic ${isLight ? 'text-gray-500' : 'text-white/40'}`}>
-              Official KRAFT curated layouts — click to open in editor.
+            <p className={`text-[10px] md:text-base font-bold italic ${isLight ? 'text-gray-500' : 'text-white/40'}`}>
+              Official KRAFT curated layouts — click to open.
             </p>
           </div>
         </div>
-        <span className={`text-[10px] font-black uppercase tracking-[0.3em] ${isLight ? 'text-black/30' : 'text-white/20'}`}>
+        <span className={`text-[8px] md:text-[10px] font-black uppercase tracking-[0.3em] ${isLight ? 'text-black/30' : 'text-white/20'}`}>
           {TEMPLATES_DATA.length} TEMPLATES
         </span>
       </div>
 
       {/* Template Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-12">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 md:gap-x-8 gap-y-10 md:gap-y-12">
         {filteredTemplates.length > 0 ? filteredTemplates.map((tpl) => (
           <TemplateCard 
             key={tpl.id} 
@@ -249,11 +249,11 @@ const DesignTemplates = memo(({ globalSearch = '', onBack, isLight: forcedIsLigh
             onImport={handleImport} 
           />
         )) : (
-          <div className="col-span-full py-40 text-center">
-            <div className={`w-20 h-20 border-[3px] border-black neo-shadow flex items-center justify-center mx-auto mb-6 ${isLight ? 'bg-ivory text-black/20' : 'bg-black text-white/10'}`}>
-               <Zap size={40} />
+          <div className="col-span-full py-20 md:py-40 text-center">
+            <div className={`w-16 h-16 md:w-20 md:h-20 border-[3px] border-black neo-shadow flex items-center justify-center mx-auto mb-6 ${isLight ? 'bg-ivory text-black/20' : 'bg-black text-white/10'}`}>
+               <Zap size={32} md:size={40} />
             </div>
-            <p className={`text-xl font-black uppercase tracking-widest italic ${isLight ? 'opacity-30' : 'opacity-10'}`}>No templates match your search</p>
+            <p className={`text-sm md:text-xl font-black uppercase tracking-widest italic ${isLight ? 'opacity-30' : 'opacity-10'}`}>No templates match search</p>
           </div>
         )}
       </div>

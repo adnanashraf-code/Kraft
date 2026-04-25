@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   Search, Plus, LayoutGrid, List, Clock, 
-  FileEdit, Archive, Star, Hash, Settings, Bell, ChevronDown
+  FileEdit, Archive, Star, Hash, Settings, Bell, Menu, X
 } from 'lucide-react';
 import Button from '../../components/common/Button';
 import ProjectCard from '../../components/dashboard/ProjectCard';
@@ -19,6 +19,7 @@ const Dashboard = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [viewMode, setViewMode] = useState('grid');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { setSettingsOpen, uiTheme, userProfile } = useEditorStore();
   const isLight = uiTheme === 'light' || uiTheme === 'gray';
   
@@ -57,7 +58,10 @@ const Dashboard = () => {
 
   const SidebarItem = ({ id, icon: Icon, label, count }) => (
     <button 
-      onClick={() => setActiveTab(id)}
+      onClick={() => {
+        setActiveTab(id);
+        setIsSidebarOpen(false);
+      }}
       className={`w-full flex items-center justify-between px-3 py-2.5 rounded-none text-[13px] transition-all border-2 border-transparent ${
         activeTab === id 
           ? 'bg-yellow-400 text-black font-black neo-shadow-sm border-black' 
@@ -78,17 +82,37 @@ const Dashboard = () => {
 
   return (
     <div className={`h-screen flex font-sans transition-colors duration-500 overflow-hidden selection:bg-yellow-400 ${isLight ? 'bg-ivory text-black' : 'bg-[#0a0a0a] text-white'}`}>
+      {/* SIDEBAR OVERLAY (Mobile) */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 z-[60] lg:hidden backdrop-blur-sm animate-in fade-in duration-300"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* LEFT SIDEBAR */}
-      <aside className={`w-[240px] border-r-[3px] border-black flex flex-col shrink-0 transition-colors ${isLight ? 'bg-white' : 'bg-[#121212]'}`}>
-        <div className="p-5">
-           <div className="flex items-center gap-2 mb-8 cursor-pointer group" onClick={() => navigate('/')}>
-              <div className={`w-8 h-8 flex items-center justify-center neo-shadow transition-transform group-hover:-translate-y-1 ${isLight ? 'bg-black' : 'bg-yellow-400'}`}>
-                <div className={`w-3 h-3 rounded-full ${isLight ? 'bg-yellow-400' : 'bg-black'}`} />
+      <aside className={`
+        fixed inset-y-0 left-0 z-[70] w-[280px] border-r-[3px] border-black flex flex-col shrink-0 transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 lg:w-[240px]
+        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        ${isLight ? 'bg-white' : 'bg-[#121212]'}
+      `}>
+        <div className="p-5 flex flex-col h-full">
+           <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-2 cursor-pointer group" onClick={() => navigate('/')}>
+                 <div className={`w-8 h-8 flex items-center justify-center neo-shadow transition-transform group-hover:-translate-y-1 ${isLight ? 'bg-black' : 'bg-yellow-400'}`}>
+                   <div className={`w-3 h-3 rounded-full ${isLight ? 'bg-yellow-400' : 'bg-black'}`} />
+                 </div>
+                 <span className="font-editorial font-bold text-xl tracking-tighter uppercase">KRAFT</span>
               </div>
-              <span className="font-editorial font-bold text-xl tracking-tighter uppercase">KRAFT</span>
+              <button 
+                onClick={() => setIsSidebarOpen(false)}
+                className="lg:hidden p-2 border-2 border-black neo-shadow-xs bg-white text-black"
+              >
+                <X size={16} strokeWidth={3} />
+              </button>
            </div>
 
-           <div className="space-y-4">
+           <div className="space-y-4 overflow-y-auto flex-1 custom-scrollbar pr-2">
               <div className={`px-3 text-[10px] font-black uppercase tracking-[0.2em] mb-1 opacity-40 ${isLight ? 'text-black' : 'text-white'}`}>Main Menu</div>
               <div className="space-y-1">
                 <SidebarItem id="recent" icon={Clock} label="Recent Projects" />
@@ -103,37 +127,46 @@ const Dashboard = () => {
                 <SidebarItem id="shared" icon={Hash} label="Cloud Hub" />
               </div>
            </div>
-        </div>
 
-         <div className="mt-auto p-5 border-t-[3px] border-black">
-            <div className={`flex items-center gap-3 p-3 border-2 border-black neo-shadow-sm ${isLight ? 'bg-orange/10' : 'bg-orange/20'}`}>
-              <div className="w-10 h-10 bg-orange border-2 border-black flex items-center justify-center shrink-0">
-                <span className="font-black text-lg">{userProfile.name?.charAt(0) || 'U'}</span>
+           <div className="mt-auto pt-5 border-t-[3px] border-black">
+              <div className={`flex items-center gap-3 p-3 border-2 border-black neo-shadow-sm ${isLight ? 'bg-orange/10' : 'bg-orange/20'}`}>
+                <div className="w-10 h-10 bg-orange border-2 border-black flex items-center justify-center shrink-0">
+                  <span className="font-black text-lg">{userProfile.name?.charAt(0) || 'U'}</span>
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-black truncate">{userProfile.name || 'User'}</p>
+                  <p className="text-[10px] font-bold opacity-40 truncate">ID: {userProfile.id || 'guest'}</p>
+                </div>
               </div>
-              <div className="min-w-0">
-                <p className="text-xs font-black truncate">{userProfile.name || 'User'}</p>
-                <p className="text-[10px] font-bold opacity-40 truncate">ID: {userProfile.id || 'guest'}</p>
-              </div>
-            </div>
-         </div>
+           </div>
+        </div>
       </aside>
 
       {/* MAIN CONTENT AREA */}
       <main className={`flex-1 flex flex-col overflow-hidden transition-colors ${isLight ? 'bg-white/50' : 'bg-black/20'}`}>
         {/* Header Bar */}
-        <header className={`h-20 border-b-[3px] border-black flex items-center justify-between px-8 shrink-0 shadow-sm transition-colors ${isLight ? 'bg-white' : 'bg-[#121212]'}`}>
-           <div className="relative w-[380px] max-w-full">
-              <Search className={`absolute left-3.5 top-1/2 -translate-y-1/2 ${isLight ? 'text-black' : 'text-white'}`} size={18} />
-              <input 
-                type="text" 
-                placeholder="Find Your Genius..." 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className={`w-full neo-border-sm py-2 pl-12 pr-4 text-xs font-bold transition-all outline-none ${isLight ? 'bg-ivory text-black focus:bg-yellow-100' : 'bg-black text-white focus:bg-gray-900'}`}
-              />
+        <header className={`h-20 border-b-[3px] border-black flex items-center justify-between px-4 md:px-8 shrink-0 shadow-sm transition-colors z-40 ${isLight ? 'bg-white' : 'bg-[#121212]'}`}>
+           <div className="flex items-center gap-4 flex-1">
+              <button 
+                onClick={() => setIsSidebarOpen(true)}
+                className="lg:hidden p-2.5 border-2 border-black neo-shadow transition-all bg-yellow-400 text-black hover:-translate-y-0.5"
+              >
+                <Menu size={18} strokeWidth={2.5} />
+              </button>
+
+              <div className="relative w-full max-w-[380px]">
+                <Search className={`absolute left-3.5 top-1/2 -translate-y-1/2 ${isLight ? 'text-black' : 'text-white'}`} size={18} />
+                <input 
+                  type="text" 
+                  placeholder="Find Your Genius..." 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className={`w-full neo-border-sm py-2 pl-12 pr-4 text-xs font-bold transition-all outline-none ${isLight ? 'bg-ivory text-black focus:bg-yellow-100' : 'bg-black text-white focus:bg-gray-900'}`}
+                />
+              </div>
            </div>
 
-           <div className="flex items-center gap-3 relative">
+           <div className="flex items-center gap-2 md:gap-3 relative ml-4">
               <button 
                 onClick={() => setIsNotifOpen(!isNotifOpen)}
                 className={`p-2.5 border-2 border-black neo-shadow transition-all relative group ${isLight ? 'bg-white hover:bg-cyan-300' : 'bg-black hover:bg-cyan-900 text-white'}`}
@@ -143,7 +176,7 @@ const Dashboard = () => {
               </button>
               
               {isNotifOpen && (
-                <div className={`absolute top-16 right-0 w-80 border-[3px] border-black neo-shadow-lg z-50 animate-in fade-in slide-in-from-top-2 duration-200 ${isLight ? 'bg-white' : 'bg-[#1a1a1a] text-white'}`}>
+                <div className={`fixed top-20 right-4 w-[calc(100vw-32px)] md:absolute md:top-16 md:right-0 md:w-80 border-[3px] border-black neo-shadow-lg z-50 animate-in fade-in slide-in-from-top-2 duration-200 ${isLight ? 'bg-white' : 'bg-[#1a1a1a] text-white'}`}>
                   <div className="p-4 border-b-2 border-black bg-cyan-300 flex justify-between items-center text-black">
                     <span className="font-black text-[10px] uppercase tracking-widest">Notification Engine ({notifications.length})</span>
                     <div className="flex items-center gap-3">
@@ -181,46 +214,47 @@ const Dashboard = () => {
               )}
 
               <button 
-                className={`p-2.5 border-2 border-black neo-shadow transition-all group ${isLight ? 'bg-white hover:bg-magenta-300' : 'bg-black hover:bg-magenta-900 text-white'}`} 
+                className={`hidden md:flex p-2.5 border-2 border-black neo-shadow transition-all group ${isLight ? 'bg-white hover:bg-magenta-300' : 'bg-black hover:bg-magenta-900 text-white'}`} 
                 onClick={() => setSettingsOpen(true)}
               >
                 <Settings size={18} strokeWidth={2.5} />
               </button>
               
-              <div className="w-[2px] h-8 bg-black mx-1"></div>
+              <div className="hidden sm:block w-[2px] h-8 bg-black mx-1"></div>
               
               <Button 
                 variant="editorial" 
                 icon={Plus} 
                 onClick={() => navigate('/editor')}
-                className="bg-black text-white px-6 py-2.5 neo-shadow hover:bg-cyan-500 hover:text-black transition-all group text-xs"
+                className="bg-black text-white px-4 md:px-6 py-2.5 neo-shadow hover:bg-cyan-500 hover:text-black transition-all group text-[10px] md:text-xs"
               >
-                New Design
+                <span className="hidden xs:inline">New Design</span>
+                <span className="xs:hidden">New</span>
               </Button>
            </div>
         </header>
 
         {/* Scrollable Grid */}
-        <div className="flex-1 overflow-y-auto p-10 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto p-4 md:p-10 custom-scrollbar">
           <div className="max-w-[1400px] mx-auto">
             {activeTab !== 'templates' && (
-              <div className="flex justify-between items-end mb-12">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8 md:mb-12">
                  <div className="flex flex-col">
-                    <h1 className={`text-4xl font-editorial font-bold capitalize mb-2 tracking-tighter underline decoration-yellow-400 decoration-4 underline-offset-4 ${isLight ? 'text-black' : 'text-white'}`}>{activeTab} Projects</h1>
-                    <p className={`text-base font-bold ${isLight ? 'text-gray-500' : 'text-white/40'}`}>Manage and organize your creative workspace.</p>
+                    <h1 className={`text-2xl md:text-4xl font-editorial font-bold capitalize mb-2 tracking-tighter underline decoration-yellow-400 decoration-4 underline-offset-4 ${isLight ? 'text-black' : 'text-white'}`}>{activeTab} Projects</h1>
+                    <p className={`text-sm md:text-base font-bold ${isLight ? 'text-gray-500' : 'text-white/40'}`}>Manage and organize your creative workspace.</p>
                  </div>
                  <div className={`flex neo-border p-0.5 neo-shadow shrink-0 ${isLight ? 'bg-white' : 'bg-black'}`}>
                     <button 
                       onClick={() => setViewMode('grid')}
                       className={`p-2 transition-all ${viewMode === 'grid' ? (isLight ? 'bg-black text-white' : 'bg-yellow-400 text-black') : (isLight ? 'text-black hover:bg-gray-100' : 'text-white hover:bg-white/10')}`}
                     >
-                      <LayoutGrid size={20}/>
+                      <LayoutGrid size={18} md:size={20}/>
                     </button>
                     <button 
                       onClick={() => setViewMode('list')}
                       className={`p-2 transition-all ${viewMode === 'list' ? (isLight ? 'bg-black text-white' : 'bg-yellow-400 text-black') : (isLight ? 'text-black hover:bg-gray-100' : 'text-white hover:bg-white/10')}`}
                     >
-                      <List size={20}/>
+                      <List size={18} md:size={20}/>
                     </button>
                  </div>
               </div>
@@ -231,7 +265,7 @@ const Dashboard = () => {
                ) : activeTab === 'templates' ? (
                  <DesignTemplates globalSearch={searchQuery} onBack={() => setActiveTab('recent')} />
                ) : filteredProjects.length > 0 ? (
-                <div className={`grid gap-x-12 gap-y-12 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'}`}>
+                <div className={`grid gap-x-4 md:gap-x-12 gap-y-8 md:gap-y-12 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'}`}>
                   {filteredProjects.map(project => (
                     <ProjectCard 
                       key={project.id} 
@@ -244,14 +278,14 @@ const Dashboard = () => {
                   ))}
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center py-40 text-center">
-                   <div className="w-24 h-24 bg-white border-[3px] border-black neo-shadow flex items-center justify-center text-black mb-8">
-                      <Search size={48} strokeWidth={3} />
+                <div className="flex flex-col items-center justify-center py-20 md:py-40 text-center">
+                   <div className="w-16 h-16 md:w-24 md:h-24 bg-white border-[3px] border-black neo-shadow flex items-center justify-center text-black mb-6 md:mb-8">
+                      <Search size={32} md:size={48} strokeWidth={3} />
                    </div>
-                   <h3 className="text-3xl font-black uppercase tracking-tight mb-2">
+                   <h3 className="text-xl md:text-3xl font-black uppercase tracking-tight mb-2">
                      {activeTab === 'drafts' ? 'No Work in Progress' : activeTab === 'archived' ? 'History is Empty' : 'Ghost Town...'}
                    </h3>
-                   <p className={`max-w-sm text-lg font-bold ${isLight ? 'text-gray-500' : 'text-white/40'}`}>
+                   <p className={`max-w-sm text-sm md:text-lg font-bold ${isLight ? 'text-gray-500' : 'text-white/40'}`}>
                      {activeTab === 'starred' ? "Bookmark your favorite templates to see them here." : "Nothing found in " + activeTab + ". Maybe try a different search?"}
                    </p>
                 </div>
