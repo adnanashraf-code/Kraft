@@ -1,0 +1,99 @@
+KRAFT EDITOR - ERASER.IO EVOLUTION PLAN
+
+GOAL: Transform the editor into a high-fidelity diagramming tool with a premium, smooth, and minimalist aesthetic inspired by Eraser.io.
+
+PHASE 1: THE "DEEP BLACK" CANVAS & GRID REMOVAL
+----------------------------------------------
+*   Background: Switch from dotted grid to a solid, deep black background.
+*   Color Token: Use #0C0C0C (Onyx Black) for the canvas.
+*   Smoothness: Disable CSS grid backgrounds. Implement smooth panning and zooming without visual "snap" artifacts.
+*   Visuals: Elements should have thin, high-contrast borders (#E0E0E0 or #FFFFFF at 0.8 opacity).
+
+PHASE 2: SMART CONNECTION HANDLES (THE CIRCLE)
+-----------------------------------------------
+*   Mechanism: When an element (Rectangle/Circle) is selected or hovered, show small "+" circle icons at the center of each edge (Top, Bottom, Left, Right).
+*   Interaction: 
+    - Clicking the "+" circle immediately spawns a new connected element or starts a connection drag.
+    - This "Circle Handle" is the primary way to build flowcharts quickly.
+*   Styling: The handles should be subtle #FFFFFF circles with a black "+" inside.
+
+PHASE 3: ORTHOGONAL ARROW CONNECTIONS
+--------------------------------------
+*   Pathing: Arrows should not be just straight lines. Implement "Orthogonal Routing" (90-degree steps) as seen in the 2nd and 4th images.
+*   Snapping: Arrows must snap to the "Connection Points" (where the Circle Handles are).
+*   Dynamic Updates: If Shape A moves, the arrow path recalculates smoothly to maintain the connection to Shape B.
+*   Head Style: Use sharp, minimalist arrowheads (V-shape, no fill).
+
+PHASE 4: SMOOTH DRAWING & PEN TOOL OPTIMIZATION
+----------------------------------------------
+*   Eraser-Style Shapes:
+    - Rectangles: Apply a uniform corner radius of 12px for a modern, soft feel.
+    - Circles: Ensure perfect circular geometry with high-quality SVG rendering.
+    - Strokes: Thin 1.5px or 2px white borders with subtle 10% opacity fills.
+*   Pen/Pencil Logic: 
+    - Grouping: Implement logic where pen strokes within a certain "space" are grouped automatically as a single element.
+    - Smoothing: Use Catmull-Rom or RDP algorithm to simplify paths for a hand-drawn but clean look.
+*   Movement: Ensure all elements (shapes, arrows, scribbles) have butter-smooth dragging with no jitter, utilizing CSS transform: translate3d for GPU acceleration.
+
+PHASE 5: PERFORMANCE & UI POLISH
+--------------------------------
+*   Z-Index Management: Ensure arrows always sit behind the shapes they connect to for a clean look.
+*   Contextual Toolbar: A small floating bar above the selected element for quick color/stroke changes.
+
+COLOR PALETTE FOR IMPLEMENTATION:
+- Canvas: #0C0C0C (Pure Onyx)
+- Primary Border: #FFFFFF (White, 0.9 opacity)
+- Selected Border: #3B82F6 (Electric Blue)
+- Handle Circle: #FFFFFF
+- Text: #F3F4F6 (Cool Gray)
+
+================================================================================
+PART 2: BLOCK-BASED RICH TEXT EDITOR (PRODUCTION-GRADE ARCHITECTURE)
+================================================================================
+
+PHASE 6: THE BLOCK ENGINE & ARCHITECTURE (SENIOR STAFF STANDARDS)
+-----------------------------------------------------------------
+*   Architecture: Implement a modular, component-based system.
+    - /editor: EditorRoot.tsx (Container), BlockRenderer.tsx (Iterative renderer).
+    - /blocks: ParagraphBlock.tsx, HeadingBlock.tsx, CodeBlock.tsx, ImageBlock.tsx.
+    - /hooks: useEditorState.ts, useBlock.ts, useSelection.ts.
+*   Editor Core: Integrate Tiptap for the rich-text editing surface within each block.
+*   State Management (Zustand):
+    - Implement a normalized JSON tree where each block is independent.
+    - Use selector-based subscriptions to ensure zero global re-renders on keystrokes.
+    - Strict use of React.memo and stable UUID keys for performance.
+
+PHASE 7: ADVANCED BLOCKS & INTERACTION DESIGN
+---------------------------------------------
+*   Interaction Logic:
+    - [Enter]: Create new paragraph block below current.
+    - [Backspace] on empty: Delete current block and merge focus with previous.
+    - [/]: Open command menu with fuzzy search and keyboard navigation.
+*   Focus Management: Implement a custom system to track and restore cursor position across block boundaries smoothly.
+*   Rich Blocks: 
+    - Code Blocks with syntax highlighting (Prism/Lowlight).
+    - Image Blocks with resizing, captions, and placeholders.
+    - Bullet/Numbered lists with auto-indent and nesting logic.
+    - Toggle (Collapsible) and Callout blocks for documentation.
+
+PHASE 8: FLOATING TOOLBAR & DRAG-AND-DROP (UX)
+----------------------------------------------
+*   Floating Toolbar: Implement a selection-aware toolbar for formatting (Bold, Italic, Link, etc.).
+*   Dnd Engine (dnd-kit): 
+    - Isolated drag handles for each block.
+    - Vertical reordering with smooth layout animations (Framer Motion).
+    - Hierarchical nesting via drag-and-drop with visual drop indicators.
+
+PHASE 9: PRODUCTION-GRADE BACKEND & PERSISTENCE
+-----------------------------------------------
+*   Infrastructure: Node.js (Fastify/Express) with PostgreSQL for storage.
+*   Storage: Use JSONB in Postgres to store the block tree efficiently.
+*   Sync Logic: Debounced (500-2000ms) background sync with local-first optimistic updates.
+*   API: Incremental PATCH API that only sends modified blocks to minimize payload.
+
+PHASE 10: ELITE PERFORMANCE & REALTIME COLLABORATION
+----------------------------------------------------
+*   Sync Engine: Use Yjs or a CRDT-based solution for conflict-free multi-user editing.
+*   WebSockets: Real-time presence indicators (remote cursors, selection highlights) and live updates.
+*   Virtualization: Use react-virtual to handle large documents (1000+ blocks) with zero lag.
+*   Concurrency: Leverage React 18 Concurrent features (startTransition) for non-blocking typing during heavy sync.

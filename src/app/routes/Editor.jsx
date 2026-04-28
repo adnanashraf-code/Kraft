@@ -1,125 +1,197 @@
-import React, { useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
-import useEditorStore from '../../store/useEditorStore';
-import Toolbar from '../../components/editor/Toolbar';
-import Canvas from '../../components/canvas/Canvas';
-import { HorizontalRuler, VerticalRuler, RulerCorner } from '../../components/canvas/Rulers';
+import React, { useEffect, useRef } from "react";
+import { useParams } from "react-router-dom";
+import useEditorStore from "../../store/useEditorStore";
+import Toolbar from "../../components/editor/Toolbar";
+import Canvas from "../../components/canvas/Canvas";
+import {
+  HorizontalRuler,
+  VerticalRuler,
+  RulerCorner,
+} from "../../components/canvas/Rulers";
 
 // Lazy load sidebars and panels for faster initial boot
-const LayersPanel = React.lazy(() => import('../../components/editor/LayersPanel'));
-const PagesPanel = React.lazy(() => import('../../components/editor/PagesPanel'));
-const PropertiesPanel = React.lazy(() => import('../../components/editor/PropertiesPanel'));
-const ContextMenu = React.lazy(() => import('../../components/common/ContextMenu'));
+const LayersPanel = React.lazy(
+  () => import("../../components/editor/LayersPanel"),
+);
+const PagesPanel = React.lazy(
+  () => import("../../components/editor/PagesPanel"),
+);
+const PropertiesPanel = React.lazy(
+  () => import("../../components/editor/PropertiesPanel"),
+);
+const ContextMenu = React.lazy(
+  () => import("../../components/common/ContextMenu"),
+);
 
 // Lazy load overlays for performance
-const SettingsModal = React.lazy(() => import('../../components/editor/overlays/SettingsModal'));
-const TemplatesModal = React.lazy(() => import('../../components/editor/overlays/TemplatesModal'));
-const AssetsModal = React.lazy(() => import('../../components/editor/overlays/AssetsModal'));
-const ShapePicker = React.lazy(() => import('../../components/editor/overlays/ShapePicker'));
-const HelpModal = React.lazy(() => import('../../components/editor/overlays/HelpModal'));
-const OnboardingTour = React.lazy(() => import('../../components/editor/overlays/OnboardingTour'));
-import TrashBin from '../../components/canvas/TrashBin';
-import FontLoader from '../../components/common/FontLoader';
-import ToastContainer from '../../components/common/ToastContainer';
-import Delayed from '../../components/common/Delayed';
-import { THEMES } from '../../utils/themes';
-import { TEMPLATE_SEEDS } from '../../utils/templateSeeds';
+const SettingsModal = React.lazy(
+  () => import("../../components/editor/overlays/SettingsModal"),
+);
+const TemplatesModal = React.lazy(
+  () => import("../../components/editor/overlays/TemplatesModal"),
+);
+const AssetsModal = React.lazy(
+  () => import("../../components/editor/overlays/AssetsModal"),
+);
+const ShapePicker = React.lazy(
+  () => import("../../components/editor/overlays/ShapePicker"),
+);
+const HelpModal = React.lazy(
+  () => import("../../components/editor/overlays/HelpModal"),
+);
+const OnboardingTour = React.lazy(
+  () => import("../../components/editor/overlays/OnboardingTour"),
+);
+import TrashBin from "../../components/canvas/TrashBin";
+import FontLoader from "../../components/common/FontLoader";
+import ToastContainer from "../../components/common/ToastContainer";
+import Delayed from "../../components/common/Delayed";
+import { THEMES } from "../../utils/themes";
+import { TEMPLATE_SEEDS } from "../../utils/templateSeeds";
 
 const Editor = () => {
   const { id } = useParams();
-  const { 
-    uiTheme, setOnboardingOpen, selectedElementIds, 
-    groupElements, ungroupElements, deleteElements, duplicateElements, addElement,
-    undo, redo, pages, activePageId, canvas, projectName, loadProject, setSaving, toggleRulers,
-    zoomToFit, zoomTo100, updateElement, saveHistory, library, setProjectName,
-    bringToFront, sendToBack, moveForward, moveBackward
+  const {
+    uiTheme,
+    setOnboardingOpen,
+    selectedElementIds,
+    groupElements,
+    ungroupElements,
+    deleteElements,
+    duplicateElements,
+    addElement,
+    undo,
+    redo,
+    pages,
+    activePageId,
+    canvas,
+    projectName,
+    loadProject,
+    setSaving,
+    toggleRulers,
+    zoomToFit,
+    zoomTo100,
+    updateElement,
+    saveHistory,
+    library,
+    setProjectName,
+    bringToFront,
+    sendToBack,
+    moveForward,
+    moveBackward,
   } = useEditorStore();
   const theme = THEMES[uiTheme];
-  
+
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = React.useState(false);
   const [isRightSidebarOpen, setIsRightSidebarOpen] = React.useState(false);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
       // Ignore if typing in an input or textarea
-      if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+      if (["INPUT", "TEXTAREA"].includes(document.activeElement.tagName))
+        return;
 
       const isCtrl = e.ctrlKey || e.metaKey;
       const isShift = e.shiftKey;
 
-      if (isCtrl && e.key.toLowerCase() === 'z') {
+      if (isCtrl && e.key.toLowerCase() === "z") {
         e.preventDefault();
         if (isShift) redo();
         else undo();
-      } else if (isCtrl && e.key.toLowerCase() === 'y') {
+      } else if (isCtrl && e.key.toLowerCase() === "y") {
         e.preventDefault();
         redo();
-      } else if (isCtrl && e.key.toLowerCase() === 'g') {
+      } else if (isCtrl && e.key.toLowerCase() === "g") {
         e.preventDefault();
         if (isShift) ungroupElements(selectedElementIds);
         else groupElements(selectedElementIds);
-      } else if (isCtrl && e.key.toLowerCase() === 'd') {
+      } else if (isCtrl && e.key.toLowerCase() === "d") {
         e.preventDefault();
         duplicateElements(selectedElementIds);
-      } else if (isCtrl && e.key.toLowerCase() === 'r') {
+      } else if (isCtrl && e.key.toLowerCase() === "r") {
         e.preventDefault();
         toggleRulers();
-      } else if (isCtrl && e.key === '0') {
+      } else if (isCtrl && e.key === "0") {
         e.preventDefault();
-        const container = document.getElementById('canvas-container');
+        const container = document.getElementById("canvas-container");
         if (container) zoomToFit(container.clientWidth, container.clientHeight);
-      } else if (isCtrl && e.key === '1') {
+      } else if (isCtrl && e.key === "1") {
         e.preventDefault();
         zoomTo100();
-      } else if (isCtrl && e.key === '[') {
+      } else if (isCtrl && e.key === "[") {
         e.preventDefault();
         if (isShift) sendToBack(selectedElementIds);
         else moveBackward(selectedElementIds);
-      } else if (isCtrl && e.key === ']') {
+      } else if (isCtrl && e.key === "]") {
         e.preventDefault();
         if (isShift) bringToFront(selectedElementIds);
         else moveForward(selectedElementIds);
-      } else if (e.key.toLowerCase() === 'l' && !isCtrl) {
+      } else if (e.key.toLowerCase() === "l" && !isCtrl) {
         if (selectedElementIds.length > 0) {
           saveHistory();
-          const activePage = pages.find(p => p.id === activePageId);
-          selectedElementIds.forEach(id => {
-            const el = activePage.elements.find(e => e.id === id);
+          const activePage = pages.find((p) => p.id === activePageId);
+          selectedElementIds.forEach((id) => {
+            const el = activePage.elements.find((e) => e.id === id);
             if (el) updateElement(id, { locked: !el.locked });
           });
         }
-      } else if (e.key.toLowerCase() === 'h' && isShift) {
+      } else if (e.key.toLowerCase() === "h" && isShift) {
         if (selectedElementIds.length > 0) {
           saveHistory();
-          const activePage = pages.find(p => p.id === activePageId);
-          selectedElementIds.forEach(id => {
-            const el = activePage.elements.find(e => e.id === id);
+          const activePage = pages.find((p) => p.id === activePageId);
+          selectedElementIds.forEach((id) => {
+            const el = activePage.elements.find((e) => e.id === id);
             if (el) updateElement(id, { visible: !el.visible });
           });
         }
-      } else if (e.key.toLowerCase() === 't' && !isCtrl) {
+      } else if (e.key.toLowerCase() === "t" && !isCtrl) {
         const { canvas } = useEditorStore.getState();
         const zoomScale = canvas.zoom / 100;
-        const centerX = (-canvas.panX + (window.innerWidth / 2)) / zoomScale;
-        const centerY = (-canvas.panY + (window.innerHeight / 2)) / zoomScale;
-        addElement({ type: 'text', content: 'New Text', x: centerX - 100, y: centerY - 20 });
-      } else if (e.key.toLowerCase() === 'r' && !isCtrl) {
+        const centerX = (-canvas.panX + window.innerWidth / 2) / zoomScale;
+        const centerY = (-canvas.panY + window.innerHeight / 2) / zoomScale;
+        addElement({
+          type: "text",
+          content: "New Text",
+          x: centerX - 100,
+          y: centerY - 20,
+        });
+      } else if (e.key.toLowerCase() === "r" && !isCtrl) {
         const { canvas } = useEditorStore.getState();
         const zoomScale = canvas.zoom / 100;
-        const centerX = (-canvas.panX + (window.innerWidth / 2)) / zoomScale;
-        const centerY = (-canvas.panY + (window.innerHeight / 2)) / zoomScale;
-        addElement({ type: 'rectangle', x: centerX - 50, y: centerY - 50 });
-      } else if (e.key === 'Delete' || e.key === 'Backspace') {
+        const centerX = (-canvas.panX + window.innerWidth / 2) / zoomScale;
+        const centerY = (-canvas.panY + window.innerHeight / 2) / zoomScale;
+        addElement({ type: "rectangle", x: centerX - 50, y: centerY - 50 });
+      } else if (e.key === "Delete" || e.key === "Backspace") {
         deleteElements(selectedElementIds);
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedElementIds, groupElements, ungroupElements, deleteElements, duplicateElements, redo, undo, toggleRulers, zoomToFit, zoomTo100, bringToFront, sendToBack, moveForward, moveBackward, saveHistory, pages, activePageId, updateElement, addElement]);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [
+    selectedElementIds,
+    groupElements,
+    ungroupElements,
+    deleteElements,
+    duplicateElements,
+    redo,
+    undo,
+    toggleRulers,
+    zoomToFit,
+    zoomTo100,
+    bringToFront,
+    sendToBack,
+    moveForward,
+    moveBackward,
+    saveHistory,
+    pages,
+    activePageId,
+    updateElement,
+    addElement,
+  ]);
 
   useEffect(() => {
-    const hasOnboarded = localStorage.getItem('kraft_onboarded');
+    const hasOnboarded = localStorage.getItem("kraft_onboarded");
     if (!hasOnboarded) {
       setTimeout(() => setOnboardingOpen(true), 1000);
     }
@@ -133,54 +205,91 @@ const Editor = () => {
   }, [id, loadProject]);
 
   // Safety check for theme
-  if (!theme) return <div className="p-10 text-red-500 font-bold">Error: Theme '{uiTheme}' not found.</div>;
+  if (!theme)
+    return (
+      <div className="p-10 text-red-500 font-bold">
+        Error: Theme '{uiTheme}' not found.
+      </div>
+    );
 
   return (
-    <div className={`flex flex-col md:flex-row h-screen w-screen ${theme.canvas} overflow-hidden font-sans relative transition-colors duration-500 select-none`}>
+    <div
+      className={`flex flex-col md:flex-row h-screen w-screen ${theme.canvas} overflow-hidden font-sans relative transition-colors duration-500 select-none`}
+    >
       {/* Sidebar Navigation & Tools */}
-      <Toolbar onToggleLeft={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)} onToggleRight={() => setIsRightSidebarOpen(!isRightSidebarOpen)} />
+      <Toolbar
+        onToggleLeft={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)}
+        onToggleRight={() => setIsRightSidebarOpen(!isRightSidebarOpen)}
+      />
 
       <div className="flex flex-1 overflow-hidden relative">
         {/* Left Sidebar Overlay (Mobile) */}
         {isLeftSidebarOpen && (
-          <div className="fixed inset-0 bg-black/60 z-30 md:hidden backdrop-blur-sm" onClick={() => setIsLeftSidebarOpen(false)} />
+          <div
+            className="fixed inset-0 bg-black/60 z-30 md:hidden backdrop-blur-sm"
+            onClick={() => setIsLeftSidebarOpen(false)}
+          />
         )}
 
         {/* Left Sidebar: Pages + Layers */}
-        <div className={`
+        <div
+          className={`
           fixed md:relative inset-y-0 left-0 z-40 w-[280px] md:w-[300px] flex flex-col h-full border-r transition-transform duration-300 ease-in-out
           ${theme.sidebar} ${theme.border}
-          ${isLeftSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
-        `}>
-            <React.Suspense fallback={<Delayed delay={1000}><div className="flex-1 bg-black/5 animate-pulse" /></Delayed>}>
-              <PagesPanel />
-              <LayersPanel />
-            </React.Suspense>
+          ${isLeftSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
+        `}
+        >
+          <React.Suspense
+            fallback={
+              <Delayed delay={1000}>
+                <div className="flex-1 bg-black/5 animate-pulse" />
+              </Delayed>
+            }
+          >
+            <PagesPanel />
+            <LayersPanel />
+          </React.Suspense>
         </div>
-        
+
         {/* Main Canvas Area */}
-        <div className={`flex-1 relative overflow-hidden flex flex-col ${theme.canvas}`}>
+        <div
+          className={`flex-1 relative overflow-hidden flex flex-col ${theme.canvas}`}
+        >
           <RulerCorner />
           <HorizontalRuler />
           <div className="flex-1 flex overflow-hidden">
-             <VerticalRuler />
-             <div id="canvas-container" className="flex-1 relative overflow-hidden">
-                <Canvas />
-             </div>
+            <VerticalRuler />
+            <div
+              id="canvas-container"
+              className="flex-1 relative overflow-hidden"
+            >
+              <Canvas />
+            </div>
           </div>
         </div>
 
         {/* Right Sidebar Overlay (Mobile) */}
         {isRightSidebarOpen && (
-          <div className="fixed inset-0 bg-black/60 z-30 md:hidden backdrop-blur-sm" onClick={() => setIsRightSidebarOpen(false)} />
+          <div
+            className="fixed inset-0 bg-black/60 z-30 md:hidden backdrop-blur-sm"
+            onClick={() => setIsRightSidebarOpen(false)}
+          />
         )}
 
         {/* Property Controls */}
-        <div className={`
+        <div
+          className={`
           fixed md:relative inset-y-0 right-0 z-40 w-[280px] md:w-[320px] transition-transform duration-300 ease-in-out
-          ${isRightSidebarOpen ? 'translate-x-0' : 'translate-x-full md:translate-x-0'}
-        `}>
-          <React.Suspense fallback={<Delayed delay={1000}><div className="w-full h-full bg-black/5 animate-pulse" /></Delayed>}>
+          ${isRightSidebarOpen ? "translate-x-0" : "translate-x-full md:translate-x-0"}
+        `}
+        >
+          <React.Suspense
+            fallback={
+              <Delayed delay={1000}>
+                <div className="w-full h-full bg-black/5 animate-pulse" />
+              </Delayed>
+            }
+          >
             <PropertiesPanel />
           </React.Suspense>
         </div>

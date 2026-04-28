@@ -1,14 +1,14 @@
 export const THEMES = {
   dark: {
-    sidebar: 'bg-[#0c0c0c]',
-    rail: 'bg-[#0a0a0a]',
-    canvas: 'bg-[#070707]',
+    sidebar: 'bg-[#0C0C0C]',
+    rail: 'bg-[#0A0A0A]',
+    canvas: 'bg-[#0C0C0C]',
     border: 'border-white/10',
     text: 'text-white',
     title: 'text-white/60',
     item: 'bg-white/5',
     activeItem: 'bg-white/10',
-    grid: '#222',
+    grid: 'transparent',
   },
   medium: {
     sidebar: 'bg-[#1a1a1a]', 

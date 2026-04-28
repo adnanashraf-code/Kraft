@@ -362,13 +362,13 @@ const useEditorStore = create(
         x: 0, y: 0, 
         w: defaultW, h: defaultH,
         rotation: 0,
-        fill: (element.type === 'text' || element.type === 'icon') ? undefined : '#D1E8E2',
+        fill: (element.type === 'text' || element.type === 'icon' || element.type === 'arrow' || element.type === 'line') ? 'transparent' : 'rgba(255, 255, 255, 0.05)',
         opacity: 1,
         visible: true,
         locked: false,
         clipPath: 'none',
-        strokeColor: '#000000',
-        strokeWidth: 0,
+        strokeColor: '#FFFFFF',
+        strokeWidth: 2,
         strokeStyle: 'solid',
         borderRadius: 0,
         shadowEnabled: false,
@@ -404,6 +404,21 @@ const useEditorStore = create(
           src: element.src,
           w: element.w || 200,
           h: element.h || 200
+        }),
+        // Arrow/Line support
+        ...((element.type === 'arrow' || element.type === 'line') && {
+          startX: element.startX || 0,
+          startY: element.startY || 0,
+          endX: element.endX || 200,
+          endY: element.endY || 200,
+          strokeWidth: element.strokeWidth || 2,
+          strokeColor: element.strokeColor || '#FFFFFF',
+        }),
+        // Pencil (Scribble) support
+        ...(element.type === 'pencil' && {
+          points: element.points || [],
+          strokeWidth: element.strokeWidth || 2,
+          strokeColor: element.strokeColor || '#FFFFFF',
         }),
         // Component Instance support
         ...(element.type === 'instance' && {

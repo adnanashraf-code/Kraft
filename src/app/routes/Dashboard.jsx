@@ -224,6 +224,15 @@ const Dashboard = () => {
               
               <Button 
                 variant="editorial" 
+                icon={Hash} 
+                onClick={() => navigate('/whiteboard')}
+                className={`hidden md:flex px-4 md:px-6 py-2.5 neo-shadow transition-all group text-[10px] md:text-xs ${isLight ? 'bg-white text-black hover:bg-yellow-400' : 'bg-white/10 text-white hover:bg-yellow-400 hover:text-black'}`}
+              >
+                Whiteboard
+              </Button>
+              
+              <Button 
+                variant="editorial" 
                 icon={Plus} 
                 onClick={() => navigate('/editor')}
                 className="bg-black text-white px-4 md:px-6 py-2.5 neo-shadow hover:bg-cyan-500 hover:text-black transition-all group text-[10px] md:text-xs"

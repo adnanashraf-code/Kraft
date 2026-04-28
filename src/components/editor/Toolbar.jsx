@@ -25,90 +25,28 @@ import { THEMES } from "../../utils/themes";
 import logo from "../../assets/logo.png";
 import ExportModal from "../../components/editor/overlays/ExportModal";
 
-const Toolbar = ({ onToggleLeft, onToggleRight }) => {
-  const navigate = useNavigate();
-  const {
-    addElement,
-    clearSelection,
-    uiTheme,
-    setUiTheme,
-    selectedElementIds,
-    setSearchOpen,
-    isTemplatesOpen,
-    setTemplatesOpen,
-    isAssetsOpen,
-    setAssetsOpen,
-    setSettingsOpen,
-    isShapePickerOpen,
-    setShapePickerOpen,
-    isHelpOpen,
-    setHelpOpen,
-    isExportOpen,
-    setExportOpen,
-    projectName,
-    setProjectName,
-    isSaving,
-    uploadImage,
-  } = useEditorStore();
-
-  const fileInputRef = React.useRef(null);
-
-  const handleUploadClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileChange = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const img = new Image();
-      img.onload = () => {
-        const dataUrl = event.target.result;
-        uploadImage(dataUrl, file.name, img.width, img.height);
-        // Also add it directly to canvas for better UX
-        addElement({
-          type: 'image',
-          name: file.name,
-          src: dataUrl,
-          w: img.width > 800 ? 800 : img.width, // Cap initial size
-          h: img.height > 800 ? 800 : img.height,
-          x: 100,
-          y: 100
-        });
-      };
-      img.src = event.target.result;
-    };
-    reader.readAsDataURL(file);
-  };
-  const theme = THEMES[uiTheme];
-  const isLight = uiTheme === "light" || uiTheme === "gray";
-
-  const handleAddText = () => {
-    const { canvas, addNotification } = useEditorStore.getState();
-    const zoomScale = (canvas.zoom || 100) / 100;
-    
-    // Use the actual canvas container size if possible, otherwise viewport
-    const container = document.getElementById('canvas-container');
-    const width = container ? container.clientWidth : window.innerWidth;
-    const height = container ? container.clientHeight : window.innerHeight;
-    
-    const centerX = (-canvas.panX + (width / 2)) / zoomScale;
-    const centerY = (-canvas.panY + (height / 2)) / zoomScale;
-
-    console.log('Adding text at:', { centerX, centerY, panX: canvas.panX, zoom: canvas.zoom });
-
-    addElement({
-      type: "text",
-      x: centerX - 100,
-      y: centerY - 20,
-      w: 200,
-      h: 40,
-      content: "Heading Text",
-      fill: "transparent",
-    });
-  };
+const ToolButton = React.memo(({ id, icon: Icon, title, onClick, active = false, className = "", theme, isLight }) => (
+  <button
+    id={id}
+    onClick={onClick}
+    title={title}
+    aria-label={title}
+    className={`
+      p-2 md:p-2.5 rounded-lg md:rounded-xl transition-all duration-200 group relative shrink-0
+      ${
+        active
+          ? "bg-blue-600 text-white shadow-lg"
+          : `${theme.text} ${isLight ? "hover:bg-blue-50 hover:text-blue-600" : "hover:bg-white/10 hover:text-white"}`
+      }
+      ${className}
+    `}
+  >
+    <Icon
+      size={18}
+      className={active ? "" : "group-hover:scale-110 transition-transform"}
+    />
+  </button>
+));
 
 const NavContent = React.memo(({ theme, isLight, onToggleLeft, onToggleRight, navigate, projectName, setProjectName, isSaving, setSettingsOpen, handleResetView, handleUploadClick }) => (
   <>
@@ -161,6 +99,14 @@ const NavContent = React.memo(({ theme, isLight, onToggleLeft, onToggleRight, na
         icon={Monitor}
         title="Reset View"
         onClick={handleResetView}
+        theme={theme}
+        isLight={isLight}
+      />
+      <ToolButton
+        id="tool-whiteboard-mobile"
+        icon={PenTool}
+        title="Whiteboard Mode"
+        onClick={() => navigate('/whiteboard')}
         theme={theme}
         isLight={isLight}
       />
@@ -277,7 +223,7 @@ const ToolsContent = React.memo(({ theme, isLight, selectedElementIds, isShapePi
   </>
 ));
 
-const BottomControls = React.memo(({ theme, isLight, uiTheme, setUiTheme, setSettingsOpen }) => (
+const BottomControls = React.memo(({ theme, isLight, uiTheme, setUiTheme, setSettingsOpen, navigate }) => (
   <div className="md:mt-auto flex md:flex-col items-center space-x-2 md:space-x-0 md:space-y-3 px-2">
     <div
       className={`hidden sm:flex md:flex-col items-center p-1 rounded-xl md:rounded-2xl ${theme.sidebar} border ${theme.border} space-x-1 md:space-x-0 md:space-y-1 shadow-sm`}
@@ -303,6 +249,16 @@ const BottomControls = React.memo(({ theme, isLight, uiTheme, setUiTheme, setSet
     </div>
 
     <ToolButton
+      id="tool-whiteboard"
+      icon={PenTool}
+      title="Whiteboard Mode"
+      onClick={() => navigate('/whiteboard')}
+      className="hidden md:flex"
+      theme={theme}
+      isLight={isLight}
+    />
+
+    <ToolButton
       id="tool-settings"
       icon={Settings}
       title="Settings"
@@ -314,54 +270,14 @@ const BottomControls = React.memo(({ theme, isLight, uiTheme, setUiTheme, setSet
   </div>
 ));
 
-const ToolButton = React.memo(({ id, icon: Icon, title, onClick, active = false, className = "", theme, isLight }) => (
-  <button
-    id={id}
-    onClick={onClick}
-    title={title}
-    aria-label={title}
-    className={`
-      p-2 md:p-2.5 rounded-lg md:rounded-xl transition-all duration-200 group relative shrink-0
-      ${
-        active
-          ? "bg-blue-600 text-white shadow-lg"
-          : `${theme.text} ${isLight ? "hover:bg-blue-50 hover:text-blue-600" : "hover:bg-white/10 hover:text-white"}`
-      }
-      ${className}
-    `}
-  >
-    <Icon
-      size={18}
-      className={active ? "" : "group-hover:scale-110 transition-transform"}
-    />
-  </button>
-));
-
 const Toolbar = ({ onToggleLeft, onToggleRight }) => {
   const navigate = useNavigate();
   const store = useEditorStore();
   const {
-    addElement,
-    clearSelection,
-    uiTheme,
-    setUiTheme,
-    selectedElementIds,
-    setSearchOpen,
-    isTemplatesOpen,
-    setTemplatesOpen,
-    isAssetsOpen,
-    setAssetsOpen,
-    setSettingsOpen,
-    isShapePickerOpen,
-    setShapePickerOpen,
-    isHelpOpen,
-    setHelpOpen,
-    isExportOpen,
-    setExportOpen,
-    projectName,
-    setProjectName,
-    isSaving,
-    uploadImage,
+    addElement, clearSelection, uiTheme, setUiTheme, selectedElementIds,
+    setSearchOpen, isTemplatesOpen, setTemplatesOpen, isAssetsOpen, setAssetsOpen,
+    setSettingsOpen, isShapePickerOpen, setShapePickerOpen, isHelpOpen, setHelpOpen,
+    isExportOpen, setExportOpen, projectName, setProjectName, isSaving, uploadImage
   } = store;
 
   const fileInputRef = React.useRef(null);
@@ -414,7 +330,7 @@ const Toolbar = ({ onToggleLeft, onToggleRight }) => {
 
   const navProps = { theme, isLight, onToggleLeft, onToggleRight, navigate, projectName, setProjectName, isSaving, setSettingsOpen, handleResetView, handleUploadClick };
   const toolsProps = { theme, isLight, selectedElementIds, isShapePickerOpen, clearSelection, setShapePickerOpen, handleAddText, handleUploadClick, setTemplatesOpen, isTemplatesOpen, setAssetsOpen, isAssetsOpen, setExportOpen, isExportOpen, setSearchOpen, fileInputRef, handleFileChange };
-  const bottomProps = { theme, isLight, uiTheme, setUiTheme, setSettingsOpen };
+  const bottomProps = { theme, isLight, uiTheme, setUiTheme, setSettingsOpen, navigate };
 
   return (
     <>

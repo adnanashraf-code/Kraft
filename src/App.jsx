@@ -6,6 +6,7 @@ import ErrorBoundary from './components/errors/ErrorBoundary';
 const Landing = lazy(() => import('./app/routes/Landing'));
 const Dashboard = lazy(() => import('./app/routes/Dashboard'));
 const Editor = lazy(() => import('./app/routes/Editor'));
+const Whiteboard = lazy(() => import('./app/routes/Whiteboard'));
 const Docs = lazy(() => import('./app/routes/Docs'));
 const Privacy = lazy(() => import('./app/routes/Privacy'));
 const NotFound = lazy(() => import('./app/routes/NotFound'));
@@ -58,6 +59,8 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/editor" element={<Editor />} />
             <Route path="/editor/:id" element={<Editor />} />
+            <Route path="/whiteboard" element={<Whiteboard />} />
+            <Route path="/whiteboard/:id" element={<Whiteboard />} />
             <Route path="/docs" element={<Docs />} />
             <Route path="/privacy" element={<Privacy />} />
             {/* Catch-all route for any undefined path */}

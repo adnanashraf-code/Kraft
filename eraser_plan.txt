@@ -1,0 +1,29 @@
+ERASER.IO TRANSFORMATION PLAN - KRAFT DESIGN EDITOR
+
+PHASE 1: THE FLOATING UI REFACTOR
+---------------------------------
+Goal: Remove fixed sidebars and implement floating vertical toolbar.
+1. Floating Vertical Toolbar: Move Toolbar.jsx to a narrow vertical bar on the LEFT center.
+2. Icon Sequence: Selection, Rectangle, Circle, Arrow, Line, Pencil, Text, Insert.
+3. Top Navigation: Floating pill at top center for Project Name and Save Status.
+4. Property Popups: Remove fixed Right Sidebar; use floating contextual menus instead.
+
+PHASE 2: INFINITE CANVAS & AESTHETIC
+------------------------------------
+Goal: Infinite whiteboard feel with hand-drawn style.
+1. Dot Grid: Subtle, infinite dot grid background.
+2. Sketchy Mode: Apply hand-drawn (wavy) look to elements (Sketchy/Hand-drawn filter).
+3. Pan/Zoom: Optimize performance for infinite coordinates.
+
+PHASE 3: DIAGRAMMING TOOLS (ARROWS & CONNECTORS)
+------------------------------------------------
+Goal: Core diagramming power.
+1. Smart Arrows: Custom element type for arrows with multiple head styles.
+2. Connectors: Lines that attach to shapes and move with them.
+3. Sticky Notes: Specialized sticky note elements with auto-text scaling.
+
+PHASE 4: CONTEXTUAL STYLING
+---------------------------
+Goal: Pro-speed editing.
+1. Floating Controls: Small toolbar that appears directly above selected elements for fast styling.
+2. AI Drafting: "Sparkles" tool for AI-generated diagram fragments.

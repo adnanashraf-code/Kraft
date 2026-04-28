@@ -53,12 +53,12 @@ const DynamicIcon = ({ el, isLight }) => {
   }
 };
 
-const DraggableElement = React.memo(({ el }) => {
+const DraggableElement = React.memo(({ el, sketchy = false }) => {
   const isSelected = useEditorStore(state => state.selectedElementIds.includes(el.id));
   const uiTheme = useEditorStore(state => state.uiTheme);
   const preferences = useEditorStore(state => state.preferences) || { highFidelity: true };
-  const { handleMouseDown, handleTouchStart, isDragging } = useDraggable(el.id);
-  const { handleResizeStart, handleRotateStart } = useResizable(el.id);
+  const { handleMouseDown, handleTouchStart } = useDraggable(el.id);
+  const { handleResizeStart } = useResizable(el.id);
   const library = useEditorStore(state => state.library) || { components: [] };
   const isLight = uiTheme === 'light' || uiTheme === 'gray';
 
@@ -84,7 +84,8 @@ const DraggableElement = React.memo(({ el }) => {
         transform: `rotate(${el.rotation || 0}deg) scale(${el.flipX ? -1 : 1}, ${el.flipY ? -1 : 1})`,
         opacity: el.opacity ?? 1,
         display: el.visible !== false ? 'block' : 'none',
-        cursor: el.locked ? 'not-allowed' : (isSelected ? 'default' : 'move')
+        cursor: el.locked ? 'not-allowed' : (isSelected ? 'default' : 'move'),
+        filter: sketchy ? 'url(#sketchy-filter)' : 'none'
       }}
       onMouseDown={el.locked ? undefined : handleMouseDown}
       onTouchStart={el.locked ? undefined : handleTouchStart}
@@ -92,12 +93,12 @@ const DraggableElement = React.memo(({ el }) => {
         <div 
           className="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden"
           style={{
-            borderRadius: el.independentRadius 
+            borderRadius: el.type === 'circle' ? '50%' : (el.independentRadius 
               ? `${el.borderRadiusTL || 0}px ${el.borderRadiusTR || 0}px ${el.borderRadiusBR || 0}px ${el.borderRadiusBL || 0}px`
-              : `${el.borderRadius || 0}px`,
+              : `${el.borderRadius || 0}px`),
             border: el.strokeWidth ? `${el.strokeWidth}px ${el.strokeStyle || 'solid'} ${el.strokeColor || '#000'}` : 'none',
             boxShadow: (el.shadowEnabled && preferences.highFidelity) ? `${el.shadowOffsetX || 0}px ${el.shadowOffsetY || 4}px ${el.shadowBlur || 10}px ${el.shadowColor || 'rgba(0,0,0,0.15)'}` : 'none',
-            background: el.type === 'rectangle' ? el.fill : 'transparent',
+            background: (el.type === 'rectangle' || el.type === 'circle') ? el.fill : 'transparent',
             clipPath: el.clipPath || 'none'
           }}
         >
@@ -132,6 +133,45 @@ const DraggableElement = React.memo(({ el }) => {
                 <path d={el.path} />
               </svg>
             </div>
+          )}
+
+          {el.type === 'pencil' && (
+            <svg className="w-full h-full overflow-visible pointer-events-none">
+              <path
+                d={`M ${el.points?.map(p => `${p.x},${p.y}`).join(' L ')}`}
+                fill="none"
+                stroke={el.strokeColor || '#000'}
+                strokeWidth={el.strokeWidth || 2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          )}
+
+          {(el.type === 'line' || el.type === 'arrow') && (
+            <svg className="w-full h-full overflow-visible pointer-events-none">
+              <defs>
+                <marker
+                  id={`arrowhead-${el.id}`}
+                  markerWidth="10"
+                  markerHeight="7"
+                  refX="10"
+                  refY="3.5"
+                  orient="auto"
+                >
+                  <polygon points="0 0, 10 3.5, 0 7" fill={el.strokeColor || '#000'} />
+                </marker>
+              </defs>
+              <line
+                x1={el.startX || 0}
+                y1={el.startY || 0}
+                x2={el.endX || el.w}
+                y2={el.endY || el.h}
+                stroke={el.strokeColor || '#000'}
+                strokeWidth={el.strokeWidth || 2}
+                markerEnd={el.type === 'arrow' ? `url(#arrowhead-${el.id})` : 'none'}
+              />
+            </svg>
           )}
 
           {el.type === 'instance' && (() => {
@@ -180,17 +220,44 @@ const DraggableElement = React.memo(({ el }) => {
         {isSelected && !el.locked && handles.map((h) => (
           <div
             key={h.dir}
-            className="absolute rounded bg-white border border-blue-500 pointer-events-auto shadow-sm"
+            className="absolute rounded bg-white border border-blue-500 pointer-events-auto shadow-sm z-50"
             style={{ width: 8, height: 8, cursor: h.cursor, ...h.style }}
             onMouseDown={(e) => handleResizeStart(e, h.dir)}
             onTouchStart={(e) => handleResizeStart(e, h.dir)}
           />
         ))}
+
+        {/* Connection Handles (Eraser Style) */}
+        {isSelected && !el.locked && (el.type === 'rectangle' || el.type === 'circle') && (
+          <>
+            {[
+              { id: 'top', style: { top: 0, left: '50%', transform: 'translate(-50%, -50%)' } },
+              { id: 'bottom', style: { bottom: 0, left: '50%', transform: 'translate(-50%, 50%)' } },
+              { id: 'left', style: { left: 0, top: '50%', transform: 'translate(-50%, -50%)' } },
+              { id: 'right', style: { right: 0, top: '50%', transform: 'translate(50%, -50%)' } }
+            ].map(handle => (
+              <div
+                key={handle.id}
+                className="absolute w-6 h-6 bg-white rounded-full border border-gray-300 shadow-md flex items-center justify-center cursor-pointer hover:scale-110 hover:bg-blue-50 transition-all z-[60] group/conn"
+                style={handle.style}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  // In a real implementation, this would trigger a connection logic
+                  console.log(`Connect from ${handle.id} of ${el.id}`);
+                }}
+              >
+                <div className="text-black text-lg font-bold leading-none select-none">+</div>
+                
+                {/* Connection Line Preview on hover could go here */}
+              </div>
+            ))}
+          </>
+        )}
     </div>
   );
 });
 
-const Canvas = () => {
+const Canvas = ({ sketchy = false }) => {
   const { 
     pages, activePageId, selectedElementIds, canvas, setZoom, setPan, 
     smartGuides, selectElement, clearSelection, deleteElements, uiTheme 
@@ -287,10 +354,9 @@ const Canvas = () => {
   }, [marquee.active, elements, canvas, selectedElementIds]);
 
   const backgroundStyle = {
-    backgroundColor: isLight ? '#ffffff' : (theme.canvas.includes('[') ? theme.canvas.split('[')[1].split(']')[0] : '#000'),
-    backgroundImage: `radial-gradient(${theme.grid} 1px, transparent 1px)`,
-    backgroundSize: `${canvas.gridSnap}px ${canvas.gridSnap}px`,
-    backgroundPosition: `${canvas.panX}px ${canvas.panY}px`,
+    backgroundColor: isLight ? '#ffffff' : (theme.canvas.includes('[') ? theme.canvas.split('[')[1].split(']')[0] : '#0C0C0C'),
+    // Removed grid background for "smooth" feel as requested
+    backgroundImage: 'none',
   };
 
   useEffect(() => {
@@ -429,7 +495,7 @@ const Canvas = () => {
               useEditorStore.getState().openContextMenu(e.clientX, e.clientY, el.id);
             }}
           >
-            <DraggableElement el={el} />
+            <DraggableElement el={el} sketchy={sketchy} />
           </div>
         ))}
 
@@ -451,6 +517,14 @@ const Canvas = () => {
       
       {isMobile ? null : <ZoomControls />}
       <HistoryControls />
+
+      {/* Eraser.io Sketchy Filter */}
+      <svg className="absolute w-0 h-0 pointer-events-none overflow-hidden">
+        <filter id="sketchy-filter">
+          <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="3" result="noise" />
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="2" />
+        </filter>
+      </svg>
     </div>
   );
 };
