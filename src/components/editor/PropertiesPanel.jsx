@@ -300,9 +300,9 @@ const PropertiesPanel = () => {
         <Section title="Stroke / Borders" defaultOpen={false} theme={theme} isLight={isLight}>
           <div className="space-y-4">
             <div className="grid grid-cols-[1fr_80px] gap-3">
-              <div className={`flex items-center ${isLight ? 'bg-white border-gray-200 shadow-sm' : 'bg-white/5 border-white/5'} border p-1 rounded-xl`}>
-                <input type="color" name="strokeColor" value={selectedElement.strokeColor || '#000000'} onChange={handleChange} className="w-6 h-6 rounded-lg cursor-pointer bg-transparent border-none p-0" />
-                <span className={`text-[11px] font-mono px-2 uppercase truncate ${isLight ? 'text-gray-900' : 'text-white/80'}`}>{selectedElement.strokeColor}</span>
+              <div className={`flex items-center ${isLight ? 'bg-white border-gray-200 shadow-sm' : 'bg-white/5 border-white/5'} border p-1 rounded-xl ${selectedElement.type === 'pencil' ? 'opacity-50 pointer-events-none' : ''}`}>
+                <input type="color" name="strokeColor" value={selectedElement.type === 'pencil' ? '#000000' : (selectedElement.strokeColor || '#000000')} onChange={handleChange} disabled={selectedElement.type === 'pencil'} className="w-6 h-6 rounded-lg cursor-pointer bg-transparent border-none p-0" />
+                <span className={`text-[11px] font-mono px-2 uppercase truncate ${isLight ? 'text-gray-900' : 'text-white/80'}`}>{selectedElement.type === 'pencil' ? '#000000' : selectedElement.strokeColor}</span>
               </div>
               <InputBox label="W" name="strokeWidth" value={selectedElement.strokeWidth || 0} onChange={handleChange} />
             </div>

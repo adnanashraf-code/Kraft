@@ -8,6 +8,8 @@ PHASE 1: THE "DEEP BLACK" CANVAS & GRID REMOVAL
 *   Color Token: Use #0C0C0C (Onyx Black) for the canvas.
 *   Smoothness: Disable CSS grid backgrounds. Implement smooth panning and zooming without visual "snap" artifacts.
 *   Visuals: Elements should have thin, high-contrast borders (#E0E0E0 or #FFFFFF at 0.8 opacity).
+*   Pen Tool: Restrict tool color to Black (#000000) only in the pen section.
+*   Design Templates: Maintain the original 3-color palette for template components as they are.
 
 PHASE 2: SMART CONNECTION HANDLES (THE CIRCLE)
 -----------------------------------------------

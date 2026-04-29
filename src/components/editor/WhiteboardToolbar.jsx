@@ -127,14 +127,14 @@ const WhiteboardToolbar = ({ onToggleLeft, onToggleRight }) => {
           <ToolButton
             icon={Square}
             title="Rectangle (R)"
-            onClick={() => addElement({ type: 'rectangle', x: 100, y: 100 })}
+            onClick={() => addElement({ type: 'rectangle', x: 100, y: 100, strokeWidth: 1, strokeColor: 'rgba(255, 255, 255, 0.8)', fill: 'transparent' })}
             theme={theme}
             isLight={isLight}
           />
           <ToolButton
             icon={Hexagon}
             title="Circle (O)"
-            onClick={() => addElement({ type: 'circle', x: 100, y: 100, w: 100, h: 100 })}
+            onClick={() => addElement({ type: 'circle', x: 100, y: 100, w: 100, h: 100, strokeWidth: 1, strokeColor: 'rgba(255, 255, 255, 0.8)', fill: 'transparent' })}
             theme={theme}
             isLight={isLight}
           />
@@ -173,6 +173,7 @@ const WhiteboardToolbar = ({ onToggleLeft, onToggleRight }) => {
                 {x: 0, y: 50}, {x: 20, y: 30}, {x: 50, y: 70}, {x: 80, y: 20}, {x: 120, y: 50}, {x: 150, y: 40}
               ], 
               strokeWidth: 3, 
+              strokeColor: '#000000',
               name: 'Scribble' 
             })}
             theme={theme}
